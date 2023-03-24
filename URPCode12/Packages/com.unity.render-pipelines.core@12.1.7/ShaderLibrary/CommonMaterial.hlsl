@@ -46,7 +46,7 @@ real PerceptualSmoothnessToRoughness(real perceptualSmoothness)
 {
     return (1.0 - perceptualSmoothness) * (1.0 - perceptualSmoothness);
 }
-
+// Done
 real PerceptualSmoothnessToPerceptualRoughness(real perceptualSmoothness)
 {
     return (1.0 - perceptualSmoothness);
@@ -348,11 +348,11 @@ void GetTriplanarCoordinate(float3 position, out float2 uvXZ, out float2 uvXY, o
 // ----------------------------------------------------------------------------
 // Helper for detail map operation
 // ----------------------------------------------------------------------------
-
+// Done
 real LerpWhiteTo(real b, real t)
 {
     real oneMinusT = 1.0 - t;
-    return oneMinusT + b * t;
+    return oneMinusT + b * t;// lerp( 1, b, t)
 }
 
 #ifndef BUILTIN_TARGET_API

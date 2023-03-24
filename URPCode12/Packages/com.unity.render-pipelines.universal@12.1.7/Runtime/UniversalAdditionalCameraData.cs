@@ -137,22 +137,15 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Updates the volume stack for this camera.
-        /// This function will only update the stack when the camera has ViaScripting selected or if
-        /// the camera is set to UsePipelineSettings and the Render Pipeline Asset is set to ViaScripting.
+        /// Done 1
         /// </summary>
-        /// <param name="camera"></param>
-        /// <param name="cameraData"></param>
         public static void UpdateVolumeStack(this Camera camera, UniversalAdditionalCameraData cameraData)
         {
             Assert.IsNotNull(cameraData, "cameraData can not be null when updating the volume stack.");
-            // We only update the local volume stacks for cameras set to ViaScripting.
-            // Otherwise it will be updated in the frame.
             if (cameraData.requiresVolumeFrameworkUpdate)
             {
                 return;
             }
-            // Create stack for camera
             if (cameraData.volumeStack == null)
             {
                 cameraData.volumeStack = VolumeManager.instance.CreateStack();
@@ -172,10 +165,8 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Destroys the volume stack for this camera.
+        /// Done 1
         /// </summary>
-        /// <param name="camera"></param>
-        /// <param name="cameraData"></param>
         public static void DestroyVolumeStack(this Camera camera, UniversalAdditionalCameraData cameraData)
         {
             cameraData.volumeStack.Dispose();
@@ -183,11 +174,10 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         internal static void GetVolumeLayerMaskAndTrigger(this Camera camera, UniversalAdditionalCameraData cameraData, out LayerMask layerMask, out Transform trigger)
         {
-            // Default values when there's no additional camera data available
             layerMask = 1; // "Default"
             trigger = camera.transform;
             if (cameraData != null)
@@ -197,7 +187,6 @@ namespace UnityEngine.Rendering.Universal
             }
             else if (camera.cameraType == CameraType.SceneView)
             {
-                // Try to mirror the MainCamera volume layer mask for the scene view - do not mirror the target
                 var mainCamera = Camera.main;
                 UniversalAdditionalCameraData mainAdditionalCameraData = null;
                 if (mainCamera != null && mainCamera.TryGetComponent(out mainAdditionalCameraData))
@@ -340,9 +329,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Returns the camera stack. Only valid for Base cameras.
-        /// Will return null if it is not a Base camera.
-        /// <seealso cref="CameraRenderType"/>.
+        /// Done 1
         /// </summary>
         public List<Camera> cameraStack
         {
@@ -354,7 +341,6 @@ namespace UnityEngine.Rendering.Universal
                     Debug.LogWarning(string.Format("{0}: This camera is of {1} type. Only Base cameras can have a camera stack.", camera.name, renderType));
                     return null;
                 }
-
                 if (!scriptableRenderer.SupportsCameraStackingType(CameraRenderType.Base))
                 {
                     var camera = gameObject.GetComponent<Camera>();
@@ -365,7 +351,7 @@ namespace UnityEngine.Rendering.Universal
             }
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         internal void UpdateCameraStack()
         {
@@ -488,7 +474,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Returns true if this camera requires the volume framework to be updated every frame.
+        /// Done 1
         /// </summary>
         public bool requiresVolumeFrameworkUpdate
         {
@@ -498,7 +484,6 @@ namespace UnityEngine.Rendering.Universal
                 {
                     return UniversalRenderPipeline.asset.volumeFrameworkUpdateMode != VolumeFrameworkUpdateMode.ViaScripting;
                 }
-
                 return m_VolumeFrameworkUpdateModeOption == VolumeFrameworkUpdateMode.EveryFrame;
             }
         }

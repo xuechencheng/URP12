@@ -13,12 +13,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // Note: we need to mask out only 8bits of the layer mask before encoding it as otherwise any value > 255 will map to all layers active if save in a buffer
+// Done
 uint GetMeshRenderingLightLayer()
 {
     #ifdef _LIGHT_LAYERS
-    return (asuint(unity_RenderingLayer.x) & RENDERING_LIGHT_LAYERS_MASK) >> RENDERING_LIGHT_LAYERS_MASK_SHIFT;
+        return (asuint(unity_RenderingLayer.x) & RENDERING_LIGHT_LAYERS_MASK) >> RENDERING_LIGHT_LAYERS_MASK_SHIFT;
     #else
-    return DEFAULT_LIGHT_LAYERS;
+        return DEFAULT_LIGHT_LAYERS;
     #endif
 }
 
@@ -110,7 +111,7 @@ half AngleAttenuation(half3 spotDirection, half3 lightDirection, half2 spotAtten
 ///////////////////////////////////////////////////////////////////////////////
 //                      Light Abstraction                                    //
 ///////////////////////////////////////////////////////////////////////////////
-
+// Done
 Light GetMainLight()
 {
     Light light;
@@ -122,47 +123,41 @@ Light GetMainLight()
 #endif
     light.shadowAttenuation = 1.0;
     light.color = _MainLightColor.rgb;
-
 #ifdef _LIGHT_LAYERS
     light.layerMask = _MainLightLayerMask;
 #else
     light.layerMask = DEFAULT_LIGHT_LAYERS;
 #endif
-
     return light;
 }
-
+// Done
 Light GetMainLight(float4 shadowCoord)
 {
     Light light = GetMainLight();
-    light.shadowAttenuation = MainLightRealtimeShadow(shadowCoord);
+    light.shadowAttenuation = MainLightRealtimeShadow(shadowCoord);// ???
     return light;
 }
-
+// Done
 Light GetMainLight(float4 shadowCoord, float3 positionWS, half4 shadowMask)
 {
     Light light = GetMainLight();
-    light.shadowAttenuation = MainLightShadow(shadowCoord, positionWS, shadowMask, _MainLightOcclusionProbes);
-
+    light.shadowAttenuation = MainLightShadow(shadowCoord, positionWS, shadowMask, _MainLightOcclusionProbes);// Done
     #if defined(_LIGHT_COOKIES)
         real3 cookieColor = SampleMainLightCookie(positionWS);
         light.color *= cookieColor;
     #endif
-
     return light;
 }
-
+// Done
 Light GetMainLight(InputData inputData, half4 shadowMask, AmbientOcclusionFactor aoFactor)
 {
     Light light = GetMainLight(inputData.shadowCoord, inputData.positionWS, shadowMask);
-
-    #if defined(_SCREEN_SPACE_OCCLUSION) && !defined(_SURFACE_TYPE_TRANSPARENT)
-    if (IsLightingFeatureEnabled(DEBUGLIGHTINGFEATUREFLAGS_AMBIENT_OCCLUSION))
-    {
-        light.color *= aoFactor.directAmbientOcclusion;
-    }
+    #if defined(_SCREEN_SPACE_OCCLUSION) && !defined(_SURFACE_TYPE_TRANSPARENT) // ???
+        if (IsLightingFeatureEnabled(DEBUGLIGHTINGFEATUREFLAGS_AMBIENT_OCCLUSION))
+        {
+            light.color *= aoFactor.directAmbientOcclusion;
+        }
     #endif
-
     return light;
 }
 
@@ -337,13 +332,12 @@ half4 CalculateShadowMask(InputData inputData)
 {
     // To ensure backward compatibility we have to avoid using shadowMask input, as it is not present in older shaders
     #if defined(SHADOWS_SHADOWMASK) && defined(LIGHTMAP_ON)
-    half4 shadowMask = inputData.shadowMask;
+        half4 shadowMask = inputData.shadowMask;
     #elif !defined (LIGHTMAP_ON)
-    half4 shadowMask = unity_ProbesOcclusion;
+        half4 shadowMask = unity_ProbesOcclusion;
     #else
-    half4 shadowMask = half4(1, 1, 1, 1);
+        half4 shadowMask = half4(1, 1, 1, 1);
     #endif
-
     return shadowMask;
 }
 

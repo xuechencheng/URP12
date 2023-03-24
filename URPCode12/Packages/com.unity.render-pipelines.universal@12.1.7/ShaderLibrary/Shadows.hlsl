@@ -22,13 +22,13 @@
 #endif
 
 #if defined(UNITY_DOTS_INSTANCING_ENABLED)
-#define SHADOWMASK_NAME unity_ShadowMasks
-#define SHADOWMASK_SAMPLER_NAME samplerunity_ShadowMasks
-#define SHADOWMASK_SAMPLE_EXTRA_ARGS , unity_LightmapIndex.x
+    #define SHADOWMASK_NAME unity_ShadowMasks
+    #define SHADOWMASK_SAMPLER_NAME samplerunity_ShadowMasks
+    #define SHADOWMASK_SAMPLE_EXTRA_ARGS , unity_LightmapIndex.x
 #else
-#define SHADOWMASK_NAME unity_ShadowMask
-#define SHADOWMASK_SAMPLER_NAME samplerunity_ShadowMask
-#define SHADOWMASK_SAMPLE_EXTRA_ARGS
+    #define SHADOWMASK_NAME unity_ShadowMask
+    #define SHADOWMASK_SAMPLER_NAME samplerunity_ShadowMask
+    #define SHADOWMASK_SAMPLE_EXTRA_ARGS
 #endif
 
 #if defined(SHADOWS_SHADOWMASK) && defined(LIGHTMAP_ON)
@@ -419,7 +419,7 @@ half AdditionalLightShadow(int lightIndex, float3 positionWS, half3 lightDirecti
 
     return MixRealtimeAndBakedShadows(realtimeShadow, bakedShadow, shadowFade);
 }
-
+// ???
 float4 GetShadowCoord(VertexPositionInputs vertexInput)
 {
 #if defined(_MAIN_LIGHT_SHADOWS_SCREEN) && !defined(_SURFACE_TYPE_TRANSPARENT)

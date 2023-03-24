@@ -8,23 +8,17 @@ Shader "Universal Render Pipeline/Particles/Simple Lit"
     {
         [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
         [MainColor]   _BaseColor("Base Color", Color) = (1,1,1,1)
-
         _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
-
         _SpecGlossMap("Specular", 2D) = "white" {}
         _SpecColor("Specular", Color) = (1.0, 1.0, 1.0)
         _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.5
-
         _BumpScale("Scale", Float) = 1.0
         _BumpMap("Normal Map", 2D) = "bump" {}
-
         [HDR] _EmissionColor("Color", Color) = (0,0,0)
         _EmissionMap("Emission", 2D) = "white" {}
-
         _SmoothnessSource("Smoothness Source", Float) = 0.0
         _SpecularHighlights("Specular Highlights", Float) = 1.0
         [ToggleUI] _ReceiveShadows("Receive Shadows", Float) = 1.0
-
         // -------------------------------------
         // Particle specific
         _SoftParticlesNearFadeDistance("Soft Particles Near Fade", Float) = 0.0
@@ -33,7 +27,6 @@ Shader "Universal Render Pipeline/Particles/Simple Lit"
         _CameraFarFadeDistance("Camera Far Fade", Float) = 2.0
         _DistortionBlend("Distortion Blend", Range(0.0, 1.0)) = 0.5
         _DistortionStrength("Distortion Strength", Float) = 1.0
-
         // -------------------------------------
         // Hidden properties - Generic
         _Surface("__surface", Float) = 0.0
@@ -44,7 +37,6 @@ Shader "Universal Render Pipeline/Particles/Simple Lit"
         [HideInInspector] _SrcBlend("__src", Float) = 1.0
         [HideInInspector] _DstBlend("__dst", Float) = 0.0
         [HideInInspector] _ZWrite("__zw", Float) = 1.0
-
         // Particle specific
         _ColorMode("_ColorMode", Float) = 0.0
         [HideInInspector] _BaseColorAddSubDiff("_ColorMode", Vector) = (0,0,0,0)
@@ -55,10 +47,8 @@ Shader "Universal Render Pipeline/Particles/Simple Lit"
         [HideInInspector] _SoftParticleFadeParams("__softparticlefadeparams", Vector) = (0,0,0,0)
         [HideInInspector] _CameraFadeParams("__camerafadeparams", Vector) = (0,0,0,0)
         [HideInInspector] _DistortionStrengthScaled("Distortion Strength Scaled", Float) = 0.1
-
         // Editmode props
         _QueueOffset("Queue offset", Float) = 0.0
-
         // ObsoleteProperties
         [HideInInspector] _FlipbookMode("flipbook", Float) = 0
         [HideInInspector] _Glossiness("gloss", Float) = 0

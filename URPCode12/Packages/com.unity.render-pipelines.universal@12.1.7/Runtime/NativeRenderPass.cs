@@ -79,43 +79,28 @@ namespace UnityEngine.Rendering.Universal
                 }
             }
         }
-
+        /// <summary>
+        /// Done
+        /// </summary>
         internal void SetupNativeRenderPassFrameData(CameraData cameraData, bool isRenderPassEnabled)
         {
-            //TODO: edge cases to detect that should affect possible passes to merge
-            // - total number of color attachment > 8
-
-            // Go through all the passes and mark the final one as last pass
-
             using (new ProfilingScope(null, Profiling.setupFrameData))
             {
                 int lastPassIndex = m_ActiveRenderPassQueue.Count - 1;
-
-                // Make sure the list is already sorted!
-
                 m_MergeableRenderPassesMap.Clear();
                 m_RenderPassesAttachmentCount.Clear();
                 uint currentHashIndex = 0;
-                // reset all the passes last pass flag
                 for (int i = 0; i < m_ActiveRenderPassQueue.Count; ++i)
                 {
                     var renderPass = m_ActiveRenderPassQueue[i];
-
-                    // Empty configure to setup dimensions/targets and whatever data is needed for merging
-                    // We do not execute this at this time, so render targets are still invalid
                     var rpDesc = InitializeRenderPassDescriptor(cameraData, renderPass);
-
                     renderPass.isLastPass = false;
                     renderPass.renderPassQueueIndex = i;
-
                     bool RPEnabled = renderPass.useNativeRenderPass && isRenderPassEnabled;
                     if (!RPEnabled)
                         continue;
-
                     Hash128 hash = CreateRenderPassHash(rpDesc, currentHashIndex);
-
                     m_PassIndexToPassHash[i] = hash;
-
                     if (!m_MergeableRenderPassesMap.ContainsKey(hash))
                     {
                         m_MergeableRenderPassesMap.Add(hash, m_MergeableRenderPassesMapArrays[m_MergeableRenderPassesMap.Count]);
@@ -123,22 +108,15 @@ namespace UnityEngine.Rendering.Universal
                     }
                     else if (m_MergeableRenderPassesMap[hash][GetValidPassIndexCount(m_MergeableRenderPassesMap[hash]) - 1] != (i - 1))
                     {
-                        // if the passes are not sequential we want to split the current mergeable passes list. So we increment the hashIndex and update the hash
-
                         currentHashIndex++;
                         hash = CreateRenderPassHash(rpDesc, currentHashIndex);
-
                         m_PassIndexToPassHash[i] = hash;
-
                         m_MergeableRenderPassesMap.Add(hash, m_MergeableRenderPassesMapArrays[m_MergeableRenderPassesMap.Count]);
                         m_RenderPassesAttachmentCount.Add(hash, 0);
                     }
-
                     m_MergeableRenderPassesMap[hash][GetValidPassIndexCount(m_MergeableRenderPassesMap[hash])] = i;
                 }
-
                 m_ActiveRenderPassQueue[lastPassIndex].isLastPass = true;
-
                 for (int i = 0; i < m_ActiveRenderPassQueue.Count; ++i)
                 {
                     m_ActiveRenderPassQueue[i].m_ColorAttachmentIndices = new NativeArray<int>(8, Allocator.Temp);
@@ -404,8 +382,6 @@ namespace UnityEngine.Rendering.Universal
                 int currentPassIndex = renderPass.renderPassQueueIndex;
                 Hash128 currentPassHash = m_PassIndexToPassHash[currentPassIndex];
                 int[] currentMergeablePasses = m_MergeableRenderPassesMap[currentPassHash];
-
-                // If it's the first pass, configure the whole merge block
                 if (currentMergeablePasses.First() == currentPassIndex)
                 {
                     foreach (var passIdx in currentMergeablePasses)
@@ -670,12 +646,16 @@ namespace UnityEngine.Rendering.Universal
         {
             return new Hash128((uint)(width << 4) + (uint)height, (uint)depthID, (uint)sample, hashIndex);
         }
-
+        /// <summary>
+        /// Done
+        /// </summary>
         internal static Hash128 CreateRenderPassHash(RenderPassDescriptor desc, uint hashIndex)
         {
             return CreateRenderPassHash(desc.w, desc.h, desc.depthID, desc.samples, hashIndex);
         }
-
+        /// <summary>
+        /// Done
+        /// </summary>
         private RenderPassDescriptor InitializeRenderPassDescriptor(CameraData cameraData, ScriptableRenderPass renderPass)
         {
             var w = (renderPass.renderTargetWidth != -1) ? renderPass.renderTargetWidth : cameraData.cameraTargetDescriptor.width;

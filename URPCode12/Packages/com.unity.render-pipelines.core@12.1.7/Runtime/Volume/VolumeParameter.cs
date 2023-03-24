@@ -180,7 +180,9 @@ namespace UnityEngine.Rendering
             m_Value = value;
             this.overrideState = overrideState;
         }
-
+        /// <summary>
+        /// Done
+        /// </summary>
         internal override void Interp(VolumeParameter from, VolumeParameter to, float t)
         {
             // Note: this is relatively unsafe (assumes that from and to are both holding type T)

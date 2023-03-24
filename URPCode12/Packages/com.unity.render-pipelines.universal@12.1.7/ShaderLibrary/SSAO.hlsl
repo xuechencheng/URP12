@@ -173,7 +173,7 @@ half3 PickSamplePoint(float2 uv, int sampleIndex)
 
     return half3(CosSin(theta) * sqrt(half(1.0) - u * u), u);
 }
-
+// Done
 float SampleAndGetLinearEyeDepth(float2 uv)
 {
     float rawDepth = SampleSceneDepth(uv.xy);
@@ -185,26 +185,19 @@ float SampleAndGetLinearEyeDepth(float2 uv)
 }
 
 // This returns a vector in world unit (not a position), from camera to the given point described by uv screen coordinate and depth (in absolute world unit).
-half3 ReconstructViewPos(float2 uv, float depth)
+half3 ReconstructViewPos(float2 uv, float depth)//Paused
 {
     // Screen is y-inverted.
     uv.y = 1.0 - uv.y;
-
     // view pos in world space
     #if defined(_ORTHOGRAPHIC)
         float zScale = depth * _ProjectionParams.w; // divide by far plane
-        float3 viewPos = _CameraViewTopLeftCorner[unity_eyeIndex].xyz
-                            + _CameraViewXExtent[unity_eyeIndex].xyz * uv.x
-                            + _CameraViewYExtent[unity_eyeIndex].xyz * uv.y
-                            + _CameraViewZExtent[unity_eyeIndex].xyz * zScale;
+        float3 viewPos = _CameraViewTopLeftCorner[unity_eyeIndex].xyz + _CameraViewXExtent[unity_eyeIndex].xyz * uv.x + _CameraViewYExtent[unity_eyeIndex].xyz * uv.y + _CameraViewZExtent[unity_eyeIndex].xyz * zScale;
     #else
-        float zScale = depth * _ProjectionParams2.x; // divide by near plane
-        float3 viewPos = _CameraViewTopLeftCorner[unity_eyeIndex].xyz
-                            + _CameraViewXExtent[unity_eyeIndex].xyz * uv.x
-                            + _CameraViewYExtent[unity_eyeIndex].xyz * uv.y;
+        float zScale = depth * _ProjectionParams2.x; // divide by near plane  -- 1.0f / renderingData.cameraData.camera.nearClipPlane
+        float3 viewPos = _CameraViewTopLeftCorner[unity_eyeIndex].xyz + _CameraViewXExtent[unity_eyeIndex].xyz * uv.x + _CameraViewYExtent[unity_eyeIndex].xyz * uv.y;
         viewPos *= zScale;
     #endif
-
     return half3(viewPos);
 }
 
@@ -291,7 +284,6 @@ void SampleDepthNormalView(float2 uv, out float depth, out half3 normal, out hal
 {
     depth  = SampleAndGetLinearEyeDepth(uv);
     vpos   = ReconstructViewPos(uv, depth);
-
     #if defined(_SOURCE_DEPTH_NORMALS)
         normal = half3(SampleSceneNormals(uv));
     #else
@@ -309,7 +301,6 @@ half4 SSAO(Varyings input) : SV_Target
 
     // Parameters used in coordinate conversion
     half3x3 camTransform = (half3x3)_CameraViewProjections[unity_eyeIndex]; // camera viewProjection matrix
-
     // Get the depth, normal and view position for this fragment
     float depth_o;
     half3 norm_o;

@@ -480,7 +480,7 @@ namespace UnityEngine.Rendering.Universal
         static List<int> m_ShadowResolutionData = new List<int>();
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public static bool IsGameCamera(Camera camera)
         {
@@ -528,6 +528,9 @@ namespace UnityEngine.Rendering.Universal
 
         Comparison<Camera> cameraComparison = (camera1, camera2) => { return (int)camera1.depth - (int)camera2.depth; };
 #if UNITY_2021_1_OR_NEWER
+        /// <summary>
+        /// Done 1
+        /// </summary>
         void SortCameras(List<Camera> cameras)
         {
             if (cameras.Count > 1)
@@ -540,7 +543,9 @@ namespace UnityEngine.Rendering.Universal
                 Array.Sort(cameras, cameraComparison);
         }
 #endif
-
+        /// <summary>
+        /// Done
+        /// </summary>
         static GraphicsFormat MakeRenderTextureGraphicsFormat(bool isHdrEnabled, bool needsAlpha)
         {
             if (isHdrEnabled)
@@ -551,7 +556,6 @@ namespace UnityEngine.Rendering.Universal
                     return GraphicsFormat.R16G16B16A16_SFloat;
                 return SystemInfo.GetGraphicsFormat(DefaultFormat.HDR); // This might actually be a LDR format on old devices.
             }
-
             return SystemInfo.GetGraphicsFormat(DefaultFormat.LDR);
         }
 
@@ -565,7 +569,9 @@ namespace UnityEngine.Rendering.Universal
             else
                 return GraphicsFormat.R8G8B8A8_UNorm;
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         static RenderTextureDescriptor CreateRenderTextureDescriptor(Camera camera, float renderScale, bool isHdrEnabled, int msaaSamples, bool needsAlpha, bool requiresOpaqueTexture)
         {
             RenderTextureDescriptor desc;
@@ -588,37 +594,18 @@ namespace UnityEngine.Rendering.Universal
                 {
                     desc.graphicsFormat = SystemInfo.GetGraphicsFormat(DefaultFormat.LDR);
                 }
-                // SystemInfo.SupportsRenderTextureFormat(camera.targetTexture.descriptor.colorFormat)
-                // will assert on R8_SINT since it isn't a valid value of RenderTextureFormat.
-                // If this is fixed then we can implement debug statement to the user explaining why some
-                // RenderTextureFormats available resolves in a black render texture when no warning or error
-                // is given.
             }
-
-            // Make sure dimension is non zero
             desc.width = Mathf.Max(1, desc.width);
             desc.height = Mathf.Max(1, desc.height);
             desc.enableRandomWrite = false;
             desc.bindMS = false;
             desc.useDynamicScale = camera.allowDynamicResolution;
-            // The way RenderTextures handle MSAA fallback when an unsupported sample count of 2 is requested (falling back to numSamples = 1), differs fom the way
-            // the fallback is handled when setting up the Vulkan swapchain (rounding up numSamples to 4, if supported). This caused an issue on Mali GPUs which don't support
-            // 2x MSAA.
-            // The following code makes sure that on Vulkan the MSAA unsupported fallback behaviour is consistent between RenderTextures and Swapchain.
-            // TODO: we should review how all backends handle MSAA fallbacks and move these implementation details in engine code.
             if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
             {
-                // if the requested number of samples is 2, and the supported value is 1x, it means that 2x is unsupported on this GPU.
-                // Then we bump up the requested value to 4.
                 if (desc.msaaSamples == 2 && SystemInfo.GetRenderTextureSupportedMSAASampleCount(desc) == 1)
                     desc.msaaSamples = 4;
             }
-            // check that the requested MSAA samples count is supported by the current platform. If it's not supported,
-            // replace the requested desc.msaaSamples value with the actual value the engine falls back to
             desc.msaaSamples = SystemInfo.GetRenderTextureSupportedMSAASampleCount(desc);
-            // if the target platform doesn't support storing multisampled RTs and we are doing a separate opaque pass, using a Load load action on the subsequent passes
-            // will result in loading Resolved data, which on some platforms is discarded, resulting in losing the results of the previous passes.
-            // As a workaround we disable MSAA to make sure that the results of previous passes are stored. (fix for Case 1247423).
             if (!SystemInfo.supportsStoreAndResolveAction && requiresOpaqueTexture)
                 desc.msaaSamples = 1;
             return desc;

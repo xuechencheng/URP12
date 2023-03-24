@@ -84,7 +84,7 @@ TEXTURECUBE(_GlossyEnvironmentCubeMap);
 SAMPLER(sampler_GlossyEnvironmentCubeMap);
 
 #define _InvCameraViewProj unity_MatrixInvVP
-float4 _ScaledScreenParams;
+float4 _ScaledScreenParams; //new Vector4(scaledCameraWidth, scaledCameraHeight, 1.0f + 1.0f / scaledCameraWidth, 1.0f + 1.0f / scaledCameraHeight)
 
 float4 _MainLightPosition;
 half4 _MainLightColor;

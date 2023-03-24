@@ -62,7 +62,7 @@ float3 GetCameraRelativePositionWS(float3 positionWS)
 #endif
     return positionWS;
 }
-
+//表示法线贴图是否需要取反，比如MAX和MAYA的法线贴图就是反的
 real GetOddNegativeScale()
 {
     // FIXME: We should be able to just return unity_WorldTransformParams.w, but it is not
@@ -113,17 +113,16 @@ float4 TransformWViewToHClip(float3 positionVS)
     return mul(GetViewToHClipMatrix(), float4(positionVS, 1.0));
 }
 
-// Normalize to support uniform scaling
+// Done
 float3 TransformObjectToWorldDir(float3 dirOS, bool doNormalize = true)
 {
     #ifndef SHADER_STAGE_RAY_TRACING
-    float3 dirWS = mul((float3x3)GetObjectToWorldMatrix(), dirOS);
+        float3 dirWS = mul((float3x3)GetObjectToWorldMatrix(), dirOS);
     #else
-    float3 dirWS = mul((float3x3)ObjectToWorld3x4(), dirOS);
+        float3 dirWS = mul((float3x3)ObjectToWorld3x4(), dirOS);
     #endif
     if (doNormalize)
         return SafeNormalize(dirWS);
-
     return dirWS;
 }
 
@@ -161,17 +160,16 @@ real3 TransformWorldToHClipDir(real3 directionWS, bool doNormalize = false)
     return dirHCS;
 }
 
-// Transforms normal from object to world space
+// Done
 float3 TransformObjectToWorldNormal(float3 normalOS, bool doNormalize = true)
 {
 #ifdef UNITY_ASSUME_UNIFORM_SCALING
     return TransformObjectToWorldDir(normalOS, doNormalize);
 #else
-    // Normal need to be multiply by inverse transpose
+    // Normal need to be multiply by inverse transpose 逆转置矩阵
     float3 normalWS = mul(normalOS, (float3x3)GetWorldToObjectMatrix());
     if (doNormalize)
         return SafeNormalize(normalWS);
-
     return normalWS;
 #endif
 }
@@ -199,7 +197,7 @@ real3x3 CreateTangentToWorld(real3 normal, real3 tangent, real flipSign)
 
     return real3x3(tangent, bitangent, normal);
 }
-
+// Done
 real3 TransformTangentToWorld(real3 dirTS, real3x3 tangentToWorld)
 {
     // Note matrix is in row major convention with left multiplication as it is build on the fly

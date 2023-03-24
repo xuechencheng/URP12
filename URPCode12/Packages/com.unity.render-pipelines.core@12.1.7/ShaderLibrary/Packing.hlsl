@@ -171,18 +171,17 @@ real3 UnpackNormalRGB(real4 packedNormal, real scale = 1.0)
     normal.xy *= scale;
     return normal;
 }
-
+// Done
 real3 UnpackNormalRGBNoScale(real4 packedNormal)
 {
     return packedNormal.rgb * 2.0 - 1.0;
 }
-
+// Done
 real3 UnpackNormalAG(real4 packedNormal, real scale = 1.0)
 {
     real3 normal;
     normal.xy = packedNormal.ag * 2.0 - 1.0;
     normal.z = max(1.0e-16, sqrt(1.0 - saturate(dot(normal.xy, normal.xy))));
-
     // must scale after reconstruction of normal.z which also
     // mirrors UnpackNormalRGB(). This does imply normal is not returned
     // as a unit length vector but doesn't need it since it will get normalized after TBN transformation.
@@ -195,6 +194,7 @@ real3 UnpackNormalAG(real4 packedNormal, real scale = 1.0)
 }
 
 // Unpack normal as DXT5nm (1, y, 0, x) or BC5 (x, y, 0, 1)
+// Done
 real3 UnpackNormalmapRGorAG(real4 packedNormal, real scale = 1.0)
 {
     // Convert to (?, y, 0, x)
@@ -203,15 +203,16 @@ real3 UnpackNormalmapRGorAG(real4 packedNormal, real scale = 1.0)
 }
 
 #ifndef BUILTIN_TARGET_API
+// Done
 real3 UnpackNormal(real4 packedNormal)
 {
 #if defined(UNITY_ASTC_NORMALMAP_ENCODING)
-    return UnpackNormalAG(packedNormal, 1.0);
+    return UnpackNormalAG(packedNormal, 1.0);//(1, y, 0, x)
 #elif defined(UNITY_NO_DXT5nm)
-    return UnpackNormalRGBNoScale(packedNormal);
+    return UnpackNormalRGBNoScale(packedNormal);//( x, y, z) 在不使用 DXT5nm 法线贴图压缩的平台（移动平台）上定义。
 #else
     // Compiler will optimize the scale away
-    return UnpackNormalmapRGorAG(packedNormal, 1.0);
+    return UnpackNormalmapRGorAG(packedNormal, 1.0);//DXT5nm (1, y, 0, x) or BC5 (x, y, 0, 1)
 #endif
 }
 #endif

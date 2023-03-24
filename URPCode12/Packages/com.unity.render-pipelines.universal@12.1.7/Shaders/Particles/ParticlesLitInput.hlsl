@@ -123,7 +123,7 @@ inline void InitializeParticleLitSurfaceData(float2 uv, float3 blendUv, float4 p
     outSurfaceData.clearCoatMask       = half(0.0);
     outSurfaceData.clearCoatSmoothness = half(1.0);
 }
-
+// Done
 inline void InitializeParticleLitSurfaceData(ParticleParams params, out SurfaceData outSurfaceData)
 {
     half4 albedo = SampleAlbedo(TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap), params);
@@ -133,15 +133,12 @@ inline void InitializeParticleLitSurfaceData(ParticleParams params, out SurfaceD
     #else
         half2 metallicGloss = half2(_Metallic, _Smoothness);
     #endif
-
     half3 normalTS = SampleNormalTS(params.uv, params.blendUv, TEXTURE2D_ARGS(_BumpMap, sampler_BumpMap), _BumpScale);
-
     #if defined(_EMISSION)
         half3 emission = BlendTexture(TEXTURE2D_ARGS(_EmissionMap, sampler_EmissionMap), params.uv, params.blendUv).rgb * _EmissionColor.rgb;
     #else
         half3 emission = half3(0, 0, 0);
     #endif
-
     #if defined(_DISTORTION_ON)
         albedo.rgb = Distortion(albedo, normalTS, _DistortionStrengthScaled, _DistortionBlend, params.projectedPosition);
     #endif
@@ -154,10 +151,8 @@ inline void InitializeParticleLitSurfaceData(ParticleParams params, out SurfaceD
     outSurfaceData.metallic = metallicGloss.r;
     outSurfaceData.smoothness = metallicGloss.g;
     outSurfaceData.occlusion = 1.0;
-
     outSurfaceData.albedo = AlphaModulate(outSurfaceData.albedo, albedo.a);
     outSurfaceData.alpha = albedo.a;
-
     outSurfaceData.clearCoatMask       = half(0.0);
     outSurfaceData.clearCoatSmoothness = half(1.0);
 }

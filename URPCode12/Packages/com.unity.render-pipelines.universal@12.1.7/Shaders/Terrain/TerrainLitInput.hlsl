@@ -120,7 +120,7 @@ void TerrainInstancing(inout float4 positionOS, inout float3 normal, inout float
 {
 #ifdef UNITY_INSTANCING_ENABLED
     float2 patchVertex = positionOS.xy;
-    float4 instanceData = UNITY_ACCESS_INSTANCED_PROP(Terrain, _TerrainPatchInstanceData);
+    float4 instanceData = UNITY_ACCESS_INSTANCED_PROP(Terrain, _TerrainPatchInstanceData);// float4(xBase, yBase, skipScale, ~)
 
     float2 sampleCoords = (patchVertex.xy + instanceData.xy) * instanceData.z; // (xy + float2(xBase,yBase)) * skipScale
     float height = UnpackHeightmap(_TerrainHeightmapTexture.Load(int3(sampleCoords, 0)));
@@ -128,11 +128,11 @@ void TerrainInstancing(inout float4 positionOS, inout float3 normal, inout float
     positionOS.xz = sampleCoords * _TerrainHeightmapScale.xz;
     positionOS.y = height * _TerrainHeightmapScale.y;
 
-#ifdef ENABLE_TERRAIN_PERPIXEL_NORMAL
-    normal = float3(0, 1, 0);
-#else
-    normal = _TerrainNormalmapTexture.Load(int3(sampleCoords, 0)).rgb * 2 - 1;
-#endif
+    #ifdef ENABLE_TERRAIN_PERPIXEL_NORMAL
+        normal = float3(0, 1, 0);
+    #else
+        normal = _TerrainNormalmapTexture.Load(int3(sampleCoords, 0)).rgb * 2 - 1;
+    #endif
     uv = sampleCoords * _TerrainHeightmapRecipSize.zw;
 #endif
 }

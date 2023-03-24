@@ -322,7 +322,9 @@ namespace UnityEngine.Rendering.Universal.Internal
                 JobHandle.ScheduleBatchedJobs();
             }
         }
-
+        /// <summary>
+        /// Done
+        /// </summary>
         public void Setup(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             int additionalLightsCount = renderingData.lightData.additionalLightsCount;
@@ -334,25 +336,19 @@ namespace UnityEngine.Rendering.Universal.Internal
                 if (useClusteredRendering)
                 {
                     m_CullingHandle.Complete();
-
                     m_ZBinBuffer.SetData(m_ZBins.Reinterpret<float4>(UnsafeUtility.SizeOf<ZBin>()), 0, 0, m_ZBins.Length / 4);
                     m_TileBuffer.SetData(m_TileLightMasks.Reinterpret<float4>(UnsafeUtility.SizeOf<uint>()), 0, 0, m_TileLightMasks.Length / 4);
-
                     cmd.SetGlobalInteger("_AdditionalLightsDirectionalCount", m_DirectionalLightCount);
                     cmd.SetGlobalInteger("_AdditionalLightsZBinOffset", m_ZBinOffset);
                     cmd.SetGlobalFloat("_AdditionalLightsZBinScale", m_ZBinFactor);
                     cmd.SetGlobalVector("_AdditionalLightsTileScale", renderingData.cameraData.pixelRect.size / (float)m_ActualTileWidth);
                     cmd.SetGlobalInteger("_AdditionalLightsTileCountX", m_TileResolution.x);
-
                     cmd.SetGlobalConstantBuffer(m_ZBinBuffer, "AdditionalLightsZBins", 0, m_ZBins.Length * 4);
                     cmd.SetGlobalConstantBuffer(m_TileBuffer, "AdditionalLightsTiles", 0, m_TileLightMasks.Length * 4);
-
                     m_ZBins.Dispose();
                     m_TileLightMasks.Dispose();
                 }
-
                 SetupShaderLightConstants(cmd, ref renderingData);
-
                 bool lightCountCheck = (renderingData.cameraData.renderer.stripAdditionalLightOffVariants && renderingData.lightData.supportsAdditionalLights) || additionalLightsCount > 0;
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.AdditionalLightsVertex,
                     lightCountCheck && additionalLightsPerVertex && !useClusteredRendering);
@@ -367,13 +363,10 @@ namespace UnityEngine.Rendering.Universal.Internal
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.LightmapShadowMixing, isSubtractive || isShadowMaskAlways);
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.ShadowsShadowMask, isShadowMask);
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.MixedLightingSubtractive, isSubtractive); // Backward compatibility
-
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.ReflectionProbeBlending, renderingData.lightData.reflectionProbeBlending);
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.ReflectionProbeBoxProjection, renderingData.lightData.reflectionProbeBoxProjection);
-
                 bool lightLayers = renderingData.lightData.supportsLightLayers;
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.LightLayers, lightLayers);
-
                 m_LightCookieManager.Setup(context, cmd, ref renderingData.lightData);
             }
             context.ExecuteCommandBuffer(cmd);
@@ -388,26 +381,21 @@ namespace UnityEngine.Rendering.Universal.Internal
                 m_TileBuffer.Dispose();
             }
         }
-
+        /// <summary>
+        /// Done
+        /// </summary>
         void InitializeLightConstants(NativeArray<VisibleLight> lights, int lightIndex, out Vector4 lightPos, out Vector4 lightColor, out Vector4 lightAttenuation, out Vector4 lightSpotDir, out Vector4 lightOcclusionProbeChannel, out uint lightLayerMask)
         {
             UniversalRenderPipeline.InitializeLightConstants_Common(lights, lightIndex, out lightPos, out lightColor, out lightAttenuation, out lightSpotDir, out lightOcclusionProbeChannel);
             lightLayerMask = 0;
-
-            // When no lights are visible, main light will be set to -1.
-            // In this case we initialize it to default values and return
             if (lightIndex < 0)
                 return;
-
             VisibleLight lightData = lights[lightIndex];
             Light light = lightData.light;
-
             if (light == null)
                 return;
-
             if (light.bakingOutput.lightmapBakeType == LightmapBakeType.Mixed &&
-                lightData.light.shadows != LightShadows.None &&
-                m_MixedLightingSetup == MixedLightingSetup.None)
+                lightData.light.shadows != LightShadows.None && m_MixedLightingSetup == MixedLightingSetup.None)
             {
                 switch (light.bakingOutput.mixedLightingMode)
                 {
@@ -419,7 +407,6 @@ namespace UnityEngine.Rendering.Universal.Internal
                         break;
                 }
             }
-
             var additionalLightData = light.GetUniversalAdditionalLightData();
             lightLayerMask = (uint)additionalLightData.lightLayerMask;
         }
@@ -427,19 +414,17 @@ namespace UnityEngine.Rendering.Universal.Internal
         void SetupShaderLightConstants(CommandBuffer cmd, ref RenderingData renderingData)
         {
             m_MixedLightingSetup = MixedLightingSetup.None;
-
-            // Main light has an optimized shader path for main light. This will benefit games that only care about a single light.
-            // Universal pipeline also supports only a single shadow light, if available it will be the main light.
             SetupMainLightConstants(cmd, ref renderingData.lightData);
             SetupAdditionalLightConstants(cmd, ref renderingData);
         }
-
+        /// <summary>
+        /// Done
+        /// </summary>
         void SetupMainLightConstants(CommandBuffer cmd, ref LightData lightData)
         {
             Vector4 lightPos, lightColor, lightAttenuation, lightSpotDir, lightOcclusionChannel;
             uint lightLayerMask;
             InitializeLightConstants(lightData.visibleLights, lightData.mainLightIndex, out lightPos, out lightColor, out lightAttenuation, out lightSpotDir, out lightOcclusionChannel, out lightLayerMask);
-
             cmd.SetGlobalVector(LightConstantBuffer._MainLightPosition, lightPos);
             cmd.SetGlobalVector(LightConstantBuffer._MainLightColor, lightColor);
             cmd.SetGlobalVector(LightConstantBuffer._MainLightOcclusionProbesChannel, lightOcclusionChannel);

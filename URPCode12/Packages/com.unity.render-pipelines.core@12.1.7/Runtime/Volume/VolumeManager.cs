@@ -66,7 +66,9 @@ namespace UnityEngine.Rendering
         // We cache this as users able to change the stack through code and
         // we want to be able to switch to the default one through the ResetMainStack() function.
         VolumeStack m_DefaultStack = null;
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         VolumeManager()
         {
             m_SortedVolumes = new Dictionary<int, List<Volume>>();
@@ -80,7 +82,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public VolumeStack CreateStack()
         {
@@ -90,8 +92,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Resets the main stack to be the default one.
-        /// Call this function if you've assigned the main stack to something other than the default one.
+        /// Done 1
         /// </summary>
         public void ResetMainStack()
         {
@@ -108,16 +109,13 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         void ReloadBaseTypes()
         {
             m_ComponentsDefaultState.Clear();
-            // Grab all the component types we can find
             baseComponentTypeArray = CoreUtils.GetAllTypesDerivedFrom<VolumeComponent>().Where(t => !t.IsAbstract).ToArray();
             var flags = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
-            // Keep an instance of each type to be used in a virtual lowest priority global volume
-            // so that we have a default state to fallback to when exiting volumes
             foreach (var type in baseComponentTypeArray)
             {
                 type.GetMethod("Init", flags)?.Invoke(null, null);
@@ -221,7 +219,9 @@ namespace UnityEngine.Rendering
             Register(volume, newLayer);
         }
 
-        // Go through all listed components and lerp overridden values in the global state
+        /// <summary>
+        /// Done 1
+        /// </summary>
         void OverrideData(VolumeStack stack, List<VolumeComponent> components, float interpFactor)
         {
             foreach (var component in components)
@@ -235,7 +235,7 @@ namespace UnityEngine.Rendering
 
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         void ReplaceData(VolumeStack stack, List<VolumeComponent> components)
         {
@@ -255,7 +255,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         [Conditional("UNITY_EDITOR")]
         public void CheckBaseTypes()
@@ -266,7 +266,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         [Conditional("UNITY_EDITOR")]
         public void CheckStack(VolumeStack stack)
@@ -290,56 +290,38 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Updates the global state of the Volume manager. Unity usually calls this once per Camera
-        /// in the Update loop before rendering happens.
+        /// Done 1
         /// </summary>
-        /// <param name="trigger">A reference Transform to consider for positional Volume blending
-        /// </param>
-        /// <param name="layerMask">The LayerMask that the Volume manager uses to filter Volumes that it should consider
-        /// for blending.</param>
         public void Update(Transform trigger, LayerMask layerMask)
         {
             Update(stack, trigger, layerMask);
         }
 
         /// <summary>
-        /// Updates the Volume manager and stores the result in a custom <see cref="VolumeStack"/>.
+        /// Done 1
         /// </summary>
-        /// <param name="stack">The stack to store the blending result into.</param>
-        /// <param name="trigger">A reference Transform to consider for positional Volume blending.
-        /// </param>
-        /// <param name="layerMask">The LayerMask that Unity uses to filter Volumes that it should consider
-        /// for blending.</param>
-        /// <seealso cref="VolumeStack"/>
         public void Update(VolumeStack stack, Transform trigger, LayerMask layerMask)
         {
             Assert.IsNotNull(stack);
             CheckBaseTypes();
             CheckStack(stack);
-            // Start by resetting the global state to default values
             ReplaceData(stack, m_ComponentsDefaultState);
             bool onlyGlobal = trigger == null;
             var triggerPos = onlyGlobal ? Vector3.zero : trigger.position;
-            // Sort the cached volume list(s) for the given layer mask if needed and return it
             var volumes = GrabVolumes(layerMask);
             Camera camera = null;
-            // Behavior should be fine even if camera is null
             if (!onlyGlobal)
                 trigger.TryGetComponent<Camera>(out camera);
-            // Traverse all volumes
             foreach (var volume in volumes)
             {
                 if (volume == null)
                     continue;
 #if UNITY_EDITOR
-                // Skip volumes that aren't in the scene currently displayed in the scene view
                 if (!IsVolumeRenderedByCamera(volume, camera))
                     continue;
 #endif
-                // Skip disabled volumes and volumes without any data or weight
                 if (!volume.enabled || volume.profileRef == null || volume.weight <= 0f)
                     continue;
-                // Global volumes always have influence
                 if (volume.isGlobal)
                 {
                     OverrideData(stack, volume.profileRef.components, Mathf.Clamp01(volume.weight));
@@ -347,45 +329,27 @@ namespace UnityEngine.Rendering
                 }
                 if (onlyGlobal)
                     continue;
-
-                // If volume isn't global and has no collider, skip it as it's useless
                 var colliders = m_TempColliders;
                 volume.GetComponents(colliders);
                 if (colliders.Count == 0)
                     continue;
-
-                // Find closest distance to volume, 0 means it's inside it
                 float closestDistanceSqr = float.PositiveInfinity;
-
                 foreach (var collider in colliders)
                 {
                     if (!collider.enabled)
                         continue;
-
                     var closestPoint = collider.ClosestPoint(triggerPos);
                     var d = (closestPoint - triggerPos).sqrMagnitude;
-
                     if (d < closestDistanceSqr)
                         closestDistanceSqr = d;
                 }
-
                 colliders.Clear();
                 float blendDistSqr = volume.blendDistance * volume.blendDistance;
-
-                // Volume has no influence, ignore it
-                // Note: Volume doesn't do anything when `closestDistanceSqr = blendDistSqr` but we
-                //       can't use a >= comparison as blendDistSqr could be set to 0 in which case
-                //       volume would have total influence
                 if (closestDistanceSqr > blendDistSqr)
                     continue;
-
-                // Volume has influence
                 float interpFactor = 1f;
-
                 if (blendDistSqr > 0f)
                     interpFactor = 1f - (closestDistanceSqr / blendDistSqr);
-
-                // No need to clamp01 the interpolation factor as it'll always be in [0;1[ range
                 OverrideData(stack, volume.profileRef.components, interpFactor * Mathf.Clamp01(volume.weight));
             }
         }
@@ -402,15 +366,13 @@ namespace UnityEngine.Rendering
             return volumes.ToArray();
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         List<Volume> GrabVolumes(LayerMask mask)
         {
             List<Volume> list;
             if (!m_SortedVolumes.TryGetValue(mask, out list))
             {
-                // New layer mask detected, create a new list and cache all the volumes that belong
-                // to this mask in it
                 list = new List<Volume>();
                 foreach (var volume in m_Volumes)
                 {
@@ -432,7 +394,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         static void SortByPriority(List<Volume> volumes)
         {

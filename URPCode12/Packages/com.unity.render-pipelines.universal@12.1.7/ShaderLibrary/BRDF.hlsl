@@ -33,7 +33,7 @@ half ReflectivitySpecular(half3 specular)
     return Max3(specular.r, specular.g, specular.b);
 #endif
 }
-
+// Done
 half OneMinusReflectivityMetallic(half metallic)
 {
     // We'll need oneMinusReflectivity, so
@@ -41,7 +41,7 @@ half OneMinusReflectivityMetallic(half metallic)
     // store (1-dielectricSpec) in kDielectricSpec.a, then
     //   1-reflectivity = lerp(alpha, 0, metallic) = alpha + metallic*(0 - alpha) =
     //                  = alpha - metallic * alpha
-    half oneMinusDielectricSpec = kDielectricSpec.a;
+    half oneMinusDielectricSpec = kDielectricSpec.a; // 0.96
     return oneMinusDielectricSpec - metallic * oneMinusDielectricSpec;
 }
 
@@ -50,7 +50,7 @@ half MetallicFromReflectivity(half reflectivity)
     half oneMinusDielectricSpec = kDielectricSpec.a;
     return (reflectivity - kDielectricSpec.r) / oneMinusDielectricSpec;
 }
-
+// Done
 inline void InitializeBRDFDataDirect(half3 albedo, half3 diffuse, half3 specular, half reflectivity, half oneMinusReflectivity, half smoothness, inout half alpha, out BRDFData outBRDFData)
 {
     outBRDFData = (BRDFData)0;
@@ -78,6 +78,7 @@ inline void InitializeBRDFDataDirect(half3 diffuse, half3 specular, half reflect
     InitializeBRDFDataDirect(half3(0.0, 0.0, 0.0), diffuse, specular, reflectivity, oneMinusReflectivity, smoothness, alpha, outBRDFData);
 }
 
+// Done
 // Initialize BRDFData for material, managing both specular and metallic setup using shader keyword _SPECULAR_SETUP.
 inline void InitializeBRDFData(half3 albedo, half metallic, half3 specular, half smoothness, inout half alpha, out BRDFData outBRDFData)
 {
@@ -90,12 +91,11 @@ inline void InitializeBRDFData(half3 albedo, half metallic, half3 specular, half
     half oneMinusReflectivity = OneMinusReflectivityMetallic(metallic);
     half reflectivity = half(1.0) - oneMinusReflectivity;
     half3 brdfDiffuse = albedo * oneMinusReflectivity;
-    half3 brdfSpecular = lerp(kDieletricSpec.rgb, albedo, metallic);
+    half3 brdfSpecular = lerp(kDieletricSpec.rgb, albedo, metallic); //half4(0.04, 0.04, 0.04, 1.0 - 0.04)
 #endif
-
     InitializeBRDFDataDirect(albedo, brdfDiffuse, brdfSpecular, reflectivity, oneMinusReflectivity, smoothness, alpha, outBRDFData);
 }
-
+// Done
 inline void InitializeBRDFData(inout SurfaceData surfaceData, out BRDFData brdfData)
 {
     InitializeBRDFData(surfaceData.albedo, surfaceData.metallic, surfaceData.specular, surfaceData.smoothness, surfaceData.alpha, brdfData);
@@ -151,22 +151,21 @@ inline void InitializeBRDFDataClearCoat(half clearCoatMask, half clearCoatSmooth
 BRDFData CreateClearCoatBRDFData(SurfaceData surfaceData, inout BRDFData brdfData)
 {
     BRDFData brdfDataClearCoat = (BRDFData)0;
-
     #if defined(_CLEARCOAT) || defined(_CLEARCOATMAP)
-    // base brdfData is modified here, rely on the compiler to eliminate dead computation by InitializeBRDFData()
-    InitializeBRDFDataClearCoat(surfaceData.clearCoatMask, surfaceData.clearCoatSmoothness, brdfData, brdfDataClearCoat);
+        // base brdfData is modified here, rely on the compiler to eliminate dead computation by InitializeBRDFData()
+        InitializeBRDFDataClearCoat(surfaceData.clearCoatMask, surfaceData.clearCoatSmoothness, brdfData, brdfDataClearCoat);
     #endif
-
     return brdfDataClearCoat;
 }
 
 // Computes the specular term for EnvironmentBRDF
+// Done
 half3 EnvironmentBRDFSpecular(BRDFData brdfData, half fresnelTerm)
 {
     float surfaceReduction = 1.0 / (brdfData.roughness2 + 1.0);
     return half3(surfaceReduction * lerp(brdfData.specular, brdfData.grazingTerm, fresnelTerm));
 }
-
+// Done
 half3 EnvironmentBRDF(BRDFData brdfData, half3 indirectDiffuse, half3 indirectSpecular, half fresnelTerm)
 {
     half3 c = indirectDiffuse * brdfData.diffuse;
@@ -183,29 +182,25 @@ half3 EnvironmentBRDFClearCoat(BRDFData brdfData, half clearCoatMask, half3 indi
 
 // Computes the scalar specular term for Minimalist CookTorrance BRDF
 // NOTE: needs to be multiplied with reflectance f0, i.e. specular color to complete
+// Done
 half DirectBRDFSpecular(BRDFData brdfData, half3 normalWS, half3 lightDirectionWS, half3 viewDirectionWS)
 {
     float3 lightDirectionWSFloat3 = float3(lightDirectionWS);
     float3 halfDir = SafeNormalize(lightDirectionWSFloat3 + float3(viewDirectionWS));
-
     float NoH = saturate(dot(float3(normalWS), halfDir));
     half LoH = half(saturate(dot(lightDirectionWSFloat3, halfDir)));
-
     // GGX Distribution multiplied by combined approximation of Visibility and Fresnel
     // BRDFspec = (D * V * F) / 4.0
     // D = roughness^2 / ( NoH^2 * (roughness^2 - 1) + 1 )^2
     // V * F = 1.0 / ( LoH^2 * (roughness + 0.5) )
     // See "Optimizing PBR for Mobile" from Siggraph 2015 moving mobile graphics course
     // https://community.arm.com/events/1155
-
     // Final BRDFspec = roughness^2 / ( NoH^2 * (roughness^2 - 1) + 1 )^2 * (LoH^2 * (roughness + 0.5) * 4.0)
     // We further optimize a few light invariant terms
     // brdfData.normalizationTerm = (roughness + 0.5) * 4.0 rewritten as roughness * 4.0 + 2.0 to a fit a MAD.
     float d = NoH * NoH * brdfData.roughness2MinusOne + 1.00001f;
-
     half LoH2 = LoH * LoH;
     half specularTerm = brdfData.roughness2 / ((d * d) * max(0.1h, LoH2) * brdfData.normalizationTerm);
-
     // On platforms where half actually means something, the denominator has a risk of overflow
     // clamp below was added specifically to "fix" that, but dx compiler (we convert bytecode to metal/gles)
     // sees that specularTerm have only non-negative terms, so it skips max(0,..) in clamp (leaving only min(100,...))
@@ -213,8 +208,7 @@ half DirectBRDFSpecular(BRDFData brdfData, half3 normalWS, half3 lightDirectionW
     specularTerm = specularTerm - HALF_MIN;
     specularTerm = clamp(specularTerm, 0.0, 100.0); // Prevent FP16 overflow on mobiles
 #endif
-
-return specularTerm;
+    return specularTerm;
 }
 
 // Based on Minimalist CookTorrance BRDF

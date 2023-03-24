@@ -117,13 +117,13 @@ bool CalculateColorForDebugSceneOverride(out half4 color)
 }
 
 #endif
-
+// Done
 bool IsAlphaDiscardEnabled()
 {
     #if defined(DEBUG_DISPLAY)
-    return (_DebugSceneOverrideMode == DEBUGSCENEOVERRIDEMODE_NONE);
+        return (_DebugSceneOverrideMode == DEBUGSCENEOVERRIDEMODE_NONE);
     #else
-    return true;
+        return true;
     #endif
 }
 
@@ -142,22 +142,22 @@ bool IsFogEnabled()
     return true;
     #endif
 }
-
+// Done
 bool IsLightingFeatureEnabled(uint bitMask)
 {
     #if defined(DEBUG_DISPLAY)
-    return (_DebugLightingFeatureFlags == 0) || ((_DebugLightingFeatureFlags & bitMask) != 0);
+        return (_DebugLightingFeatureFlags == 0) || ((_DebugLightingFeatureFlags & bitMask) != 0);
     #else
-    return true;
+        return true;
     #endif
 }
 
 bool IsOnlyAOLightingFeatureEnabled()
 {
     #if defined(DEBUG_DISPLAY)
-    return _DebugLightingFeatureFlags == DEBUGLIGHTINGFEATUREFLAGS_AMBIENT_OCCLUSION;
+        return _DebugLightingFeatureFlags == DEBUGLIGHTINGFEATUREFLAGS_AMBIENT_OCCLUSION;
     #else
-    return false;
+        return false;
     #endif
 }
 

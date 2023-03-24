@@ -345,10 +345,8 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Return the number of items in colorBuffers actually referring to an existing RenderTarget
+        /// Done
         /// </summary>
-        /// <param name="colorBuffers"></param>
-        /// <returns></returns>
         internal static uint GetValidColorBufferCount(RenderTargetIdentifier[] colorBuffers)
         {
             uint nonNullColorBuffers = 0;

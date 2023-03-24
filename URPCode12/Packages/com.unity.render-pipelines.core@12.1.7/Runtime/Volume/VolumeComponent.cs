@@ -192,40 +192,8 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Interpolates a <see cref="VolumeComponent"/> with this component by an interpolation
-        /// factor and puts the result back into the given <see cref="VolumeComponent"/>.
+        /// Done 1
         /// </summary>
-        /// <remarks>
-        /// You can override this method to do your own blending. Either loop through the
-        /// <see cref="parameters"/> list or reference direct fields. You should only use
-        /// <see cref="VolumeParameter.SetValue"/> to set parameter values and not assign
-        /// directly to the state object. you should also manually check
-        /// <see cref="VolumeParameter.overrideState"/> before you set any values.
-        /// </remarks>
-        /// <param name="state">The internal component to interpolate from. You must store
-        /// the result of the interpolation in this same component.</param>
-        /// <param name="interpFactor">The interpolation factor in range [0,1].</param>
-        /// <example>
-        /// Below is the default implementation for blending:
-        /// <code>
-        /// public virtual void Override(VolumeComponent state, float interpFactor)
-        /// {
-        ///     int count = parameters.Count;
-        ///
-        ///     for (int i = 0; i &lt; count; i++)
-        ///     {
-        ///         var stateParam = state.parameters[i];
-        ///         var toParam = parameters[i];
-        ///
-        ///         // Keep track of the override state for debugging purpose
-        ///         stateParam.overrideState = toParam.overrideState;
-        ///
-        ///         if (toParam.overrideState)
-        ///             stateParam.Interp(stateParam, toParam, interpFactor);
-        ///     }
-        /// }
-        /// </code>
-        /// </example>
         public virtual void Override(VolumeComponent state, float interpFactor)
         {
             int count = parameters.Count;

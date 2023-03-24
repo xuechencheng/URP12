@@ -989,6 +989,7 @@ float Linear01Depth(float depth, float4 zBufferParam)
 // Does NOT correctly handle oblique view frustums.
 // Does NOT work with orthographic projection.
 // zBufferParam = { (f-n)/n, 1, (f-n)/n*f, 1/f }
+// Done
 float LinearEyeDepth(float depth, float4 zBufferParam)
 {
     return 1.0 / (zBufferParam.z * depth + zBufferParam.w);
@@ -1321,6 +1322,7 @@ bool HasFlag(uint bitfield, uint flag)
 }
 
 // Normalize that account for vectors with zero length
+// Done
 real3 SafeNormalize(float3 inVec)
 {
     float dp3 = max(FLT_MIN, dot(inVec, inVec));

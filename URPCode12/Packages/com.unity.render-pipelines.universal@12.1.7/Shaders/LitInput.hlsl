@@ -82,11 +82,10 @@ TEXTURE2D(_ClearCoatMap);       SAMPLER(sampler_ClearCoatMap);
 #else
     #define SAMPLE_METALLICSPECULAR(uv) SAMPLE_TEXTURE2D(_MetallicGlossMap, sampler_MetallicGlossMap, uv)
 #endif
-
+// Done
 half4 SampleMetallicSpecGloss(float2 uv, half albedoAlpha)
 {
     half4 specGloss;
-
 #ifdef _METALLICSPECGLOSSMAP
     specGloss = half4(SAMPLE_METALLICSPECULAR(uv));
     #ifdef _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
@@ -100,17 +99,16 @@ half4 SampleMetallicSpecGloss(float2 uv, half albedoAlpha)
     #else
         specGloss.rgb = _Metallic.rrr;
     #endif
-
     #ifdef _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
         specGloss.a = albedoAlpha * _Smoothness;
     #else
         specGloss.a = _Smoothness;
     #endif
 #endif
-
     return specGloss;
 }
 
+// Done
 half SampleOcclusion(float2 uv)
 {
     #ifdef _OCCLUSIONMAP
@@ -134,11 +132,9 @@ half2 SampleClearCoat(float2 uv)
 {
 #if defined(_CLEARCOAT) || defined(_CLEARCOATMAP)
     half2 clearCoatMaskSmoothness = half2(_ClearCoatMask, _ClearCoatSmoothness);
-
 #if defined(_CLEARCOATMAP)
     clearCoatMaskSmoothness *= SAMPLE_TEXTURE2D(_ClearCoatMap, sampler_ClearCoatMap, uv).rg;
 #endif
-
     return clearCoatMaskSmoothness;
 #else
     return half2(0.0, 1.0);
@@ -161,56 +157,49 @@ half3 ScaleDetailAlbedo(half3 detailAlbedo, half scale)
     // detailAlbedo *= _DetailAlbedoMapScale;
     // detailAlbedo = detailAlbedo * 0.5h + 0.5h;
     // return detailAlbedo * 2.0f;
-
     // A bit more optimized
     return half(2.0) * detailAlbedo * scale - scale + half(1.0);
 }
-
+// Done
 half3 ApplyDetailAlbedo(float2 detailUv, half3 albedo, half detailMask)
 {
 #if defined(_DETAIL)
     half3 detailAlbedo = SAMPLE_TEXTURE2D(_DetailAlbedoMap, sampler_DetailAlbedoMap, detailUv).rgb;
-
     // In order to have same performance as builtin, we do scaling only if scale is not 1.0 (Scaled version has 6 additional instructions)
-#if defined(_DETAIL_SCALED)
-    detailAlbedo = ScaleDetailAlbedo(detailAlbedo, _DetailAlbedoMapScale);
-#else
-    detailAlbedo = half(2.0) * detailAlbedo;
-#endif
-
+    #if defined(_DETAIL_SCALED)
+        detailAlbedo = ScaleDetailAlbedo(detailAlbedo, _DetailAlbedoMapScale);
+    #else
+        detailAlbedo = half(2.0) * detailAlbedo;
+    #endif
     return albedo * LerpWhiteTo(detailAlbedo, detailMask);
 #else
     return albedo;
 #endif
 }
-
+// Done
 half3 ApplyDetailNormal(float2 detailUv, half3 normalTS, half detailMask)
 {
 #if defined(_DETAIL)
-#if BUMP_SCALE_NOT_SUPPORTED
-    half3 detailNormalTS = UnpackNormal(SAMPLE_TEXTURE2D(_DetailNormalMap, sampler_DetailNormalMap, detailUv));
-#else
-    half3 detailNormalTS = UnpackNormalScale(SAMPLE_TEXTURE2D(_DetailNormalMap, sampler_DetailNormalMap, detailUv), _DetailNormalMapScale);
-#endif
-
+    #if BUMP_SCALE_NOT_SUPPORTED
+        half3 detailNormalTS = UnpackNormal(SAMPLE_TEXTURE2D(_DetailNormalMap, sampler_DetailNormalMap, detailUv));
+    #else
+        half3 detailNormalTS = UnpackNormalScale(SAMPLE_TEXTURE2D(_DetailNormalMap, sampler_DetailNormalMap, detailUv), _DetailNormalMapScale);
+    #endif
     // With UNITY_NO_DXT5nm unpacked vector is not normalized for BlendNormalRNM
     // For visual consistancy we going to do in all cases
     detailNormalTS = normalize(detailNormalTS);
-
     return lerp(normalTS, BlendNormalRNM(normalTS, detailNormalTS), detailMask); // todo: detailMask should lerp the angle of the quaternion rotation, not the normals
 #else
     return normalTS;
 #endif
 }
-
+// Done
 inline void InitializeStandardLitSurfaceData(float2 uv, out SurfaceData outSurfaceData)
 {
     half4 albedoAlpha = SampleAlbedoAlpha(uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap));
     outSurfaceData.alpha = Alpha(albedoAlpha.a, _BaseColor, _Cutoff);
-
     half4 specGloss = SampleMetallicSpecGloss(uv, albedoAlpha.a);
     outSurfaceData.albedo = albedoAlpha.rgb * _BaseColor.rgb;
-
 #if _SPECULAR_SETUP
     outSurfaceData.metallic = half(1.0);
     outSurfaceData.specular = specGloss.rgb;
@@ -218,13 +207,11 @@ inline void InitializeStandardLitSurfaceData(float2 uv, out SurfaceData outSurfa
     outSurfaceData.metallic = specGloss.r;
     outSurfaceData.specular = half3(0.0, 0.0, 0.0);
 #endif
-
     outSurfaceData.smoothness = specGloss.a;
-    outSurfaceData.normalTS = SampleNormal(uv, TEXTURE2D_ARGS(_BumpMap, sampler_BumpMap), _BumpScale);
+    outSurfaceData.normalTS = SampleNormal(uv, TEXTURE2D_ARGS(_BumpMap, sampler_BumpMap), _BumpScale);//???
     outSurfaceData.occlusion = SampleOcclusion(uv);
     outSurfaceData.emission = SampleEmission(uv, _EmissionColor.rgb, TEXTURE2D_ARGS(_EmissionMap, sampler_EmissionMap));
-
-#if defined(_CLEARCOAT) || defined(_CLEARCOATMAP)
+#if defined(_CLEARCOAT) || defined(_CLEARCOATMAP)//表面涂层效果
     half2 clearCoat = SampleClearCoat(uv);
     outSurfaceData.clearCoatMask       = clearCoat.r;
     outSurfaceData.clearCoatSmoothness = clearCoat.g;
@@ -232,8 +219,7 @@ inline void InitializeStandardLitSurfaceData(float2 uv, out SurfaceData outSurfa
     outSurfaceData.clearCoatMask       = half(0.0);
     outSurfaceData.clearCoatSmoothness = half(0.0);
 #endif
-
-#if defined(_DETAIL)
+#if defined(_DETAIL) //细节图
     half detailMask = SAMPLE_TEXTURE2D(_DetailMask, sampler_DetailMask, uv).a;
     float2 detailUv = uv * _DetailAlbedoMap_ST.xy + _DetailAlbedoMap_ST.zw;
     outSurfaceData.albedo = ApplyDetailAlbedo(detailUv, outSurfaceData.albedo, detailMask);

@@ -72,13 +72,9 @@ real3 SampleMainLightCookie(float3 samplePositionWS)
 {
     if(!IsMainLightCookieEnabled())
         return real3(1,1,1);
-
     float2 uv = ComputeLightCookieUVDirectional(_MainLightWorldToLight, samplePositionWS, float4(1, 1, 0, 0), URP_TEXTURE_WRAP_MODE_NONE);
     real4 color = SampleMainLightCookieTexture(uv);
-
-    return IsMainLightCookieTextureRGBFormat() ? color.rgb
-             : IsMainLightCookieTextureAlphaFormat() ? color.aaa
-             : color.rrr;
+    return IsMainLightCookieTextureRGBFormat() ? color.rgb : IsMainLightCookieTextureAlphaFormat() ? color.aaa : color.rrr;
 }
 
 real3 SampleAdditionalLightCookie(int perObjectLightIndex, float3 samplePositionWS)

@@ -21,7 +21,7 @@ namespace UnityEngine.Rendering
         internal static Dictionary<TEnum, TProfilingSampler<TEnum>> samples = new Dictionary<TEnum, TProfilingSampler<TEnum>>();
 #endif
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         static TProfilingSampler()
         {
@@ -43,7 +43,7 @@ namespace UnityEngine.Rendering
             }
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public TProfilingSampler(string name) : base(name)
         {
@@ -56,7 +56,7 @@ namespace UnityEngine.Rendering
     public class ProfilingSampler
     {
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public static ProfilingSampler Get<TEnum>(TEnum marker) where TEnum : Enum
         {
@@ -69,16 +69,16 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public ProfilingSampler(string name)
         {
-#if UNITY_USE_RECORDER
+#if UNITY_USE_RECORDER //Always true
             sampler = CustomSampler.Create(name, true);
 #else
             sampler = CustomSampler.Create($"Dummy_{name}");
 #endif
-            inlineSampler = CustomSampler.Create($"Inl_{name}"); // Profiles code "immediately"
+            inlineSampler = CustomSampler.Create($"Inl_{name}");
             this.name = name;
 #if UNITY_USE_RECORDER
             m_Recorder = sampler.GetRecorder();
@@ -89,7 +89,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public void Begin(CommandBuffer cmd)
         {
@@ -106,7 +106,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public void End(CommandBuffer cmd)
         {
@@ -210,7 +210,7 @@ namespace UnityEngine.Rendering
         bool                m_Disposed;
         ProfilingSampler    m_Sampler;
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public ProfilingScope(CommandBuffer cmd, ProfilingSampler sampler)
         {
@@ -221,14 +221,14 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public void Dispose()
         {
             Dispose(true);
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         void Dispose(bool disposing)
         {

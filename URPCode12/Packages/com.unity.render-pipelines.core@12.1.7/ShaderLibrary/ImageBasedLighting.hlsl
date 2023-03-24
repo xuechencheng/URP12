@@ -24,13 +24,14 @@
 // approximating the cone of the specular lobe, and then computing the MIP map level
 // which (approximately) covers the footprint of the lobe with a single texel.
 // Improves the perceptual roughness distribution.
+// Done
 real PerceptualRoughnessToMipmapLevel(real perceptualRoughness, uint maxMipLevel)
 {
     perceptualRoughness = perceptualRoughness * (1.7 - 0.7 * perceptualRoughness);
-
     return perceptualRoughness * maxMipLevel;
 }
 
+// Done
 real PerceptualRoughnessToMipmapLevel(real perceptualRoughness)
 {
     return PerceptualRoughnessToMipmapLevel(perceptualRoughness, UNITY_SPECCUBE_LOD_STEPS);

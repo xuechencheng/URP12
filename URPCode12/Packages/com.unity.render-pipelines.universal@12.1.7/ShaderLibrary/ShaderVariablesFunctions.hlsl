@@ -3,7 +3,7 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderVariablesFunctions.deprecated.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Debug/DebuggingCommon.hlsl"
-
+//Done
 VertexPositionInputs GetVertexPositionInputs(float3 positionOS)
 {
     VertexPositionInputs input;
@@ -11,10 +11,9 @@ VertexPositionInputs GetVertexPositionInputs(float3 positionOS)
     input.positionVS = TransformWorldToView(input.positionWS);
     input.positionCS = TransformWorldToHClip(input.positionWS);
 
-    float4 ndc = input.positionCS * 0.5f;
+    float4 ndc = input.positionCS * 0.5f; //[-1,1]-->[0,1]
     input.positionNDC.xy = float2(ndc.x, ndc.y * _ProjectionParams.x) + ndc.w;
     input.positionNDC.zw = input.positionCS.zw;
-
     return input;
 }
 
@@ -27,10 +26,10 @@ VertexNormalInputs GetVertexNormalInputs(float3 normalOS)
     return tbn;
 }
 
+// Done
 VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float4 tangentOS)
 {
     VertexNormalInputs tbn;
-
     // mikkts space compliant. only normalize when extracting normal at frag.
     real sign = real(tangentOS.w) * GetOddNegativeScale();
     tbn.normalWS = TransformObjectToWorldNormal(normalOS);
@@ -38,18 +37,19 @@ VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float4 tangentOS)
     tbn.bitangentWS = real3(cross(tbn.normalWS, float3(tbn.tangentWS))) * sign;
     return tbn;
 }
-
+// Done new Vector4(scaledCameraWidth, scaledCameraHeight, 1.0f + 1.0f / scaledCameraWidth, 1.0f + 1.0f / scaledCameraHeight)
 float4 GetScaledScreenParams()
 {
     return _ScaledScreenParams;
 }
 
-// Returns 'true' if the current view performs a perspective projection.
+// Done
 bool IsPerspectiveProjection()
 {
     return (unity_OrthoParams.w == 0);
 }
 
+// Done
 float3 GetCameraPositionWS()
 {
     // Currently we do not support Camera Relative Rendering so
@@ -65,6 +65,7 @@ float3 GetCameraPositionWS()
     //#endif
 }
 
+// Done
 // Could be e.g. the position of a primary camera or a shadow-casting light.
 float3 GetCurrentViewPosition()
 {
@@ -92,6 +93,7 @@ float3 GetViewForwardDir()
 }
 
 // Computes the world space view direction (pointing towards the viewer).
+// Done
 float3 GetWorldSpaceViewDir(float3 positionWS)
 {
     if (IsPerspectiveProjection())
@@ -107,6 +109,7 @@ float3 GetWorldSpaceViewDir(float3 positionWS)
 }
 
 // Computes the object space view direction (pointing towards the viewer).
+// Done
 half3 GetObjectSpaceNormalizeViewDir(float3 positionOS)
 {
     if (IsPerspectiveProjection())
@@ -122,6 +125,7 @@ half3 GetObjectSpaceNormalizeViewDir(float3 positionOS)
     }
 }
 
+// Done
 half3 GetWorldSpaceNormalizeViewDir(float3 positionWS)
 {
     if (IsPerspectiveProjection())
@@ -148,15 +152,15 @@ void GetLeftHandedViewSpaceMatrices(out float4x4 viewMatrix, out float4x4 projMa
     projMatrix = UNITY_MATRIX_P;
     projMatrix._13_23_33_43 = -projMatrix._13_23_33_43;
 }
-
+// Done
 void AlphaDiscard(real alpha, real cutoff, real offset = real(0.0))
 {
     #ifdef _ALPHATEST_ON
-    if (IsAlphaDiscardEnabled())
-        clip(alpha - cutoff + offset);
+        if (IsAlphaDiscardEnabled())
+            clip(alpha - cutoff + offset);
     #endif
 }
-
+// Done
 half OutputAlpha(half outputAlpha, half surfaceType = half(0.0))
 {
     return surfaceType == 1 ? outputAlpha : half(1.0);
@@ -194,6 +198,7 @@ float3 NormalizeNormalPerVertex(float3 normalWS)
     #endif
 }
 
+// Done
 half3 NormalizeNormalPerPixel(half3 normalWS)
 {
 // With XYZ normal map encoding we sporadically sample normals with near-zero-length causing Inf/NaN
@@ -203,7 +208,7 @@ half3 NormalizeNormalPerPixel(half3 normalWS)
     return normalize(normalWS);
 #endif
 }
-
+// Done
 float3 NormalizeNormalPerPixel(float3 normalWS)
 {
 #if defined(UNITY_NO_DXT5nm) && defined(_NORMALMAP)
@@ -214,25 +219,26 @@ float3 NormalizeNormalPerPixel(float3 normalWS)
 }
 
 
-
+// Done
 real ComputeFogFactorZ0ToFar(float z)
 {
     #if defined(FOG_LINEAR)
-    // factor = (end-z)/(end-start) = z * (-1/(end-start)) + (end/(end-start))
-    float fogFactor = saturate(z * unity_FogParams.z + unity_FogParams.w);
-    return real(fogFactor);
+        // factor = (end-z)/(end-start) = z * (-1/(end-start)) + (end/(end-start))
+        float fogFactor = saturate(z * unity_FogParams.z + unity_FogParams.w);
+        return real(fogFactor);
     #elif defined(FOG_EXP) || defined(FOG_EXP2)
-    // factor = exp(-(density*z)^2)
-    // -density * z computed at vertex
-    return real(unity_FogParams.x * z);
+        // factor = exp(-(density*z)^2)
+        // -density * z computed at vertex
+        return real(unity_FogParams.x * z);
     #else
         return real(0.0);
     #endif
 }
 
+// Done
 real ComputeFogFactor(float zPositionCS)
 {
-    float clipZ_0Far = UNITY_Z_0_FAR_FROM_CLIPSPACE(zPositionCS);
+    float clipZ_0Far = UNITY_Z_0_FAR_FROM_CLIPSPACE(zPositionCS);// ???
     return ComputeFogFactorZ0ToFar(clipZ_0Far);
 }
 
@@ -257,6 +263,7 @@ half ComputeFogIntensity(half fogFactor)
 
 // Force enable fog fragment shader evaluation
 #define _FOG_FRAGMENT 1
+// Done
 real InitializeInputDataFog(float4 positionWS, real vertFogFactor)
 {
     real fogFactor = 0.0;
@@ -273,7 +280,7 @@ real InitializeInputDataFog(float4 positionWS, real vertFogFactor)
 #endif
     return fogFactor;
 }
-
+// Done
 float ComputeFogIntensity(float fogFactor)
 {
     float fogIntensity = 0.0;
@@ -292,7 +299,7 @@ float ComputeFogIntensity(float fogFactor)
     #endif
     return fogIntensity;
 }
-
+// Done
 half3 MixFogColor(half3 fragColor, half3 fogColor, half fogFactor)
 {
     #if defined(FOG_LINEAR) || defined(FOG_EXP) || defined(FOG_EXP2)
@@ -313,7 +320,7 @@ float3 MixFogColor(float3 fragColor, float3 fogColor, float fogFactor)
     #endif
     return fragColor;
 }
-
+// Done
 half3 MixFog(half3 fragColor, half fogFactor)
 {
     return MixFogColor(fragColor, unity_FogColor.rgb, fogFactor);
@@ -346,24 +353,24 @@ float LinearDepthToEyeDepth(float rawDepth)
 void TransformScreenUV(inout float2 uv, float screenHeight)
 {
     #if UNITY_UV_STARTS_AT_TOP
-    uv.y = screenHeight - (uv.y * _ScaleBiasRt.x + _ScaleBiasRt.y * screenHeight);
+        uv.y = screenHeight - (uv.y * _ScaleBiasRt.x + _ScaleBiasRt.y * screenHeight);
     #endif
 }
 
 void TransformScreenUV(inout float2 uv)
 {
     #if UNITY_UV_STARTS_AT_TOP
-    TransformScreenUV(uv, GetScaledScreenParams().y);
+        TransformScreenUV(uv, GetScaledScreenParams().y);
     #endif
 }
 
 void TransformNormalizedScreenUV(inout float2 uv)
 {
     #if UNITY_UV_STARTS_AT_TOP
-    TransformScreenUV(uv, 1.0);
+        TransformScreenUV(uv, 1.0);
     #endif
 }
-
+// ???
 float2 GetNormalizedScreenSpaceUV(float2 positionCS)
 {
     float2 normalizedScreenSpaceUV = positionCS.xy * rcp(GetScaledScreenParams().xy);

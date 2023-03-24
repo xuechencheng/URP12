@@ -46,7 +46,6 @@ namespace UnityEngine.Rendering.Universal
             bool componentExists = gameObject.TryGetComponent<UniversalAdditionalLightData>(out var lightData);
             if (!componentExists)
                 lightData = gameObject.AddComponent<UniversalAdditionalLightData>();
-
             return lightData;
         }
     }

@@ -18,7 +18,7 @@ namespace UnityEngine.Rendering
         {
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         internal void Reload(Type[] baseTypes)
         {
@@ -35,26 +35,17 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Gets the current state of the <see cref="VolumeComponent"/> of type <typeparamref name="T"/>
-        /// in the stack.
+        /// Done 1
         /// </summary>
-        /// <typeparam name="T">A type of <see cref="VolumeComponent"/>.</typeparam>
-        /// <returns>The current state of the <see cref="VolumeComponent"/> of type <typeparamref name="T"/>
-        /// in the stack.</returns>
-        public T GetComponent<T>()
-            where T : VolumeComponent
+        public T GetComponent<T>() where T : VolumeComponent
         {
             var comp = GetComponent(typeof(T));
             return (T)comp;
         }
 
         /// <summary>
-        /// Gets the current state of the <see cref="VolumeComponent"/> of the specified type in the
-        /// stack.
+        /// Done 1
         /// </summary>
-        /// <param name="type">The type of <see cref="VolumeComponent"/> to look for.</param>
-        /// <returns>The current state of the <see cref="VolumeComponent"/> of the specified type,
-        /// or <c>null</c> if the type is invalid.</returns>
         public VolumeComponent GetComponent(Type type)
         {
             components.TryGetValue(type, out var comp);
@@ -62,14 +53,12 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Cleans up the content of this stack. Once a <c>VolumeStack</c> is disposed, it souldn't
-        /// be used anymore.
+        /// Done 1
         /// </summary>
         public void Dispose()
         {
             foreach (var component in components)
                 CoreUtils.Destroy(component.Value);
-
             components.Clear();
         }
     }
