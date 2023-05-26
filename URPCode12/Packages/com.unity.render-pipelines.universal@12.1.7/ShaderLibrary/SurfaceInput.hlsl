@@ -18,6 +18,7 @@ SAMPLER(sampler_EmissionMap);
 ///////////////////////////////////////////////////////////////////////////////
 //                      Material Property Helpers                            //
 ///////////////////////////////////////////////////////////////////////////////
+// Done
 half Alpha(half albedoAlpha, half4 color, half cutoff)
 {
 #if !defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A) && !defined(_GLOSSINESS_FROM_BASE_ALPHA)
@@ -25,11 +26,9 @@ half Alpha(half albedoAlpha, half4 color, half cutoff)
 #else
     half alpha = color.a;
 #endif
-
 #if defined(_ALPHATEST_ON)
     clip(alpha - cutoff);
 #endif
-
     return alpha;
 }
 
@@ -56,11 +55,11 @@ half3 SampleNormal(float2 uv, TEXTURE2D_PARAM(bumpMap, sampler_bumpMap), half sc
 // Done
 half3 SampleEmission(float2 uv, half3 emissionColor, TEXTURE2D_PARAM(emissionMap, sampler_emissionMap))
 {
-#ifndef _EMISSION
-    return 0;
-#else
-    return SAMPLE_TEXTURE2D(emissionMap, sampler_emissionMap, uv).rgb * emissionColor;
-#endif
+    #ifndef _EMISSION
+        return 0;
+    #else
+        return SAMPLE_TEXTURE2D(emissionMap, sampler_emissionMap, uv).rgb * emissionColor;
+    #endif
 }
 
 #endif

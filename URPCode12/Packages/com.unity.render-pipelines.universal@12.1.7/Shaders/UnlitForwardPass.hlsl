@@ -33,7 +33,7 @@ struct Varyings
     UNITY_VERTEX_INPUT_INSTANCE_ID
     UNITY_VERTEX_OUTPUT_STEREO
 };
-// Done
+
 void InitializeInputData(Varyings input, out InputData inputData)
 {
     inputData = (InputData)0;
@@ -53,7 +53,7 @@ void InitializeInputData(Varyings input, out InputData inputData)
     inputData.normalizedScreenSpaceUV = 0;
     inputData.shadowMask = half4(1, 1, 1, 1);
 }
-// Done
+
 Varyings UnlitPassVertex(Attributes input)
 {
     Varyings output = (Varyings)0;
@@ -81,7 +81,7 @@ Varyings UnlitPassVertex(Attributes input)
     #endif
     return output;
 }
-// Done
+
 half4 UnlitPassFragment(Varyings input) : SV_Target
 {
     UNITY_SETUP_INSTANCE_ID(input);

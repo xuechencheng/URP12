@@ -30,7 +30,7 @@ CBUFFER_END
 #endif
 
 TEXTURE2D(_SpecGlossMap);       SAMPLER(sampler_SpecGlossMap);
-
+// Done
 half4 SampleSpecularSmoothness(float2 uv, half alpha, half4 specColor, TEXTURE2D_PARAM(specMap, sampler_specMap))
 {
     half4 specularSmoothness = half4(0, 0, 0, 1);
@@ -46,20 +46,17 @@ half4 SampleSpecularSmoothness(float2 uv, half alpha, half4 specColor, TEXTURE2D
 
     return specularSmoothness;
 }
-
+// Done
 inline void InitializeSimpleLitSurfaceData(float2 uv, out SurfaceData outSurfaceData)
 {
     outSurfaceData = (SurfaceData)0;
-
     half4 albedoAlpha = SampleAlbedoAlpha(uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap));
     outSurfaceData.alpha = albedoAlpha.a * _BaseColor.a;
     AlphaDiscard(outSurfaceData.alpha, _Cutoff);
-
     outSurfaceData.albedo = albedoAlpha.rgb * _BaseColor.rgb;
 #ifdef _ALPHAPREMULTIPLY_ON
     outSurfaceData.albedo *= outSurfaceData.alpha;
 #endif
-
     half4 specularSmoothness = SampleSpecularSmoothness(uv, outSurfaceData.alpha, _SpecColor, TEXTURE2D_ARGS(_SpecGlossMap, sampler_SpecGlossMap));
     outSurfaceData.metallic = 0.0; // unused
     outSurfaceData.specular = specularSmoothness.rgb;

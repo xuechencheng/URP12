@@ -989,7 +989,7 @@ float Linear01Depth(float depth, float4 zBufferParam)
 // Does NOT correctly handle oblique view frustums.
 // Does NOT work with orthographic projection.
 // zBufferParam = { (f-n)/n, 1, (f-n)/n*f, 1/f }
-// Done
+
 float LinearEyeDepth(float depth, float4 zBufferParam)
 {
     return 1.0 / (zBufferParam.z * depth + zBufferParam.w);
@@ -1159,6 +1159,7 @@ float3 ComputeViewSpacePosition(float2 positionNDC, float deviceDepth, float4x4 
     return positionVS.xyz / positionVS.w;
 }
 
+// Done
 float3 ComputeWorldSpacePosition(float2 positionNDC, float deviceDepth, float4x4 invViewProjMatrix)
 {
     float4 positionCS  = ComputeClipSpacePosition(positionNDC, deviceDepth);
@@ -1322,7 +1323,7 @@ bool HasFlag(uint bitfield, uint flag)
 }
 
 // Normalize that account for vectors with zero length
-// Done
+
 real3 SafeNormalize(float3 inVec)
 {
     float dp3 = max(FLT_MIN, dot(inVec, inVec));
@@ -1386,7 +1387,6 @@ float4 GetFullScreenTriangleVertexPosition(uint vertexID, float z = UNITY_NEAR_C
 // 1 - 0,1
 // 2 - 1,1
 // 3 - 1,0
-
 float2 GetQuadTexCoord(uint vertexID)
 {
     uint topBit = vertexID >> 1;

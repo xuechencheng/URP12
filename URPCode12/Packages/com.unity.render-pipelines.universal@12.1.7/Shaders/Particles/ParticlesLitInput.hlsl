@@ -61,11 +61,10 @@ half4 SampleAlbedo(float2 uv, float3 blendUv, half4 color, float4 particleColor,
 
     return albedo;
 }
-
+// Done
 half4 SampleAlbedo(TEXTURE2D_PARAM(albedoMap, sampler_albedoMap), ParticleParams params)
 {
     half4 albedo = BlendTexture(TEXTURE2D_ARGS(albedoMap, sampler_albedoMap), params.uv, params.blendUv) * params.baseColor;
-
     half4 colorAddSubDiff = half4(0, 0, 0, 0);
 #if defined (_COLORADDSUBDIFF_ON)
     colorAddSubDiff = _BaseColorAddSubDiff;
@@ -123,7 +122,7 @@ inline void InitializeParticleLitSurfaceData(float2 uv, float3 blendUv, float4 p
     outSurfaceData.clearCoatMask       = half(0.0);
     outSurfaceData.clearCoatSmoothness = half(1.0);
 }
-// Done
+
 inline void InitializeParticleLitSurfaceData(ParticleParams params, out SurfaceData outSurfaceData)
 {
     half4 albedo = SampleAlbedo(TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap), params);

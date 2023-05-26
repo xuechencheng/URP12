@@ -28,7 +28,7 @@ struct Varyings
     UNITY_VERTEX_INPUT_INSTANCE_ID
     UNITY_VERTEX_OUTPUT_STEREO
 };
-// Done
+
 void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData)
 {
     inputData = (InputData)0;
@@ -62,7 +62,7 @@ void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData
         #endif
     #endif
 }
-// Done
+
 Varyings BakedLitForwardPassVertex(Attributes input)
 {
     Varyings output;

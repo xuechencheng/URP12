@@ -79,14 +79,13 @@ UNITY_DEFINE_INSTANCED_PROP(float4, _TerrainPatchInstanceData)  // float4(xBase,
 UNITY_INSTANCING_BUFFER_END(Terrain)
 
 #ifdef _ALPHATEST_ON
-TEXTURE2D(_TerrainHolesTexture);
-SAMPLER(sampler_TerrainHolesTexture);
-
-void ClipHoles(float2 uv)
-{
-    float hole = SAMPLE_TEXTURE2D(_TerrainHolesTexture, sampler_TerrainHolesTexture, uv).r;
-    clip(hole == 0.0f ? -1 : 1);
-}
+    TEXTURE2D(_TerrainHolesTexture);
+    SAMPLER(sampler_TerrainHolesTexture);
+    void ClipHoles(float2 uv)
+    {
+        float hole = SAMPLE_TEXTURE2D(_TerrainHolesTexture, sampler_TerrainHolesTexture, uv).r;
+        clip(hole == 0.0f ? -1 : 1);
+    }
 #endif
 
 half4 SampleMetallicSpecGloss(float2 uv, half albedoAlpha)

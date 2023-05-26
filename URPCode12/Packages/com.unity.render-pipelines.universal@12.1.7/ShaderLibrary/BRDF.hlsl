@@ -33,7 +33,7 @@ half ReflectivitySpecular(half3 specular)
     return Max3(specular.r, specular.g, specular.b);
 #endif
 }
-// Done
+
 half OneMinusReflectivityMetallic(half metallic)
 {
     // We'll need oneMinusReflectivity, so
@@ -50,7 +50,7 @@ half MetallicFromReflectivity(half reflectivity)
     half oneMinusDielectricSpec = kDielectricSpec.a;
     return (reflectivity - kDielectricSpec.r) / oneMinusDielectricSpec;
 }
-// Done
+
 inline void InitializeBRDFDataDirect(half3 albedo, half3 diffuse, half3 specular, half reflectivity, half oneMinusReflectivity, half smoothness, inout half alpha, out BRDFData outBRDFData)
 {
     outBRDFData = (BRDFData)0;
@@ -78,7 +78,7 @@ inline void InitializeBRDFDataDirect(half3 diffuse, half3 specular, half reflect
     InitializeBRDFDataDirect(half3(0.0, 0.0, 0.0), diffuse, specular, reflectivity, oneMinusReflectivity, smoothness, alpha, outBRDFData);
 }
 
-// Done
+
 // Initialize BRDFData for material, managing both specular and metallic setup using shader keyword _SPECULAR_SETUP.
 inline void InitializeBRDFData(half3 albedo, half metallic, half3 specular, half smoothness, inout half alpha, out BRDFData outBRDFData)
 {
@@ -147,7 +147,7 @@ inline void InitializeBRDFDataClearCoat(half clearCoatMask, half clearCoatSmooth
     baseBRDFData.specular = lerp(baseBRDFData.specular, ConvertF0ForClearCoat15(baseBRDFData.specular), clearCoatMask);
     // TODO: what about diffuse? at least in specular workflow diffuse should be recalculated as it directly depends on it.
 }
-
+// Done
 BRDFData CreateClearCoatBRDFData(SurfaceData surfaceData, inout BRDFData brdfData)
 {
     BRDFData brdfDataClearCoat = (BRDFData)0;
@@ -159,13 +159,13 @@ BRDFData CreateClearCoatBRDFData(SurfaceData surfaceData, inout BRDFData brdfDat
 }
 
 // Computes the specular term for EnvironmentBRDF
-// Done
+
 half3 EnvironmentBRDFSpecular(BRDFData brdfData, half fresnelTerm)
 {
     float surfaceReduction = 1.0 / (brdfData.roughness2 + 1.0);
     return half3(surfaceReduction * lerp(brdfData.specular, brdfData.grazingTerm, fresnelTerm));
 }
-// Done
+
 half3 EnvironmentBRDF(BRDFData brdfData, half3 indirectDiffuse, half3 indirectSpecular, half fresnelTerm)
 {
     half3 c = indirectDiffuse * brdfData.diffuse;
@@ -182,7 +182,7 @@ half3 EnvironmentBRDFClearCoat(BRDFData brdfData, half clearCoatMask, half3 indi
 
 // Computes the scalar specular term for Minimalist CookTorrance BRDF
 // NOTE: needs to be multiplied with reflectance f0, i.e. specular color to complete
-// Done
+
 half DirectBRDFSpecular(BRDFData brdfData, half3 normalWS, half3 lightDirectionWS, half3 viewDirectionWS)
 {
     float3 lightDirectionWSFloat3 = float3(lightDirectionWS);

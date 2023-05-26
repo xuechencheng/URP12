@@ -3,7 +3,7 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Unlit.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Particles.hlsl"
-// Done
+
 void InitializeInputData(VaryingsParticle input, SurfaceData surfaceData, out InputData inputData)
 {
     inputData = (InputData)0;
@@ -31,7 +31,7 @@ void InitializeInputData(VaryingsParticle input, SurfaceData surfaceData, out In
         inputData.vertexSH = input.vertexSH;
     #endif
 }
-// Done
+
 void InitializeSurfaceData(ParticleParams particleParams, out SurfaceData surfaceData)
 {
     surfaceData = (SurfaceData)0;
@@ -60,7 +60,7 @@ void InitializeSurfaceData(ParticleParams particleParams, out SurfaceData surfac
 ///////////////////////////////////////////////////////////////////////////////
 //                  Vertex and Fragment functions                            //
 ///////////////////////////////////////////////////////////////////////////////
-// Done
+
 VaryingsParticle vertParticleUnlit(AttributesParticle input)
 {
     VaryingsParticle output = (VaryingsParticle)0;
@@ -101,7 +101,7 @@ VaryingsParticle vertParticleUnlit(AttributesParticle input)
 #endif
     return output;
 }
-// Done
+
 half4 fragParticleUnlit(VaryingsParticle input) : SV_Target
 {
     UNITY_SETUP_INSTANCE_ID(input);

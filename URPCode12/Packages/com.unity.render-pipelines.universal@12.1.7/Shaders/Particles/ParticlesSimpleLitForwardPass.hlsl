@@ -3,7 +3,7 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Particles.hlsl"
-// Done
+
 void InitializeInputData(VaryingsParticle input, half3 normalTS, out InputData inputData)
 {
     inputData = (InputData)0;
@@ -41,7 +41,7 @@ void InitializeInputData(VaryingsParticle input, half3 normalTS, out InputData i
 ///////////////////////////////////////////////////////////////////////////////
 //                  Vertex and Fragment functions                            //
 ///////////////////////////////////////////////////////////////////////////////
-// Done
+
 VaryingsParticle ParticlesLitVertex(AttributesParticle input)
 {
     VaryingsParticle output;
@@ -85,7 +85,7 @@ VaryingsParticle ParticlesLitVertex(AttributesParticle input)
 #endif
     return output;
 }
-// Done
+
 half4 ParticlesLitFragment(VaryingsParticle input) : SV_Target
 {
     UNITY_SETUP_INSTANCE_ID(input);

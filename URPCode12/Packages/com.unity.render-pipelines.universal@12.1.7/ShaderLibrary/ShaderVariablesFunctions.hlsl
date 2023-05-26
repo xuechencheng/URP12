@@ -11,8 +11,8 @@ VertexPositionInputs GetVertexPositionInputs(float3 positionOS)
     input.positionVS = TransformWorldToView(input.positionWS);
     input.positionCS = TransformWorldToHClip(input.positionWS);
 
-    float4 ndc = input.positionCS * 0.5f; //[-1,1]-->[0,1]
-    input.positionNDC.xy = float2(ndc.x, ndc.y * _ProjectionParams.x) + ndc.w;
+    float4 ndc = input.positionCS * 0.5f; // [-1, 1]-->[-0.5, 0.5]
+    input.positionNDC.xy = float2(ndc.x, ndc.y * _ProjectionParams.x) + ndc.w;// [-1, 1]-->[0, 1]
     input.positionNDC.zw = input.positionCS.zw;
     return input;
 }
@@ -30,26 +30,25 @@ VertexNormalInputs GetVertexNormalInputs(float3 normalOS)
 VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float4 tangentOS)
 {
     VertexNormalInputs tbn;
-    // mikkts space compliant. only normalize when extracting normal at frag.
     real sign = real(tangentOS.w) * GetOddNegativeScale();
     tbn.normalWS = TransformObjectToWorldNormal(normalOS);
     tbn.tangentWS = real3(TransformObjectToWorldDir(tangentOS.xyz));
     tbn.bitangentWS = real3(cross(tbn.normalWS, float3(tbn.tangentWS))) * sign;
     return tbn;
 }
-// Done new Vector4(scaledCameraWidth, scaledCameraHeight, 1.0f + 1.0f / scaledCameraWidth, 1.0f + 1.0f / scaledCameraHeight)
+// Done
 float4 GetScaledScreenParams()
 {
-    return _ScaledScreenParams;
+    return _ScaledScreenParams;//new Vector4(scaledCameraWidth, scaledCameraHeight, 1.0f + 1.0f / scaledCameraWidth, 1.0f + 1.0f / scaledCameraHeight)
 }
 
-// Done
+
 bool IsPerspectiveProjection()
 {
     return (unity_OrthoParams.w == 0);
 }
 
-// Done
+
 float3 GetCameraPositionWS()
 {
     // Currently we do not support Camera Relative Rendering so
@@ -65,7 +64,7 @@ float3 GetCameraPositionWS()
     //#endif
 }
 
-// Done
+
 // Could be e.g. the position of a primary camera or a shadow-casting light.
 float3 GetCurrentViewPosition()
 {
@@ -93,7 +92,7 @@ float3 GetViewForwardDir()
 }
 
 // Computes the world space view direction (pointing towards the viewer).
-// Done
+
 float3 GetWorldSpaceViewDir(float3 positionWS)
 {
     if (IsPerspectiveProjection())
@@ -109,7 +108,7 @@ float3 GetWorldSpaceViewDir(float3 positionWS)
 }
 
 // Computes the object space view direction (pointing towards the viewer).
-// Done
+
 half3 GetObjectSpaceNormalizeViewDir(float3 positionOS)
 {
     if (IsPerspectiveProjection())
@@ -130,13 +129,11 @@ half3 GetWorldSpaceNormalizeViewDir(float3 positionWS)
 {
     if (IsPerspectiveProjection())
     {
-        // Perspective
         float3 V = GetCurrentViewPosition() - positionWS;
         return half3(normalize(V));
     }
     else
     {
-        // Orthographic
         return half3(-GetViewForwardDir());
     }
 }
@@ -198,7 +195,7 @@ float3 NormalizeNormalPerVertex(float3 normalWS)
     #endif
 }
 
-// Done
+
 half3 NormalizeNormalPerPixel(half3 normalWS)
 {
 // With XYZ normal map encoding we sporadically sample normals with near-zero-length causing Inf/NaN
@@ -208,7 +205,7 @@ half3 NormalizeNormalPerPixel(half3 normalWS)
     return normalize(normalWS);
 #endif
 }
-// Done
+
 float3 NormalizeNormalPerPixel(float3 normalWS)
 {
 #if defined(UNITY_NO_DXT5nm) && defined(_NORMALMAP)
@@ -219,7 +216,7 @@ float3 NormalizeNormalPerPixel(float3 normalWS)
 }
 
 
-// Done
+
 real ComputeFogFactorZ0ToFar(float z)
 {
     #if defined(FOG_LINEAR)
@@ -235,10 +232,10 @@ real ComputeFogFactorZ0ToFar(float z)
     #endif
 }
 
-// Done
+
 real ComputeFogFactor(float zPositionCS)
 {
-    float clipZ_0Far = UNITY_Z_0_FAR_FROM_CLIPSPACE(zPositionCS);// ???
+    float clipZ_0Far = UNITY_Z_0_FAR_FROM_CLIPSPACE(zPositionCS);// z clip range remapping to [0, far]
     return ComputeFogFactorZ0ToFar(clipZ_0Far);
 }
 
@@ -263,7 +260,7 @@ half ComputeFogIntensity(half fogFactor)
 
 // Force enable fog fragment shader evaluation
 #define _FOG_FRAGMENT 1
-// Done
+
 real InitializeInputDataFog(float4 positionWS, real vertFogFactor)
 {
     real fogFactor = 0.0;
@@ -280,7 +277,7 @@ real InitializeInputDataFog(float4 positionWS, real vertFogFactor)
 #endif
     return fogFactor;
 }
-// Done
+
 float ComputeFogIntensity(float fogFactor)
 {
     float fogIntensity = 0.0;
@@ -299,7 +296,7 @@ float ComputeFogIntensity(float fogFactor)
     #endif
     return fogIntensity;
 }
-// Done
+
 half3 MixFogColor(half3 fragColor, half3 fogColor, half fogFactor)
 {
     #if defined(FOG_LINEAR) || defined(FOG_EXP) || defined(FOG_EXP2)
@@ -320,7 +317,7 @@ float3 MixFogColor(float3 fragColor, float3 fogColor, float fogFactor)
     #endif
     return fragColor;
 }
-// Done
+
 half3 MixFog(half3 fragColor, half fogFactor)
 {
     return MixFogColor(fragColor, unity_FogColor.rgb, fogFactor);

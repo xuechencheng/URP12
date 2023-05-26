@@ -10,12 +10,12 @@
 
 #if defined(LIGHTMAP_ON)
     #define DECLARE_LIGHTMAP_OR_SH(lmName, shName, index) float2 lmName : TEXCOORD##index
-    #define OUTPUT_LIGHTMAP_UV(lightmapUV, lightmapScaleOffset, OUT) OUT.xy = lightmapUV.xy * lightmapScaleOffset.xy + lightmapScaleOffset.zw;
+    #define OUTPUT_LIGHTMAP_UV(lightmapUV, lightmapScaleOffset, OUT) OUT.xy = lightmapUV.xy * lightmapScaleOffset.xy + lightmapScaleOffset.zw;// Done
     #define OUTPUT_SH(normalWS, OUT)
 #else
     #define DECLARE_LIGHTMAP_OR_SH(lmName, shName, index) half3 shName : TEXCOORD##index
     #define OUTPUT_LIGHTMAP_UV(lightmapUV, lightmapScaleOffset, OUT)
-    #define OUTPUT_SH(normalWS, OUT) OUT.xyz = SampleSHVertex(normalWS)
+    #define OUTPUT_SH(normalWS, OUT) OUT.xyz = SampleSHVertex(normalWS) // Done
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ half3 LightingLambert(half3 lightColor, half3 lightDir, half3 normal)
     half NdotL = saturate(dot(normal, lightDir));
     return lightColor * NdotL;
 }
-// Done
+
 half3 LightingSpecular(half3 lightColor, half3 lightDir, half3 normal, half3 viewDir, half4 specular, half smoothness)
 {
     float3 halfVec = SafeNormalize(float3(lightDir) + float3(viewDir));
@@ -36,7 +36,7 @@ half3 LightingSpecular(half3 lightColor, half3 lightDir, half3 normal, half3 vie
     half3 specularReflection = specular.rgb * modifier;
     return lightColor * specularReflection;
 }
-// Done
+
 half3 LightingPhysicallyBased(BRDFData brdfData, BRDFData brdfDataClearCoat, half3 lightColor, half3 lightDirectionWS, half lightAttenuation,
     half3 normalWS, half3 viewDirectionWS, half clearCoatMask, bool specularHighlightsOff){
     half NdotL = saturate(dot(normalWS, lightDirectionWS));
@@ -64,7 +64,7 @@ half3 LightingPhysicallyBased(BRDFData brdfData, BRDFData brdfDataClearCoat, hal
 
     return brdf * radiance;
 }
-// Done
+
 half3 LightingPhysicallyBased(BRDFData brdfData, BRDFData brdfDataClearCoat, Light light, half3 normalWS, half3 viewDirectionWS, half clearCoatMask, bool specularHighlightsOff)
 {
     return LightingPhysicallyBased(brdfData, brdfDataClearCoat, light.color, light.direction, light.distanceAttenuation * light.shadowAttenuation, normalWS, viewDirectionWS, clearCoatMask, specularHighlightsOff);
@@ -107,14 +107,14 @@ half3 LightingPhysicallyBased(BRDFData brdfData, half3 lightColor, half3 lightDi
     light.shadowAttenuation   = 1;
     return LightingPhysicallyBased(brdfData, light, viewDirectionWS, specularHighlightsOff, specularHighlightsOff);
 }
-// Done
+// 顶点额外光源光照，不包含主光源，逐对象光源 Done
 half3 VertexLighting(float3 positionWS, half3 normalWS)
 {
     half3 vertexLightColor = half3(0.0, 0.0, 0.0);
 #ifdef _ADDITIONAL_LIGHTS_VERTEX
     uint lightsCount = GetAdditionalLightsCount();
     LIGHT_LOOP_BEGIN(lightsCount)
-        Light light = GetAdditionalLight(lightIndex, positionWS); // ???
+        Light light = GetAdditionalLight(lightIndex, positionWS); // Ignore
         half3 lightColor = light.color * light.distanceAttenuation;
         vertexLightColor += LightingLambert(lightColor, light.direction, normalWS);
     LIGHT_LOOP_END
@@ -130,11 +130,11 @@ struct LightingData
     half3 vertexLightingColor;
     half3 emissionColor;
 };
-// Done
+
 half3 CalculateLightingColor(LightingData lightingData, half3 albedo)
 {
     half3 lightingColor = 0;
-
+    // Debug
     if (IsOnlyAOLightingFeatureEnabled())
     {
         return lightingData.giColor; // Contains white + AO
@@ -169,13 +169,13 @@ half3 CalculateLightingColor(LightingData lightingData, half3 albedo)
 
     return lightingColor;
 }
-// Done
+
 half4 CalculateFinalColor(LightingData lightingData, half alpha)
 {
     half3 finalColor = CalculateLightingColor(lightingData, 1);
     return half4(finalColor, alpha);
 }
-// Done
+
 half4 CalculateFinalColor(LightingData lightingData, half3 albedo, half alpha, float fogCoord)
 {
     #if defined(_FOG_FRAGMENT)
@@ -204,7 +204,7 @@ LightingData CreateLightingData(InputData inputData, SurfaceData surfaceData)
     lightingData.additionalLightsColor = 0;
     return lightingData;
 }
-// Done
+
 half3 CalculateBlinnPhong(Light light, InputData inputData, SurfaceData surfaceData)
 {
     half3 attenuatedLightColor = light.color * (light.distanceAttenuation * light.shadowAttenuation);
@@ -225,7 +225,7 @@ half3 CalculateBlinnPhong(Light light, InputData inputData, SurfaceData surfaceD
 ////////////////////////////////////////////////////////////////////////////////
 /// PBR lighting...
 ////////////////////////////////////////////////////////////////////////////////
-// Done
+// Paused Point
 half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData)
 {
     #if defined(_SPECULARHIGHLIGHTS_OFF)
@@ -247,15 +247,15 @@ half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData)
 
     // Clear-coat calculation...
     BRDFData brdfDataClearCoat = CreateClearCoatBRDFData(surfaceData, brdfData);
-    half4 shadowMask = CalculateShadowMask(inputData);// ???
-    AmbientOcclusionFactor aoFactor = CreateAmbientOcclusionFactor(inputData, surfaceData);// ??? SSAO
+    half4 shadowMask = CalculateShadowMask(inputData);
+    AmbientOcclusionFactor aoFactor = CreateAmbientOcclusionFactor(inputData, surfaceData);// SSAO
     uint meshRenderingLayers = GetMeshRenderingLightLayer();
     Light mainLight = GetMainLight(inputData, shadowMask, aoFactor);
     // NOTE: We don't apply AO to the GI here because it's done in the lighting calculation below...
     MixRealtimeAndBakedGI(mainLight, inputData.normalWS, inputData.bakedGI);//_MIXED_LIGHTING_SUBTRACTIVE
     LightingData lightingData = CreateLightingData(inputData, surfaceData);
     lightingData.giColor = GlobalIllumination(brdfData, brdfDataClearCoat, surfaceData.clearCoatMask, inputData.bakedGI, aoFactor.indirectAmbientOcclusion, 
-            inputData.positionWS, inputData.normalWS, inputData.viewDirectionWS);// Paused Point
+            inputData.positionWS, inputData.normalWS, inputData.viewDirectionWS);
     if (IsMatchingLightLayer(mainLight.layerMask, meshRenderingLayers))
     {
         lightingData.mainLightColor = LightingPhysicallyBased(brdfData, brdfDataClearCoat, mainLight,
@@ -278,7 +278,6 @@ half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData)
         #endif
         LIGHT_LOOP_BEGIN(pixelLightCount)
             Light light = GetAdditionalLight(lightIndex, inputData, shadowMask, aoFactor);
-
             if (IsMatchingLightLayer(light.layerMask, meshRenderingLayers))
             {
                 lightingData.additionalLightsColor += LightingPhysicallyBased(brdfData, brdfDataClearCoat, light,
@@ -291,7 +290,6 @@ half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData)
     #if defined(_ADDITIONAL_LIGHTS_VERTEX)
         lightingData.vertexLightingColor += inputData.vertexLighting * brdfData.diffuse;
     #endif
-
     return CalculateFinalColor(lightingData, surfaceData.alpha);
 }
 
@@ -318,7 +316,7 @@ half4 UniversalFragmentPBR(InputData inputData, half3 albedo, half metallic, hal
 ////////////////////////////////////////////////////////////////////////////////
 /// Phong lighting...
 ////////////////////////////////////////////////////////////////////////////////
-// Done
+
 half4 UniversalFragmentBlinnPhong(InputData inputData, SurfaceData surfaceData)
 {
     #if defined(DEBUG_DISPLAY)
@@ -328,7 +326,6 @@ half4 UniversalFragmentBlinnPhong(InputData inputData, SurfaceData surfaceData)
             return debugColor;
         }
     #endif
-
     uint meshRenderingLayers = GetMeshRenderingLightLayer();
     half4 shadowMask = CalculateShadowMask(inputData);
     AmbientOcclusionFactor aoFactor = CreateAmbientOcclusionFactor(inputData, surfaceData);
@@ -388,7 +385,7 @@ half4 UniversalFragmentBlinnPhong(InputData inputData, half3 diffuse, half4 spec
 ////////////////////////////////////////////////////////////////////////////////
 /// Unlit
 ////////////////////////////////////////////////////////////////////////////////
-// Done
+
 half4 UniversalFragmentBakedLit(InputData inputData, SurfaceData surfaceData)
 {
     #ifdef _ALPHAPREMULTIPLY_ON
@@ -411,7 +408,7 @@ half4 UniversalFragmentBakedLit(InputData inputData, SurfaceData surfaceData)
 }
 
 // Deprecated: Use the version which takes "SurfaceData" instead of passing all of these arguments...
-// Done
+
 half4 UniversalFragmentBakedLit(InputData inputData, half3 color, half alpha, half3 normalTS)
 {
     SurfaceData surfaceData;

@@ -11,7 +11,9 @@ namespace UnityEngine.Rendering.Universal
         public int offsetY;
         public int resolution;
         public ShadowSplitData splitData; // splitData contains culling information
-
+        /// <summary>
+        /// Done
+        /// </summary>
         public void Clear()
         {
             viewMatrix = Matrix4x4.identity;
@@ -39,28 +41,21 @@ namespace UnityEngine.Rendering.Universal
             projMatrix = shadowSliceData.projectionMatrix;
             return result;
         }
-
+        /// <summary>
+        /// Done 空间变换
+        /// </summary>
         public static bool ExtractDirectionalLightMatrix(ref CullingResults cullResults, ref ShadowData shadowData, int shadowLightIndex, int cascadeIndex, int shadowmapWidth, int shadowmapHeight, int shadowResolution, float shadowNearPlane, out Vector4 cascadeSplitDistance, out ShadowSliceData shadowSliceData)
         {
             bool success = cullResults.ComputeDirectionalShadowMatricesAndCullingPrimitives(shadowLightIndex,
-                cascadeIndex, shadowData.mainLightShadowCascadesCount, shadowData.mainLightShadowCascadesSplit, shadowResolution, shadowNearPlane, out shadowSliceData.viewMatrix, out shadowSliceData.projectionMatrix,
-                out shadowSliceData.splitData);
-
-            cascadeSplitDistance = shadowSliceData.splitData.cullingSphere;
+                cascadeIndex, shadowData.mainLightShadowCascadesCount, shadowData.mainLightShadowCascadesSplit, shadowResolution, shadowNearPlane, out shadowSliceData.viewMatrix, out shadowSliceData.projectionMatrix, out shadowSliceData.splitData);
+            cascadeSplitDistance = shadowSliceData.splitData.cullingSphere;//cullSphere (球心, 半径)
             shadowSliceData.offsetX = (cascadeIndex % 2) * shadowResolution;
             shadowSliceData.offsetY = (cascadeIndex / 2) * shadowResolution;
             shadowSliceData.resolution = shadowResolution;
             shadowSliceData.shadowTransform = GetShadowTransform(shadowSliceData.projectionMatrix, shadowSliceData.viewMatrix);
-
-            // It is the culling sphere radius multiplier for shadow cascade blending
-            // If this is less than 1.0, then it will begin to cull castors across cascades
             shadowSliceData.splitData.shadowCascadeBlendCullingFactor = 1.0f;
-
-            // If we have shadow cascades baked into the atlas we bake cascade transform
-            // in each shadow matrix to save shader ALU and L/S
             if (shadowData.mainLightShadowCascadesCount > 1)
                 ApplySliceTransform(ref shadowSliceData, shadowmapWidth, shadowmapHeight);
-
             return success;
         }
 
@@ -96,11 +91,9 @@ namespace UnityEngine.Rendering.Universal
         }
 
         public static void RenderShadowSlice(CommandBuffer cmd, ref ScriptableRenderContext context,
-            ref ShadowSliceData shadowSliceData, ref ShadowDrawingSettings settings,
-            Matrix4x4 proj, Matrix4x4 view)
+            ref ShadowSliceData shadowSliceData, ref ShadowDrawingSettings settings, Matrix4x4 proj, Matrix4x4 view)
         {
-            cmd.SetGlobalDepthBias(1.0f, 2.5f); // these values match HDRP defaults (see https://github.com/Unity-Technologies/Graphics/blob/9544b8ed2f98c62803d285096c91b44e9d8cbc47/com.unity.render-pipelines.high-definition/Runtime/Lighting/Shadow/HDShadowAtlas.cs#L197 )
-
+            cmd.SetGlobalDepthBias(1.0f, 2.5f); 
             cmd.SetViewport(new Rect(shadowSliceData.offsetX, shadowSliceData.offsetY, shadowSliceData.resolution, shadowSliceData.resolution));
             cmd.SetViewProjectionMatrices(view, proj);
             context.ExecuteCommandBuffer(cmd);
@@ -109,7 +102,6 @@ namespace UnityEngine.Rendering.Universal
             cmd.DisableScissorRect();
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
-
             cmd.SetGlobalDepthBias(0.0f, 0.0f); // Restore previous depth bias values
         }
 
@@ -119,7 +111,9 @@ namespace UnityEngine.Rendering.Universal
             RenderShadowSlice(cmd, ref context, ref shadowSliceData, ref settings,
                 shadowSliceData.projectionMatrix, shadowSliceData.viewMatrix);
         }
-
+        /// <summary>
+        /// Done 计算每个级联的分辨率
+        /// </summary>
         public static int GetMaxTileResolutionInAtlas(int atlasWidth, int atlasHeight, int tileCount)
         {
             int resolution = Mathf.Min(atlasWidth, atlasHeight);
@@ -129,9 +123,11 @@ namespace UnityEngine.Rendering.Universal
                 resolution = resolution >> 1;
                 currentTileCount = atlasWidth / resolution * atlasHeight / resolution;
             }
-            return resolution;
+            return resolution;//正方形
         }
-
+        /// <summary>
+        /// Done 级联偏移
+        /// </summary>
         public static void ApplySliceTransform(ref ShadowSliceData shadowSliceData, int atlasWidth, int atlasHeight)
         {
             Matrix4x4 sliceTransform = Matrix4x4.identity;
@@ -141,11 +137,12 @@ namespace UnityEngine.Rendering.Universal
             sliceTransform.m11 = shadowSliceData.resolution * oneOverAtlasHeight;
             sliceTransform.m03 = shadowSliceData.offsetX * oneOverAtlasWidth;
             sliceTransform.m13 = shadowSliceData.offsetY * oneOverAtlasHeight;
-
             // Apply shadow slice scale and offset
             shadowSliceData.shadowTransform = sliceTransform * shadowSliceData.shadowTransform;
         }
-
+        /// <summary>
+        /// Done 设置深度偏移和法线偏移
+        /// </summary>
         public static Vector4 GetShadowBias(ref VisibleLight shadowLight, int shadowLightIndex, ref ShadowData shadowData, Matrix4x4 lightProjectionMatrix, float shadowResolution)
         {
             if (shadowLightIndex < 0 || shadowLightIndex >= shadowData.bias.Count)
@@ -158,7 +155,7 @@ namespace UnityEngine.Rendering.Universal
             if (shadowLight.lightType == LightType.Directional)
             {
                 // Frustum size is guaranteed to be a cube as we wrap shadow frustum around a sphere
-                frustumSize = 2.0f / lightProjectionMatrix.m00;
+                frustumSize = 2.0f / lightProjectionMatrix.m00;//cot(FOV/2) / Aspect ???
             }
             else if (shadowLight.lightType == LightType.Spot)
             {
@@ -218,7 +215,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Extract scale and bias from a fade distance to achieve a linear fading of the fade distance.
+        /// Extract scale and bias from a fade distance to achieve a linear fading of the fade distance. ???
         /// </summary>
         /// <param name="fadeDistance">Distance at which object should be totally fade</param>
         /// <param name="border">Normalized distance of fade</param>
@@ -244,20 +241,22 @@ namespace UnityEngine.Rendering.Universal
             scale = 1.0f / (fadeDistance - distanceFadeNear);
             bias = -distanceFadeNear / (fadeDistance - distanceFadeNear);
         }
-
+        /// <summary>
+        /// Done
+        /// </summary>
         public static void SetupShadowCasterConstantBuffer(CommandBuffer cmd, ref VisibleLight shadowLight, Vector4 shadowBias)
         {
             cmd.SetGlobalVector("_ShadowBias", shadowBias);
 
-            // Light direction is currently used in shadow caster pass to apply shadow normal offset (normal bias).
             Vector3 lightDirection = -shadowLight.localToWorldMatrix.GetColumn(2);
             cmd.SetGlobalVector("_LightDirection", new Vector4(lightDirection.x, lightDirection.y, lightDirection.z, 0.0f));
 
-            // For punctual lights, computing light direction at each vertex position provides more consistent results (shadow shape does not change when "rotating the point light" for example)
             Vector3 lightPosition = shadowLight.localToWorldMatrix.GetColumn(3);
             cmd.SetGlobalVector("_LightPosition", new Vector4(lightPosition.x, lightPosition.y, lightPosition.z, 1.0f));
         }
-
+        /// <summary>
+        /// Done
+        /// </summary>
         public static RenderTexture GetTemporaryShadowTexture(int width, int height, int bits)
         {
             var format = Experimental.Rendering.GraphicsFormatUtility.GetDepthStencilFormat(bits, 0);
@@ -270,7 +269,9 @@ namespace UnityEngine.Rendering.Universal
             shadowTexture.wrapMode = TextureWrapMode.Clamp;
             return shadowTexture;
         }
-
+        /// <summary>
+        /// Done 1,裁剪空间 2,规划到[0,1]
+        /// </summary>
         static Matrix4x4 GetShadowTransform(Matrix4x4 proj, Matrix4x4 view)
         {
             // Currently CullResults ComputeDirectionalShadowMatricesAndCullingPrimitives doesn't

@@ -186,11 +186,8 @@ Shader "Hidden/Universal Render Pipeline/LutBuilderHdr"
             // (~58.85666) and is good enough to be stored in fp16 without losing precision in the
             // darks
             float3 colorLutSpace = GetLutStripValue(input.uv, _Lut_Params);
-
-            // Color grade & tonemap
             float3 gradedColor = ColorGrade(colorLutSpace);
             gradedColor = Tonemap(gradedColor);
-
             return float4(gradedColor, 1.0);
         }
 

@@ -69,7 +69,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done 1
+        /// Perfect
         /// </summary>
         public ProfilingSampler(string name)
         {
@@ -89,7 +89,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done 1
+        /// Perfect 如果cmd为null，那么只搜集CPU数据
         /// </summary>
         public void Begin(CommandBuffer cmd)
         {
@@ -106,7 +106,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done 1
+        /// Perfect
         /// </summary>
         public void End(CommandBuffer cmd)
         {
@@ -123,7 +123,9 @@ namespace UnityEngine.Rendering
         }
 
         internal bool IsValid() { return (sampler != null && inlineSampler != null); }
+        // 收集GPU信息
         internal CustomSampler sampler { get; private set; }
+        // 不收集GPU信息
         internal CustomSampler inlineSampler { get; private set; }
         public string name { get; private set; }
 
@@ -202,7 +204,7 @@ namespace UnityEngine.Rendering
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
     /// <summary>
-    /// Done
+    /// Perfect
     /// </summary>
     public struct ProfilingScope : IDisposable
     {
@@ -210,7 +212,7 @@ namespace UnityEngine.Rendering
         bool                m_Disposed;
         ProfilingSampler    m_Sampler;
         /// <summary>
-        /// Done 1
+        /// Perfect
         /// </summary>
         public ProfilingScope(CommandBuffer cmd, ProfilingSampler sampler)
         {
@@ -221,14 +223,14 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done 1
+        /// Perfect
         /// </summary>
         public void Dispose()
         {
             Dispose(true);
         }
         /// <summary>
-        /// Done 1
+        /// Perfect
         /// </summary>
         void Dispose(bool disposing)
         {

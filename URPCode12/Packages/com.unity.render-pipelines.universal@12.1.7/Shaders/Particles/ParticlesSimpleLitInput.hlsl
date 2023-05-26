@@ -54,7 +54,7 @@ half4 SampleAlbedo(float2 uv, float3 blendUv, half4 color, float4 particleColor,
 
     return albedo;
 }
-// Done
+
 half4 SampleAlbedo(TEXTURE2D_PARAM(albedoMap, sampler_albedoMap), ParticleParams params)
 {
     half4 albedo = BlendTexture(TEXTURE2D_ARGS(albedoMap, sampler_albedoMap), params.uv, params.blendUv) * params.baseColor;

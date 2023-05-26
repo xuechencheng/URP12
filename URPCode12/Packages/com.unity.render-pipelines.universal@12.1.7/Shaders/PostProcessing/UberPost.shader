@@ -94,7 +94,6 @@ Shader "Hidden/Universal Render Pipeline/UberPost"
                 uv = (uv - 0.5) * DistScale + 0.5;
                 float2 ruv = DistAxis * (uv - 0.5 - DistCenter);
                 float ru = length(float2(ruv));
-
                 UNITY_BRANCH
                 if (DistIntensity > 0.0)
                 {
@@ -109,7 +108,6 @@ Shader "Hidden/Universal Render Pipeline/UberPost"
                 }
             }
             #endif
-
             return uv;
         }
 
@@ -129,7 +127,6 @@ Shader "Hidden/Universal Render Pipeline/UberPost"
                 float2 coords = 2.0 * uv - 1.0;
                 float2 end = uv - coords * dot(coords, coords) * ChromaAmount;
                 float2 delta = (end - uv) / 3.0;
-
                 half r = SAMPLE_TEXTURE2D_X(_SourceTex, sampler_LinearClamp, uvDistorted                ).x;
                 half g = SAMPLE_TEXTURE2D_X(_SourceTex, sampler_LinearClamp, DistortUV(delta + uv)      ).y;
                 half b = SAMPLE_TEXTURE2D_X(_SourceTex, sampler_LinearClamp, DistortUV(delta * 2.0 + uv)).z;
@@ -152,13 +149,13 @@ Shader "Hidden/Universal Render Pipeline/UberPost"
             #if defined(BLOOM)
             {
                 #if _BLOOM_HQ && !defined(SHADER_API_GLES)
-                half4 bloom = SampleTexture2DBicubic(TEXTURE2D_X_ARGS(_Bloom_Texture, sampler_LinearClamp), uvDistorted, _Bloom_Texture_TexelSize.zwxy, (1.0).xx, unity_StereoEyeIndex);
+                    half4 bloom = SampleTexture2DBicubic(TEXTURE2D_X_ARGS(_Bloom_Texture, sampler_LinearClamp), uvDistorted, _Bloom_Texture_TexelSize.zwxy, (1.0).xx, unity_StereoEyeIndex);
                 #else
-                half4 bloom = SAMPLE_TEXTURE2D_X(_Bloom_Texture, sampler_LinearClamp, uvDistorted);
+                    half4 bloom = SAMPLE_TEXTURE2D_X(_Bloom_Texture, sampler_LinearClamp, uvDistorted);
                 #endif
 
                 #if UNITY_COLORSPACE_GAMMA
-                bloom.xyz *= bloom.xyz; // γ to linear
+                    bloom.xyz *= bloom.xyz; // γ to linear
                 #endif
 
                 UNITY_BRANCH

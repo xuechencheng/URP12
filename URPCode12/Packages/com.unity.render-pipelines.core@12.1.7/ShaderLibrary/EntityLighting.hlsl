@@ -283,7 +283,7 @@ real3 DecodeLightmap(real4 encodedIlluminance, real4 decodeInstructions)
 #endif
 }
 #endif
-// Done
+
 real3 DecodeHDREnvironment(real4 encodedIrradiance, real4 decodeInstructions)
 {
     // Take into account texture alpha if decodeInstructions.w is true(the alpha value affects the RGB channels)

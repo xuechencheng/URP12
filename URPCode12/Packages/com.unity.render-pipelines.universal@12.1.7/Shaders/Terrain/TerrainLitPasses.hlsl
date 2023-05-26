@@ -233,6 +233,7 @@ void SplatmapFinalColor(inout half4 color, half fogCoord)
 ///////////////////////////////////////////////////////////////////////////////
 
 // Used in Standard Terrain shader
+// Done
 Varyings SplatmapVert(Attributes v)
 {
     Varyings o = (Varyings)0;
@@ -240,28 +241,22 @@ Varyings SplatmapVert(Attributes v)
     UNITY_SETUP_INSTANCE_ID(v);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
     TerrainInstancing(v.positionOS, v.normalOS, v.texcoord);
-
     VertexPositionInputs Attributes = GetVertexPositionInputs(v.positionOS.xyz);
-
     o.uvMainAndLM.xy = v.texcoord;
     o.uvMainAndLM.zw = v.texcoord * unity_LightmapST.xy + unity_LightmapST.zw;
-
     #ifndef TERRAIN_SPLAT_BASEPASS
         o.uvSplat01.xy = TRANSFORM_TEX(v.texcoord, _Splat0);
         o.uvSplat01.zw = TRANSFORM_TEX(v.texcoord, _Splat1);
         o.uvSplat23.xy = TRANSFORM_TEX(v.texcoord, _Splat2);
         o.uvSplat23.zw = TRANSFORM_TEX(v.texcoord, _Splat3);
     #endif
-
 #if defined(DYNAMICLIGHTMAP_ON)
     o.dynamicLightmapUV = v.texcoord * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
 #endif
-
     #if defined(_NORMALMAP) && !defined(ENABLE_TERRAIN_PERPIXEL_NORMAL)
         half3 viewDirWS = GetWorldSpaceNormalizeViewDir(Attributes.positionWS);
         float4 vertexTangent = float4(cross(float3(0, 0, 1), v.normalOS), 1.0);
         VertexNormalInputs normalInput = GetVertexNormalInputs(v.normalOS, vertexTangent);
-
         o.normal = half4(normalInput.normalWS, viewDirWS.x);
         o.tangent = half4(normalInput.tangentWS, viewDirWS.y);
         o.bitangent = half4(normalInput.bitangentWS, viewDirWS.z);
@@ -281,14 +276,11 @@ Varyings SplatmapVert(Attributes v)
     #else
         o.fogFactor = fogFactor;
     #endif
-
     o.positionWS = Attributes.positionWS;
     o.clipPos = Attributes.positionCS;
-
     #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
         o.shadowCoord = GetShadowCoord(Attributes);
     #endif
-
     return o;
 }
 
@@ -327,7 +319,6 @@ half4 SplatmapFragment(Varyings IN) : SV_TARGET
 #ifdef _ALPHATEST_ON
     ClipHoles(IN.uvMainAndLM.xy);
 #endif
-
     half3 normalTS = half3(0.0h, 0.0h, 1.0h);
 #ifdef TERRAIN_SPLAT_BASEPASS
     half3 albedo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uvMainAndLM.xy).rgb;
@@ -336,20 +327,17 @@ half4 SplatmapFragment(Varyings IN) : SV_TARGET
     half alpha = 1;
     half occlusion = 1;
 #else
-
     half4 hasMask = half4(_LayerHasMask0, _LayerHasMask1, _LayerHasMask2, _LayerHasMask3);
     half4 masks[4];
     ComputeMasks(masks, hasMask, IN);
-
     float2 splatUV = (IN.uvMainAndLM.xy * (_Control_TexelSize.zw - 1.0f) + 0.5f) * _Control_TexelSize.xy;
     half4 splatControl = SAMPLE_TEXTURE2D(_Control, sampler_Control, splatUV);
-
     half alpha = dot(splatControl, 1.0h);
-#ifdef _TERRAIN_BLEND_HEIGHT
-    // disable Height Based blend when there are more than 4 layers (multi-pass breaks the normalization)
-    if (_NumLayersCount <= 4)
-        HeightBasedSplatModify(splatControl, masks);
-#endif
+    #ifdef _TERRAIN_BLEND_HEIGHT
+        // disable Height Based blend when there are more than 4 layers (multi-pass breaks the normalization)
+        if (_NumLayersCount <= 4)
+            HeightBasedSplatModify(splatControl, masks);
+    #endif
 
     half weight;
     half4 mixedDiffuse;

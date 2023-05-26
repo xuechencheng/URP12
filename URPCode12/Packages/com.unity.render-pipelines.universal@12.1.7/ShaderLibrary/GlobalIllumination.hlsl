@@ -64,9 +64,9 @@ half3 SampleSHPixel(half3 L2Term, half3 normalWS)
     return L2Term;
 #elif defined(EVALUATE_SH_MIXED)
     half3 res = SHEvalLinearL0L1(normalWS, unity_SHAr, unity_SHAg, unity_SHAb);
-#ifdef UNITY_COLORSPACE_GAMMA
-    res = LinearToSRGB(res);
-#endif
+    #ifdef UNITY_COLORSPACE_GAMMA
+        res = LinearToSRGB(res);
+    #endif
     return max(half3(0, 0, 0), res);
 #endif
     // Default: Evaluate SH fully per-pixel
@@ -106,6 +106,7 @@ half3 SampleLightmap(float2 staticLightmapUV, float2 dynamicLightmapUV, half3 no
 #elif defined(LIGHTMAP_ON)
     diffuseLighting = SampleSingleLightmap(TEXTURE2D_LIGHTMAP_ARGS(LIGHTMAP_NAME, LIGHTMAP_SAMPLER_NAME), LIGHTMAP_SAMPLE_EXTRA_ARGS, transformCoords, encodedLightmap, decodeInstructions);
 #endif
+
 #if defined(DYNAMICLIGHTMAP_ON) && defined(DIRLIGHTMAP_COMBINED)
     diffuseLighting += SampleDirectionalLightmap(TEXTURE2D_ARGS(unity_DynamicLightmap, samplerunity_DynamicLightmap),
         TEXTURE2D_ARGS(unity_DynamicDirectionality, samplerunity_DynamicLightmap), dynamicLightmapUV, transformCoords, normalWS, false, decodeInstructions);
@@ -270,7 +271,7 @@ half3 GlossyEnvironmentReflection(half3 reflectVector, float3 positionWS, half p
     return _GlossyEnvironmentColor.rgb * occlusion;
 #endif // _ENVIRONMENTREFLECTIONS_OFF
 }
-// Done
+
 half3 GlossyEnvironmentReflection(half3 reflectVector, half perceptualRoughness, half occlusion)
 {
 #if !defined(_ENVIRONMENTREFLECTIONS_OFF)
@@ -349,7 +350,7 @@ half3 GlobalIllumination(BRDFData brdfData, half3 bakedGI, half occlusion, float
     const BRDFData noClearCoat = (BRDFData)0;
     return GlobalIllumination(brdfData, noClearCoat, 0.0, bakedGI, occlusion, positionWS, normalWS, viewDirectionWS);
 }
-// Done
+
 half3 GlobalIllumination(BRDFData brdfData, BRDFData brdfDataClearCoat, float clearCoatMask, half3 bakedGI, half occlusion, half3 normalWS, half3 viewDirectionWS)
 {
     half3 reflectVector = reflect(-viewDirectionWS, normalWS);

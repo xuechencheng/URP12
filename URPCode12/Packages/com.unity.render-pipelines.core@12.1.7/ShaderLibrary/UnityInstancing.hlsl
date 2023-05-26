@@ -102,32 +102,31 @@
 // - UNITY_TRANSFER_VERTEX_OUTPUT_STEREO    Copy stero target from input struct to output struct. Used in vertex shader.
 // - UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX
 #ifdef UNITY_STEREO_INSTANCING_ENABLED
-#if defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)
-    #define DEFAULT_UNITY_VERTEX_OUTPUT_STEREO                          uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex; uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-    #define DEFAULT_UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output)       output.stereoTargetEyeIndexAsRTArrayIdx = unity_StereoEyeIndex; output.stereoTargetEyeIndexAsBlendIdx0 = unity_StereoEyeIndex;
-    #define DEFAULT_UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input, output)  output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-    #define DEFAULT_UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input)     unity_StereoEyeIndex = input.stereoTargetEyeIndexAsBlendIdx0;
-#elif defined(SHADER_API_PSSL) && defined(TESSELLATION_ON)
-    // Use of SV_RenderTargetArrayIndex is a little more complicated if we have tessellation stages involved
-    // This will add an extra instructions which we might be able to optimize away in some stages if we are careful.
-    #if defined(SHADER_STAGE_VERTEX)
-        #define DEFAULT_UNITY_VERTEX_OUTPUT_STEREO                          uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-        #define DEFAULT_UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output)       output.stereoTargetEyeIndexAsBlendIdx0 = unity_StereoEyeIndex;
-        #define DEFAULT_UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input, output)  output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-        #define DEFAULT_UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input)     unity_StereoEyeIndex = input.stereoTargetEyeIndexAsBlendIdx0;
-    #else
+    #if defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)
         #define DEFAULT_UNITY_VERTEX_OUTPUT_STEREO                          uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex; uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
         #define DEFAULT_UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output)       output.stereoTargetEyeIndexAsRTArrayIdx = unity_StereoEyeIndex; output.stereoTargetEyeIndexAsBlendIdx0 = unity_StereoEyeIndex;
         #define DEFAULT_UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input, output)  output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
         #define DEFAULT_UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input)     unity_StereoEyeIndex = input.stereoTargetEyeIndexAsBlendIdx0;
+    #elif defined(SHADER_API_PSSL) && defined(TESSELLATION_ON)
+        // Use of SV_RenderTargetArrayIndex is a little more complicated if we have tessellation stages involved
+        // This will add an extra instructions which we might be able to optimize away in some stages if we are careful.
+        #if defined(SHADER_STAGE_VERTEX)
+            #define DEFAULT_UNITY_VERTEX_OUTPUT_STEREO                          uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
+            #define DEFAULT_UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output)       output.stereoTargetEyeIndexAsBlendIdx0 = unity_StereoEyeIndex;
+            #define DEFAULT_UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input, output)  output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
+            #define DEFAULT_UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input)     unity_StereoEyeIndex = input.stereoTargetEyeIndexAsBlendIdx0;
+        #else
+            #define DEFAULT_UNITY_VERTEX_OUTPUT_STEREO                          uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex; uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
+            #define DEFAULT_UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output)       output.stereoTargetEyeIndexAsRTArrayIdx = unity_StereoEyeIndex; output.stereoTargetEyeIndexAsBlendIdx0 = unity_StereoEyeIndex;
+            #define DEFAULT_UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input, output)  output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
+            #define DEFAULT_UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input)     unity_StereoEyeIndex = input.stereoTargetEyeIndexAsBlendIdx0;
+        #endif
+    #else
+        #define DEFAULT_UNITY_VERTEX_OUTPUT_STEREO                          uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
+        #define DEFAULT_UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output)       output.stereoTargetEyeIndexAsRTArrayIdx = unity_StereoEyeIndex
+        #define DEFAULT_UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input, output)  output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
+        #define DEFAULT_UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input)     unity_StereoEyeIndex = input.stereoTargetEyeIndexAsRTArrayIdx;
     #endif
-#else
-    #define DEFAULT_UNITY_VERTEX_OUTPUT_STEREO                          uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-    #define DEFAULT_UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output)       output.stereoTargetEyeIndexAsRTArrayIdx = unity_StereoEyeIndex
-    #define DEFAULT_UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input, output)  output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-    #define DEFAULT_UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input)     unity_StereoEyeIndex = input.stereoTargetEyeIndexAsRTArrayIdx;
-#endif
-
 #elif defined(UNITY_STEREO_MULTIVIEW_ENABLED)
     #define DEFAULT_UNITY_VERTEX_OUTPUT_STEREO float stereoTargetEyeIndexAsBlendIdx0 : BLENDWEIGHT0;
     #define DEFAULT_UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output) output.stereoTargetEyeIndexAsBlendIdx0 = unity_StereoEyeIndex;
@@ -192,7 +191,6 @@
             unity_InstanceID = inputInstanceID + unity_BaseInstanceID;
         #endif
     }
-
     #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
         #ifndef UNITY_INSTANCING_PROCEDURAL_FUNC
             #error "UNITY_INSTANCING_PROCEDURAL_FUNC must be defined."
@@ -203,14 +201,14 @@
     #else
         #define DEFAULT_UNITY_SETUP_INSTANCE_ID(input)          { UnitySetupInstanceID(UNITY_GET_INSTANCE_ID(input));}
     #endif
-    #define UNITY_TRANSFER_INSTANCE_ID(input, output)   output.instanceID = UNITY_GET_INSTANCE_ID(input)
+    #define UNITY_TRANSFER_INSTANCE_ID(input, output)   output.instanceID = UNITY_GET_INSTANCE_ID(input) // Done
 #else
     #define DEFAULT_UNITY_SETUP_INSTANCE_ID(input)
     #define UNITY_TRANSFER_INSTANCE_ID(input, output)
 #endif
 
-#if !defined(UNITY_SETUP_INSTANCE_ID)
-#   define UNITY_SETUP_INSTANCE_ID(input) DEFAULT_UNITY_SETUP_INSTANCE_ID(input)
+#if !defined(UNITY_SETUP_INSTANCE_ID) // Done
+    #define UNITY_SETUP_INSTANCE_ID(input) DEFAULT_UNITY_SETUP_INSTANCE_ID(input)
 #endif
 
 ////////////////////////////////////////////////////////

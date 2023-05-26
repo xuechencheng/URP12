@@ -62,7 +62,7 @@ struct Varyings
     UNITY_VERTEX_INPUT_INSTANCE_ID
     UNITY_VERTEX_OUTPUT_STEREO
 };
-// Done
+
 void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData)
 {
     inputData = (InputData)0;
@@ -73,11 +73,11 @@ void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData
 #if defined(_NORMALMAP) || defined(_DETAIL)
     float sgn = input.tangentWS.w;      // should be either +1 or -1
     float3 bitangent = sgn * cross(input.normalWS.xyz, input.tangentWS.xyz);
-    half3x3 tangentToWorld = half3x3(input.tangentWS.xyz, bitangent.xyz, input.normalWS.xyz);
+    half3x3 tangentToWorld = half3x3(input.tangentWS.xyz, bitangent.xyz, input.normalWS.xyz);//按行填充矩阵
     #if defined(_NORMALMAP)
         inputData.tangentToWorld = tangentToWorld;
     #endif
-    inputData.normalWS = TransformTangentToWorld(normalTS, tangentToWorld);
+    inputData.normalWS = TransformTangentToWorld(normalTS, tangentToWorld);//行向量左乘
 #else
     inputData.normalWS = input.normalWS;
 #endif
@@ -86,18 +86,18 @@ void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData
 #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
     inputData.shadowCoord = input.shadowCoord;
 #elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
-    inputData.shadowCoord = TransformWorldToShadowCoord(inputData.positionWS);// ???
+    inputData.shadowCoord = TransformWorldToShadowCoord(inputData.positionWS);
 #else
     inputData.shadowCoord = float4(0, 0, 0, 0);
 #endif
 #ifdef _ADDITIONAL_LIGHTS_VERTEX
-    inputData.fogCoord = InitializeInputDataFog(float4(input.positionWS, 1.0), input.fogFactorAndVertexLight.x);
+    inputData.fogCoord = InitializeInputDataFog(float4(input.positionWS, 1.0), input.fogFactorAndVertexLight.x);// Ignore
     inputData.vertexLighting = input.fogFactorAndVertexLight.yzw;
 #else
-    inputData.fogCoord = InitializeInputDataFog(float4(input.positionWS, 1.0), input.fogFactor);
+    inputData.fogCoord = InitializeInputDataFog(float4(input.positionWS, 1.0), input.fogFactor);// Ignore
 #endif
-#if defined(DYNAMICLIGHTMAP_ON)
-    inputData.bakedGI = SAMPLE_GI(input.staticLightmapUV, input.dynamicLightmapUV, input.vertexSH, inputData.normalWS);// ???
+#if defined(DYNAMICLIGHTMAP_ON) // SampleLightmap or SampleSHPixel
+    inputData.bakedGI = SAMPLE_GI(input.staticLightmapUV, input.dynamicLightmapUV, input.vertexSH, inputData.normalWS);
 #else
     inputData.bakedGI = SAMPLE_GI(input.staticLightmapUV, input.vertexSH, inputData.normalWS);
 #endif
@@ -128,17 +128,13 @@ Varyings LitPassVertex(Attributes input)
     UNITY_TRANSFER_INSTANCE_ID(input, output);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
-    // normalWS and tangentWS already normalize.
-    // this is required to avoid skewing the direction during interpolation
-    // also required for per-vertex lighting and SH evaluation
     VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
     half3 vertexLight = VertexLighting(vertexInput.positionWS, normalInput.normalWS);
     half fogFactor = 0;
     #if !defined(_FOG_FRAGMENT)
-        fogFactor = ComputeFogFactor(vertexInput.positionCS.z);
+        fogFactor = ComputeFogFactor(vertexInput.positionCS.z);//Ignore
     #endif
     output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
-    // already normalized from normal transform to WS.
     output.normalWS = normalInput.normalWS;
 #if defined(REQUIRES_WORLD_SPACE_TANGENT_INTERPOLATOR) || defined(REQUIRES_TANGENT_SPACE_VIEW_DIR_INTERPOLATOR)
     real sign = input.tangentOS.w * GetOddNegativeScale();
@@ -153,7 +149,7 @@ Varyings LitPassVertex(Attributes input)
     output.viewDirTS = viewDirTS;
 #endif
     OUTPUT_LIGHTMAP_UV(input.staticLightmapUV, unity_LightmapST, output.staticLightmapUV);
-#ifdef DYNAMICLIGHTMAP_ON
+#ifdef DYNAMICLIGHTMAP_ON // ???
     output.dynamicLightmapUV = input.dynamicLightmapUV.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
 #endif
     OUTPUT_SH(output.normalWS.xyz, output.vertexSH);
@@ -173,7 +169,7 @@ Varyings LitPassVertex(Attributes input)
 }
 
 // Used in Standard (Physically Based) shader
-// Done
+
 half4 LitPassFragment(Varyings input) : SV_Target
 {
     UNITY_SETUP_INSTANCE_ID(input);
@@ -185,7 +181,7 @@ half4 LitPassFragment(Varyings input) : SV_Target
         half3 viewDirWS = GetWorldSpaceNormalizeViewDir(input.positionWS);
         half3 viewDirTS = GetViewDirectionTangentSpace(input.tangentWS, input.normalWS, viewDirWS);
     #endif
-        ApplyPerPixelDisplacement(viewDirTS, input.uv);// ???
+        ApplyPerPixelDisplacement(viewDirTS, input.uv);
 #endif
     SurfaceData surfaceData;
     InitializeStandardLitSurfaceData(input.uv, surfaceData);

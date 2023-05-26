@@ -117,7 +117,7 @@ bool CalculateColorForDebugSceneOverride(out half4 color)
 }
 
 #endif
-// Done
+
 bool IsAlphaDiscardEnabled()
 {
     #if defined(DEBUG_DISPLAY)
@@ -142,7 +142,7 @@ bool IsFogEnabled()
     return true;
     #endif
 }
-// Done
+
 bool IsLightingFeatureEnabled(uint bitMask)
 {
     #if defined(DEBUG_DISPLAY)

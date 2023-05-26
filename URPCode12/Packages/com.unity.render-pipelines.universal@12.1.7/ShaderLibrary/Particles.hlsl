@@ -79,6 +79,7 @@ half4 MixParticleColor(half4 baseColor, half4 particleColor, half4 colorAddSubDi
 }
 
 // Soft particles - returns alpha value for fading particles based on the depth to the background pixel
+// Done
 float SoftParticles(float near, float far, float4 projection)
 {
     float fade = 1;
@@ -114,7 +115,7 @@ half CameraFade(float near, float far, float4 projection)
     float thisZ = LinearEyeDepth(projection.z / projection.w, _ZBufferParams);
     return half(saturate((thisZ - near) * far));
 }
-// Done
+
 half3 AlphaModulate(half3 albedo, half alpha)
 {
 #if defined(_ALPHAMODULATE_ON)
@@ -133,7 +134,6 @@ half3 Distortion(float4 baseColor, float3 normal, half strength, half blend, flo
     return half3(lerp(Distortion.rgb, baseColor.rgb, saturate(baseColor.a - blend)));
 }
 
-// Sample a texture and do blending for texture sheet animation if needed
 // Done
 half4 BlendTexture(TEXTURE2D_PARAM(_Texture, sampler_Texture), float2 uv, float3 blendUv)
 {
@@ -146,7 +146,7 @@ half4 BlendTexture(TEXTURE2D_PARAM(_Texture, sampler_Texture), float2 uv, float3
 }
 
 // Sample a normal map in tangent space
-// Done
+
 half3 SampleNormalTS(float2 uv, float3 blendUv, TEXTURE2D_PARAM(bumpMap, sampler_bumpMap), half scale = half(1.0))
 {
 #if defined(_NORMALMAP)
@@ -160,7 +160,7 @@ half3 SampleNormalTS(float2 uv, float3 blendUv, TEXTURE2D_PARAM(bumpMap, sampler
     return half3(0.0, 0.0, 1.0);
 #endif
 }
-// Done
+//
 half4 GetParticleColor(half4 color)
 {
 #if defined(UNITY_PARTICLE_INSTANCING_ENABLED)

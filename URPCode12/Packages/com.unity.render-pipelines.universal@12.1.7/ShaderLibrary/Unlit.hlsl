@@ -5,12 +5,12 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Debug/Debugging3D.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceData.hlsl"
-// Done
+
 half4 UniversalFragmentUnlit(InputData inputData, SurfaceData surfaceData)
 {
     half3 albedo = surfaceData.albedo;
     #if defined(DEBUG_DISPLAY)
-    half4 debugColor;
+        half4 debugColor;
         if (CanDebugOverrideOutputColor(inputData, surfaceData, debugColor))
         {
             return debugColor;
@@ -21,7 +21,7 @@ half4 UniversalFragmentUnlit(InputData inputData, SurfaceData surfaceData)
 }
 
 // Deprecated: Use the version which takes "SurfaceData" instead of passing all of these arguments.
-// Done
+
 half4 UniversalFragmentUnlit(InputData inputData, half3 color, half alpha)
 {
     SurfaceData surfaceData;

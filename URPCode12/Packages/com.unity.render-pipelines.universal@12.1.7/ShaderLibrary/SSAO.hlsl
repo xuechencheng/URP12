@@ -173,7 +173,7 @@ half3 PickSamplePoint(float2 uv, int sampleIndex)
 
     return half3(CosSin(theta) * sqrt(half(1.0) - u * u), u);
 }
-// Done
+
 float SampleAndGetLinearEyeDepth(float2 uv)
 {
     float rawDepth = SampleSceneDepth(uv.xy);
@@ -185,7 +185,7 @@ float SampleAndGetLinearEyeDepth(float2 uv)
 }
 
 // This returns a vector in world unit (not a position), from camera to the given point described by uv screen coordinate and depth (in absolute world unit).
-half3 ReconstructViewPos(float2 uv, float depth)//Paused
+half3 ReconstructViewPos(float2 uv, float depth)
 {
     // Screen is y-inverted.
     uv.y = 1.0 - uv.y;

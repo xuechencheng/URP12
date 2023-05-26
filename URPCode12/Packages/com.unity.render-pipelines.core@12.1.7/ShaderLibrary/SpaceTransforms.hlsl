@@ -62,21 +62,18 @@ float3 GetCameraRelativePositionWS(float3 positionWS)
 #endif
     return positionWS;
 }
-//表示法线贴图是否需要取反，比如MAX和MAYA的法线贴图就是反的
+//表示法线贴图是否需要取反，比如MAX和MAYA的法线贴图就是反的 Done
 real GetOddNegativeScale()
 {
-    // FIXME: We should be able to just return unity_WorldTransformParams.w, but it is not
-    // properly set at the moment, when doing ray-tracing; once this has been fixed in cpp,
-    // we can revert back to the former implementation.
     return unity_WorldTransformParams.w >= 0.0 ? 1.0 : -1.0;
 }
 
 float3 TransformObjectToWorld(float3 positionOS)
 {
     #if defined(SHADER_STAGE_RAY_TRACING)
-    return mul(ObjectToWorld3x4(), float4(positionOS, 1.0)).xyz;
+        return mul(ObjectToWorld3x4(), float4(positionOS, 1.0)).xyz;
     #else
-    return mul(GetObjectToWorldMatrix(), float4(positionOS, 1.0)).xyz;
+        return mul(GetObjectToWorldMatrix(), float4(positionOS, 1.0)).xyz;
     #endif
 }
 
@@ -101,7 +98,7 @@ float4 TransformObjectToHClip(float3 positionOS)
     return mul(GetWorldToHClipMatrix(), mul(GetObjectToWorldMatrix(), float4(positionOS, 1.0)));
 }
 
-// Tranforms position from world space to homogenous space
+
 float4 TransformWorldToHClip(float3 positionWS)
 {
     return mul(GetWorldToHClipMatrix(), float4(positionWS, 1.0));
@@ -113,7 +110,7 @@ float4 TransformWViewToHClip(float3 positionVS)
     return mul(GetViewToHClipMatrix(), float4(positionVS, 1.0));
 }
 
-// Done
+
 float3 TransformObjectToWorldDir(float3 dirOS, bool doNormalize = true)
 {
     #ifndef SHADER_STAGE_RAY_TRACING
@@ -166,7 +163,7 @@ float3 TransformObjectToWorldNormal(float3 normalOS, bool doNormalize = true)
 #ifdef UNITY_ASSUME_UNIFORM_SCALING
     return TransformObjectToWorldDir(normalOS, doNormalize);
 #else
-    // Normal need to be multiply by inverse transpose 逆转置矩阵
+    // 逆转置矩阵
     float3 normalWS = mul(normalOS, (float3x3)GetWorldToObjectMatrix());
     if (doNormalize)
         return SafeNormalize(normalWS);

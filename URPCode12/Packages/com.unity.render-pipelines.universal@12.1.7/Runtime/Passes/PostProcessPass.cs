@@ -278,7 +278,9 @@ namespace UnityEngine.Rendering.Universal.Internal
 
         RenderTextureDescriptor GetCompatibleDescriptor()
             => GetCompatibleDescriptor(m_Descriptor.width, m_Descriptor.height, m_Descriptor.graphicsFormat);
-
+        /// <summary>
+        /// Done
+        /// </summary>
         RenderTextureDescriptor GetCompatibleDescriptor(int width, int height, GraphicsFormat format, int depthBufferBits = 0)
         {
             var desc = m_Descriptor;
@@ -1139,19 +1141,15 @@ namespace UnityEngine.Rendering.Universal.Internal
                 th = Mathf.Max(1, th >> 1);
                 int mipDown = ShaderConstants._BloomMipDown[i];
                 int mipUp = ShaderConstants._BloomMipUp[i];
-
                 desc.width = tw;
                 desc.height = th;
-
                 cmd.GetTemporaryRT(mipDown, desc, FilterMode.Bilinear);
                 cmd.GetTemporaryRT(mipUp, desc, FilterMode.Bilinear);
-
                 // Classic two pass gaussian blur - use mipUp as a temporary target
                 //   First pass does 2x downsampling + 9-tap gaussian
                 //   Second pass does 9-tap gaussian using a 5-tap filter + bilinear filtering
                 Blit(cmd, lastDown, mipUp, bloomMaterial, 1);
                 Blit(cmd, mipUp, mipDown, bloomMaterial, 2);
-
                 lastDown = mipDown;
             }
 
@@ -1161,7 +1159,6 @@ namespace UnityEngine.Rendering.Universal.Internal
                 int lowMip = (i == mipCount - 2) ? ShaderConstants._BloomMipDown[i + 1] : ShaderConstants._BloomMipUp[i + 1];
                 int highMip = ShaderConstants._BloomMipDown[i];
                 int dst = ShaderConstants._BloomMipUp[i];
-
                 cmd.SetGlobalTexture(ShaderConstants._SourceTexLowMip, lowMip);
                 Blit(cmd, highMip, BlitDstDiscardContent(cmd, dst), bloomMaterial, 3);
             }

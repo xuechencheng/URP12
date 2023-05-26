@@ -13,7 +13,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // Note: we need to mask out only 8bits of the layer mask before encoding it as otherwise any value > 255 will map to all layers active if save in a buffer
-// Done
+
 uint GetMeshRenderingLightLayer()
 {
     #ifdef _LIGHT_LAYERS
@@ -111,7 +111,7 @@ half AngleAttenuation(half3 spotDirection, half3 lightDirection, half2 spotAtten
 ///////////////////////////////////////////////////////////////////////////////
 //                      Light Abstraction                                    //
 ///////////////////////////////////////////////////////////////////////////////
-// Done
+
 Light GetMainLight()
 {
     Light light;
@@ -130,25 +130,25 @@ Light GetMainLight()
 #endif
     return light;
 }
-// Done
+
 Light GetMainLight(float4 shadowCoord)
 {
     Light light = GetMainLight();
     light.shadowAttenuation = MainLightRealtimeShadow(shadowCoord);// ???
     return light;
 }
-// Done
+
 Light GetMainLight(float4 shadowCoord, float3 positionWS, half4 shadowMask)
 {
     Light light = GetMainLight();
-    light.shadowAttenuation = MainLightShadow(shadowCoord, positionWS, shadowMask, _MainLightOcclusionProbes);// Done
+    light.shadowAttenuation = MainLightShadow(shadowCoord, positionWS, shadowMask, _MainLightOcclusionProbes);
     #if defined(_LIGHT_COOKIES)
         real3 cookieColor = SampleMainLightCookie(positionWS);
         light.color *= cookieColor;
     #endif
     return light;
 }
-// Done
+
 Light GetMainLight(InputData inputData, half4 shadowMask, AmbientOcclusionFactor aoFactor)
 {
     Light light = GetMainLight(inputData.shadowCoord, inputData.positionWS, shadowMask);
@@ -170,41 +170,36 @@ Light GetAdditionalPerObjectLight(int perObjectLightIndex, float3 positionWS)
     half3 color = _AdditionalLightsBuffer[perObjectLightIndex].color.rgb;
     half4 distanceAndSpotAttenuation = _AdditionalLightsBuffer[perObjectLightIndex].attenuation;
     half4 spotDirection = _AdditionalLightsBuffer[perObjectLightIndex].spotDirection;
-#ifdef _LIGHT_LAYERS
-    uint lightLayerMask = _AdditionalLightsBuffer[perObjectLightIndex].layerMask;
-#else
-    uint lightLayerMask = DEFAULT_LIGHT_LAYERS;
-#endif
-
+    #ifdef _LIGHT_LAYERS
+        uint lightLayerMask = _AdditionalLightsBuffer[perObjectLightIndex].layerMask;
+    #else
+        uint lightLayerMask = DEFAULT_LIGHT_LAYERS;
+    #endif
 #else
     float4 lightPositionWS = _AdditionalLightsPosition[perObjectLightIndex];
     half3 color = _AdditionalLightsColor[perObjectLightIndex].rgb;
     half4 distanceAndSpotAttenuation = _AdditionalLightsAttenuation[perObjectLightIndex];
     half4 spotDirection = _AdditionalLightsSpotDir[perObjectLightIndex];
-#ifdef _LIGHT_LAYERS
-    uint lightLayerMask = asuint(_AdditionalLightsLayerMasks[perObjectLightIndex]);
-#else
-    uint lightLayerMask = DEFAULT_LIGHT_LAYERS;
-#endif
-
+    #ifdef _LIGHT_LAYERS
+        uint lightLayerMask = asuint(_AdditionalLightsLayerMasks[perObjectLightIndex]);
+    #else
+        uint lightLayerMask = DEFAULT_LIGHT_LAYERS;
+    #endif
 #endif
 
     // Directional lights store direction in lightPosition.xyz and have .w set to 0.0.
     // This way the following code will work for both directional and punctual lights.
     float3 lightVector = lightPositionWS.xyz - positionWS * lightPositionWS.w;
     float distanceSqr = max(dot(lightVector, lightVector), HALF_MIN);
-
     half3 lightDirection = half3(lightVector * rsqrt(distanceSqr));
     // full-float precision required on some platforms
     float attenuation = half(DistanceAttenuation(distanceSqr, distanceAndSpotAttenuation.xy) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw));
-
     Light light;
     light.direction = lightDirection;
     light.distanceAttenuation = attenuation;
     light.shadowAttenuation = 1.0; // This value can later be overridden in GetAdditionalLight(uint i, float3 positionWS, half4 shadowMask)
     light.color = color;
     light.layerMask = lightLayerMask;
-
     return light;
 }
 
@@ -286,7 +281,6 @@ Light GetAdditionalLight(uint i, float3 positionWS, half4 shadowMask)
     int lightIndex = GetPerObjectLightIndex(i);
 #endif
     Light light = GetAdditionalPerObjectLight(lightIndex, positionWS);
-
 #if USE_STRUCTURED_BUFFER_FOR_LIGHT_DATA
     half4 occlusionProbeChannels = _AdditionalLightsBuffer[lightIndex].occlusionProbeChannels;
 #else
@@ -297,7 +291,6 @@ Light GetAdditionalLight(uint i, float3 positionWS, half4 shadowMask)
     real3 cookieColor = SampleAdditionalLightCookie(lightIndex, positionWS);
     light.color *= cookieColor;
 #endif
-
     return light;
 }
 
@@ -314,16 +307,12 @@ Light GetAdditionalLight(uint i, InputData inputData, half4 shadowMask, AmbientO
 
     return light;
 }
-
+// Done
 int GetAdditionalLightsCount()
 {
 #if USE_CLUSTERED_LIGHTING
-    // Counting the number of lights in clustered requires traversing the bit list, and is not needed up front.
     return 0;
 #else
-    // TODO: we need to expose in SRP api an ability for the pipeline cap the amount of lights
-    // in the culling. This way we could do the loop branch with an uniform
-    // This would be helpful to support baking exceeding lights in SH as well
     return int(min(_AdditionalLightsCount.x, unity_LightData.y));
 #endif
 }
