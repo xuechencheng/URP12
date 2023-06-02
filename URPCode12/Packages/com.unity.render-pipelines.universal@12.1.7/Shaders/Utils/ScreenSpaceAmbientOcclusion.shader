@@ -19,7 +19,7 @@ Shader "Hidden/Universal Render Pipeline/ScreenSpaceAmbientOcclusion"
             float2  uv          : TEXCOORD0;
             UNITY_VERTEX_OUTPUT_STEREO
         };
-        
+        // Done
         Varyings VertDefault(Attributes input)
         {
             Varyings output;

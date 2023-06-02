@@ -195,18 +195,6 @@ half3 ApplyDithering(half3 input, float2 uv, TEXTURE2D_PARAM(BlueNoiseTexture, B
     return input;
 }
 
-half3 ApplyDithering(half3 input, float2 uv, TEXTURE2D_PARAM(BlueNoiseTexture, BlueNoiseSampler), float2 scale, float2 offset)
-{
-    float noise = SAMPLE_TEXTURE2D(BlueNoiseTexture, BlueNoiseSampler, uv * scale + offset).a * 2.0 - 1.0;
-    noise = FastSign(noise) * (1.0 - sqrt(1.0 - abs(noise)));
-#if UNITY_COLORSPACE_GAMMA
-    input += noise / 255.0;
-#else
-    input = GetSRGBToLinear(GetLinearToSRGB(input) + noise / 255.0);
-#endif
-    return input;
-}
-
 #define FXAA_SPAN_MAX   (8.0)
 #define FXAA_REDUCE_MUL (1.0 / 8.0)
 #define FXAA_REDUCE_MIN (1.0 / 128.0)

@@ -78,7 +78,7 @@ static half SSAORandomUV[40] =
 // SSAO Settings
 #define INTENSITY _SSAOParams.x
 #define RADIUS _SSAOParams.y
-#define DOWNSAMPLE _SSAOParams.z
+#define DOWNSAMPLE _SSAOParams.z //1.0f / downsampleDivider
 
 // GLES2: In many cases, dynamic looping is not supported.
 #if defined(SHADER_API_GLES) && !defined(SHADER_API_GLES3)
@@ -88,7 +88,7 @@ static half SSAORandomUV[40] =
 #endif
 
 // Function defines
-#define SCREEN_PARAMS        GetScaledScreenParams()
+#define SCREEN_PARAMS        GetScaledScreenParams()//new Vector4(scaledCameraWidth, scaledCameraHeight, 1.0f + 1.0f / scaledCameraWidth, 1.0f + 1.0f / scaledCameraHeight)
 #define SAMPLE_BASEMAP(uv)   SAMPLE_TEXTURE2D_X(_BaseMap, sampler_BaseMap, UnityStereoTransformScreenSpaceTex(uv));
 
 // Constants
@@ -166,14 +166,12 @@ float2 GetScreenSpacePosition(float2 uv)
 half3 PickSamplePoint(float2 uv, int sampleIndex)
 {
     const float2 positionSS = GetScreenSpacePosition(uv);
-    const half gn = half(InterleavedGradientNoise(positionSS, sampleIndex));
-
-    const half u = frac(GetRandomUVForSSAO(half(0.0), sampleIndex) + gn) * half(2.0) - half(1.0);
+    const half gn = half(InterleavedGradientNoise(positionSS, sampleIndex));//[0-1]
+    const half u = frac(GetRandomUVForSSAO(half(0.0), sampleIndex) + gn) * half(2.0) - half(1.0);//[-1,1]
     const half theta = (GetRandomUVForSSAO(half(1.0), sampleIndex) + gn) * half(TWO_PI);
-
     return half3(CosSin(theta) * sqrt(half(1.0) - u * u), u);
 }
-
+// Done
 float SampleAndGetLinearEyeDepth(float2 uv)
 {
     float rawDepth = SampleSceneDepth(uv.xy);
@@ -185,6 +183,7 @@ float SampleAndGetLinearEyeDepth(float2 uv)
 }
 
 // This returns a vector in world unit (not a position), from camera to the given point described by uv screen coordinate and depth (in absolute world unit).
+// Done 视野空间坐标
 half3 ReconstructViewPos(float2 uv, float depth)
 {
     // Screen is y-inverted.
@@ -207,6 +206,7 @@ half3 ReconstructViewPos(float2 uv, float depth)
 // High:   5 taps on each direction: | z | x | * | y | w |
 // https://atyuwen.github.io/posts/normal-reconstruction/
 // https://wickedengine.net/2019/09/22/improved-normal-reconstruction-from-depth/
+// ???
 half3 ReconstructNormal(float2 uv, float depth, float3 vpos)
 {
     #if defined(_RECONSTRUCT_NORMAL_LOW)
@@ -224,7 +224,6 @@ half3 ReconstructNormal(float2 uv, float depth, float3 vpos)
         float3 r1 = float3(uv + rUV, 0.0); r1.z = SampleAndGetLinearEyeDepth(r1.xy); // Right1
         float3 u1 = float3(uv + uUV, 0.0); u1.z = SampleAndGetLinearEyeDepth(u1.xy); // Up1
         float3 d1 = float3(uv + dUV, 0.0); d1.z = SampleAndGetLinearEyeDepth(d1.xy); // Down1
-
         // Determine the closest horizontal and vertical pixels...
         // horizontal: left = 0.0 right = 1.0
         // vertical  : down = 0.0    up = 1.0
@@ -240,8 +239,6 @@ half3 ReconstructNormal(float2 uv, float depth, float3 vpos)
             const uint closest_horizontal = abs( (2.0 * l1.z - l2.z) - depth) < abs( (2.0 * r1.z - r2.z) - depth) ? 0 : 1;
             const uint closest_vertical   = abs( (2.0 * d1.z - d2.z) - depth) < abs( (2.0 * u1.z - u2.z) - depth) ? 0 : 1;
         #endif
-
-
         // Calculate the triangle, in a counter-clockwize order, to
         // use based on the closest horizontal and vertical depths.
         // h == 0.0 && v == 0.0: p1 = left,  p2 = down
@@ -261,7 +258,6 @@ half3 ReconstructNormal(float2 uv, float depth, float3 vpos)
             P1 = closest_horizontal == 0 ? u1 : r1;
             P2 = closest_horizontal == 0 ? l1 : u1;
         }
-
         // Use the cross product to calculate the normal...
         return half3(normalize(cross(ReconstructViewPos(P2.xy, P2.z) - vpos, ReconstructViewPos(P1.xy, P1.z) - vpos)));
     #endif
@@ -298,15 +294,10 @@ half4 SSAO(Varyings input) : SV_Target
 {
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
     float2 uv = input.uv;
-
-    // Parameters used in coordinate conversion
     half3x3 camTransform = (half3x3)_CameraViewProjections[unity_eyeIndex]; // camera viewProjection matrix
     // Get the depth, normal and view position for this fragment
-    float depth_o;
-    half3 norm_o;
-    half3 vpos_o;
+    float depth_o; half3 norm_o; half3 vpos_o;
     SampleDepthNormalView(uv, depth_o, norm_o, vpos_o);
-
     // This was added to avoid a NVIDIA driver issue.
     const half rcpSampleCount = half(rcp(SAMPLE_COUNT));
     half ao = 0.0;

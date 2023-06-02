@@ -39,7 +39,6 @@ namespace UnityEngine.Rendering.Universal
         // Private Fields
         private Material m_Material;
         private ScreenSpaceAmbientOcclusionPass m_SSAOPass = null;
-
         // Constants
         private const string k_ShaderName = "Hidden/Universal Render Pipeline/ScreenSpaceAmbientOcclusion";
         private const string k_OrthographicCameraKeyword = "_ORTHOGRAPHIC";
@@ -48,7 +47,6 @@ namespace UnityEngine.Rendering.Universal
         private const string k_NormalReconstructionHighKeyword = "_RECONSTRUCT_NORMAL_HIGH";
         private const string k_SourceDepthKeyword = "_SOURCE_DEPTH";
         private const string k_SourceDepthNormalsKeyword = "_SOURCE_DEPTH_NORMALS";
-
         internal bool afterOpaque => m_Settings.AfterOpaque;
         /// <summary>
         /// Done
@@ -131,11 +129,9 @@ namespace UnityEngine.Rendering.Universal
             private RenderTextureDescriptor m_BlurPassesDescriptor;
             private RenderTextureDescriptor m_FinalDescriptor;
             private ScreenSpaceAmbientOcclusionSettings m_CurrentSettings;
-
             // Constants
             private const string k_SSAOTextureName = "_ScreenSpaceOcclusionTexture";
             private const string k_SSAOAmbientOcclusionParamName = "_AmbientOcclusionParam";
-
             // Statics
             private static readonly int s_BaseMapID = Shader.PropertyToID("_BaseMap");
             private static readonly int s_SSAOParamsID = Shader.PropertyToID("_SSAOParams");
@@ -149,7 +145,6 @@ namespace UnityEngine.Rendering.Universal
             private static readonly int s_ProjectionParams2ID = Shader.PropertyToID("_ProjectionParams2");
             private static readonly int s_CameraViewProjectionsID = Shader.PropertyToID("_CameraViewProjections");
             private static readonly int s_CameraViewTopLeftCornerID = Shader.PropertyToID("_CameraViewTopLeftCorner");
-
             private enum ShaderPasses
             {
                 AO = 0,
@@ -179,9 +174,6 @@ namespace UnityEngine.Rendering.Universal
                 }
                 else
                 {
-                    // Rendering after PrePasses is usually correct except when depth priming is in play:
-                    // then we rely on a depth resolve taking place after the PrePasses in order to have it ready for SSAO.
-                    // Hence we set the event to RenderPassEvent.AfterRenderingPrePasses + 1 at the earliest.
                     renderPassEvent = featureSettings.AfterOpaque ? RenderPassEvent.AfterRenderingOpaques : RenderPassEvent.AfterRenderingPrePasses + 1;
                     source = m_CurrentSettings.Source;
                 }
@@ -196,10 +188,7 @@ namespace UnityEngine.Rendering.Universal
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-                return m_Material != null
-                    && m_CurrentSettings.Intensity > 0.0f
-                    && m_CurrentSettings.Radius > 0.0f
-                    && m_CurrentSettings.SampleCount > 0;
+                return m_Material != null && m_CurrentSettings.Intensity > 0.0f && m_CurrentSettings.Radius > 0.0f && m_CurrentSettings.SampleCount > 0;
             }
 
             /// <summary>
@@ -209,16 +198,9 @@ namespace UnityEngine.Rendering.Universal
             {
                 RenderTextureDescriptor cameraTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
                 int downsampleDivider = m_CurrentSettings.Downsample ? 2 : 1;
-
                 // Update SSAO parameters in the material
-                Vector4 ssaoParams = new Vector4(
-                    m_CurrentSettings.Intensity,   // Intensity
-                    m_CurrentSettings.Radius,      // Radius
-                    1.0f / downsampleDivider,      // Downsampling
-                    m_CurrentSettings.SampleCount  // Sample count
-                );
+                Vector4 ssaoParams = new Vector4(m_CurrentSettings.Intensity,m_CurrentSettings.Radius,1.0f / downsampleDivider,m_CurrentSettings.SampleCount);
                 m_Material.SetVector(s_SSAOParamsID, ssaoParams);
-
 #if ENABLE_VR && ENABLE_XR_MODULE
                 int eyeCount = renderingData.cameraData.xr.enabled && renderingData.cameraData.xr.singlePassEnabled ? 2 : 1;
 #else
@@ -229,14 +211,12 @@ namespace UnityEngine.Rendering.Universal
                     Matrix4x4 view = renderingData.cameraData.GetViewMatrix(eyeIndex);
                     Matrix4x4 proj = renderingData.cameraData.GetProjectionMatrix(eyeIndex);
                     m_CameraViewProjections[eyeIndex] = proj * view;
-
                     // camera view space without translation, used by SSAO.hlsl ReconstructViewPos() to calculate view vector.
                     Matrix4x4 cview = view;
-                    cview.SetColumn(3, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));//移动到相机坐标原点 Paused
+                    cview.SetColumn(3, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));//移动到相机坐标原点
                     Matrix4x4 cviewProj = proj * cview;
                     Matrix4x4 cviewProjInv = cviewProj.inverse;
-
-                    Vector4 topLeftCorner = cviewProjInv.MultiplyPoint(new Vector4(-1, 1, -1, 1));
+                    Vector4 topLeftCorner = cviewProjInv.MultiplyPoint(new Vector4(-1, 1, -1, 1));//相机近平面左上角世界坐标
                     Vector4 topRightCorner = cviewProjInv.MultiplyPoint(new Vector4(1, 1, -1, 1));
                     Vector4 bottomLeftCorner = cviewProjInv.MultiplyPoint(new Vector4(-1, -1, -1, 1));
                     Vector4 farCentre = cviewProjInv.MultiplyPoint(new Vector4(0, 0, 1, 1));
@@ -289,7 +269,6 @@ namespace UnityEngine.Rendering.Universal
                         CoreUtils.SetKeyword(m_Material, k_SourceDepthNormalsKeyword, false);
                         break;
                 }
-                // Set up the descriptors
                 RenderTextureDescriptor descriptor = cameraTargetDescriptor;
                 descriptor.msaaSamples = 1;
                 descriptor.depthBufferBits = 0;
@@ -304,13 +283,11 @@ namespace UnityEngine.Rendering.Universal
 
                 m_FinalDescriptor = descriptor;
                 m_FinalDescriptor.colorFormat = m_SupportsR8RenderTextureFormat ? RenderTextureFormat.R8 : RenderTextureFormat.ARGB32;
-
                 // Get temporary render textures
                 cmd.GetTemporaryRT(s_SSAOTexture1ID, m_AOPassDescriptor, FilterMode.Bilinear);
                 cmd.GetTemporaryRT(s_SSAOTexture2ID, m_BlurPassesDescriptor, FilterMode.Bilinear);
                 cmd.GetTemporaryRT(s_SSAOTexture3ID, m_BlurPassesDescriptor, FilterMode.Bilinear);
                 cmd.GetTemporaryRT(s_SSAOTextureFinalID, m_FinalDescriptor, FilterMode.Bilinear);
-
                 // Configure targets and clear color
                 ConfigureTarget(m_CurrentSettings.AfterOpaque ? m_Renderer.cameraColorTarget : s_SSAOTexture2ID);
                 ConfigureClear(ClearFlag.None, Color.white);

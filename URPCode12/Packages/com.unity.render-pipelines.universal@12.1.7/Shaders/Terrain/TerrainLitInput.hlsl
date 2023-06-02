@@ -81,6 +81,7 @@ UNITY_INSTANCING_BUFFER_END(Terrain)
 #ifdef _ALPHATEST_ON
     TEXTURE2D(_TerrainHolesTexture);
     SAMPLER(sampler_TerrainHolesTexture);
+    // Done
     void ClipHoles(float2 uv)
     {
         float hole = SAMPLE_TEXTURE2D(_TerrainHolesTexture, sampler_TerrainHolesTexture, uv).r;
