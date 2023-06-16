@@ -7,7 +7,7 @@
 
 // Caution: For HDRP, adding a function in this file requires adding the appropriate #define in PickingSpaceTransforms.hlsl
 
-// Return the PreTranslated ObjectToWorld Matrix (i.e matrix with _WorldSpaceCameraPos apply to it if we use camera relative rendering)
+// Done
 float4x4 GetObjectToWorldMatrix()
 {
     return UNITY_MATRIX_M;
@@ -27,13 +27,12 @@ float4x4 GetPrevWorldToObjectMatrix()
 {
     return UNITY_PREV_MATRIX_I_M;
 }
-
+// Done
 float4x4 GetWorldToViewMatrix()
 {
     return UNITY_MATRIX_V;
 }
-
-// Transform to homogenous clip space
+// Done
 float4x4 GetWorldToHClipMatrix()
 {
     return UNITY_MATRIX_VP;
@@ -67,7 +66,7 @@ real GetOddNegativeScale()
 {
     return unity_WorldTransformParams.w >= 0.0 ? 1.0 : -1.0;
 }
-
+// Done
 float3 TransformObjectToWorld(float3 positionOS)
 {
     #if defined(SHADER_STAGE_RAY_TRACING)
@@ -85,7 +84,7 @@ float3 TransformWorldToObject(float3 positionWS)
     return mul(GetWorldToObjectMatrix(), float4(positionWS, 1.0)).xyz;
     #endif
 }
-
+// Done
 float3 TransformWorldToView(float3 positionWS)
 {
     return mul(GetWorldToViewMatrix(), float4(positionWS, 1.0)).xyz;
@@ -98,7 +97,7 @@ float4 TransformObjectToHClip(float3 positionOS)
     return mul(GetWorldToHClipMatrix(), mul(GetObjectToWorldMatrix(), float4(positionOS, 1.0)));
 }
 
-
+// Done
 float4 TransformWorldToHClip(float3 positionWS)
 {
     return mul(GetWorldToHClipMatrix(), float4(positionWS, 1.0));
@@ -110,7 +109,7 @@ float4 TransformWViewToHClip(float3 positionVS)
     return mul(GetViewToHClipMatrix(), float4(positionVS, 1.0));
 }
 
-
+// Done
 float3 TransformObjectToWorldDir(float3 dirOS, bool doNormalize = true)
 {
     #ifndef SHADER_STAGE_RAY_TRACING

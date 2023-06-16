@@ -64,7 +64,7 @@ half3 LightingPhysicallyBased(BRDFData brdfData, BRDFData brdfDataClearCoat, hal
 
     return brdf * radiance;
 }
-
+// Here
 half3 LightingPhysicallyBased(BRDFData brdfData, BRDFData brdfDataClearCoat, Light light, half3 normalWS, half3 viewDirectionWS, half clearCoatMask, bool specularHighlightsOff)
 {
     return LightingPhysicallyBased(brdfData, brdfDataClearCoat, light.color, light.direction, light.distanceAttenuation * light.shadowAttenuation, normalWS, viewDirectionWS, clearCoatMask, specularHighlightsOff);
@@ -130,7 +130,7 @@ struct LightingData
     half3 vertexLightingColor;
     half3 emissionColor;
 };
-
+// Done
 half3 CalculateLightingColor(LightingData lightingData, half3 albedo)
 {
     half3 lightingColor = 0;
@@ -169,7 +169,7 @@ half3 CalculateLightingColor(LightingData lightingData, half3 albedo)
 
     return lightingColor;
 }
-
+// Done
 half4 CalculateFinalColor(LightingData lightingData, half alpha)
 {
     half3 finalColor = CalculateLightingColor(lightingData, 1);
@@ -225,7 +225,7 @@ half3 CalculateBlinnPhong(Light light, InputData inputData, SurfaceData surfaceD
 ////////////////////////////////////////////////////////////////////////////////
 /// PBR lighting...
 ////////////////////////////////////////////////////////////////////////////////
-// Paused Point
+// Done
 half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData)
 {
     #if defined(_SPECULARHIGHLIGHTS_OFF)
@@ -245,7 +245,7 @@ half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData)
         }
     #endif
 
-    // Clear-coat calculation...
+    // Clear-coat calculation... 透明涂层
     BRDFData brdfDataClearCoat = CreateClearCoatBRDFData(surfaceData, brdfData);
     half4 shadowMask = CalculateShadowMask(inputData);
     AmbientOcclusionFactor aoFactor = CreateAmbientOcclusionFactor(inputData, surfaceData);// SSAO

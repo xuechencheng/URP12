@@ -1322,8 +1322,7 @@ bool HasFlag(uint bitfield, uint flag)
     return (bitfield & flag) != 0;
 }
 
-// Normalize that account for vectors with zero length
-
+// Done
 real3 SafeNormalize(float3 inVec)
 {
     float dp3 = max(FLT_MIN, dot(inVec, inVec));

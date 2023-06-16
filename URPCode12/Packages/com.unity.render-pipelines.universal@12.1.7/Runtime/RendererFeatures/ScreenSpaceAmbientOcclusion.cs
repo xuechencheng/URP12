@@ -219,7 +219,7 @@ namespace UnityEngine.Rendering.Universal
                     Vector4 topLeftCorner = cviewProjInv.MultiplyPoint(new Vector4(-1, 1, -1, 1));//相机近平面左上角世界坐标
                     Vector4 topRightCorner = cviewProjInv.MultiplyPoint(new Vector4(1, 1, -1, 1));
                     Vector4 bottomLeftCorner = cviewProjInv.MultiplyPoint(new Vector4(-1, -1, -1, 1));
-                    Vector4 farCentre = cviewProjInv.MultiplyPoint(new Vector4(0, 0, 1, 1));
+                    Vector4 farCentre = cviewProjInv.MultiplyPoint(new Vector4(0, 0, 1, 1));//远平面中心的世界坐标
                     m_CameraTopLeftCorner[eyeIndex] = topLeftCorner;
                     m_CameraXExtent[eyeIndex] = topRightCorner - topLeftCorner;
                     m_CameraYExtent[eyeIndex] = bottomLeftCorner - topLeftCorner;

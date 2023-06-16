@@ -33,17 +33,14 @@
 
 // TODO: Check if PI is correctly handled!
 
-// Ref: "Efficient Evaluation of Irradiance Environment Maps" from ShaderX 2
+// Done
 real3 SHEvalLinearL0L1(real3 N, real4 shAr, real4 shAg, real4 shAb)
 {
     real4 vA = real4(N, 1.0);
-
     real3 x1;
-    // Linear (L1) + constant (L0) polynomial terms
     x1.r = dot(shAr, vA);
     x1.g = dot(shAg, vA);
     x1.b = dot(shAb, vA);
-
     return x1;
 }
 
@@ -53,10 +50,9 @@ real3 SHEvalLinearL1(real3 N, real3 shAr, real3 shAg, real3 shAb)
     x1.r = dot(shAr, N);
     x1.g = dot(shAg, N);
     x1.b = dot(shAb, N);
-
     return x1;
 }
-
+// Done
 real3 SHEvalLinearL2(real3 N, real4 shBr, real4 shBg, real4 shBb, real4 shC)
 {
     real3 x2;
@@ -65,11 +61,9 @@ real3 SHEvalLinearL2(real3 N, real4 shBr, real4 shBg, real4 shBb, real4 shC)
     x2.r = dot(shBr, vB);
     x2.g = dot(shBg, vB);
     x2.b = dot(shBb, vB);
-
     // Final (5th) quadratic (L2) polynomial
     real vC = N.x * N.x - N.y * N.y;
     real3 x3 = shC.rgb * vC;
-
     return x2 + x3;
 }
 
@@ -83,17 +77,13 @@ half3 SampleSH9(half4 SHCoefficients[7], half3 N)
     half4 shBg = SHCoefficients[4];
     half4 shBb = SHCoefficients[5];
     half4 shCr = SHCoefficients[6];
-
     // Linear + constant polynomial terms
     half3 res = SHEvalLinearL0L1(N, shAr, shAg, shAb);
-
     // Quadratic polynomials
     res += SHEvalLinearL2(N, shBr, shBg, shBb, shCr);
-
 #ifdef UNITY_COLORSPACE_GAMMA
     res = LinearToSRGB(res);
 #endif
-
     return res;
 }
 #endif

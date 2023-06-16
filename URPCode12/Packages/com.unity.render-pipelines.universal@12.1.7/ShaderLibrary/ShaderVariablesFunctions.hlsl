@@ -10,7 +10,7 @@ VertexPositionInputs GetVertexPositionInputs(float3 positionOS)
     input.positionWS = TransformObjectToWorld(positionOS);
     input.positionVS = TransformWorldToView(input.positionWS);
     input.positionCS = TransformWorldToHClip(input.positionWS);
-
+    
     float4 ndc = input.positionCS * 0.5f; // [-1, 1]-->[-0.5, 0.5]
     input.positionNDC.xy = float2(ndc.x, ndc.y * _ProjectionParams.x) + ndc.w;// [-1, 1]-->[0, 1]
     input.positionNDC.zw = input.positionCS.zw;
@@ -367,14 +367,14 @@ void TransformNormalizedScreenUV(inout float2 uv)
         TransformScreenUV(uv, 1.0);
     #endif
 }
-// ???
+// Done
 float2 GetNormalizedScreenSpaceUV(float2 positionCS)
 {
     float2 normalizedScreenSpaceUV = positionCS.xy * rcp(GetScaledScreenParams().xy);
     TransformNormalizedScreenUV(normalizedScreenSpaceUV);
     return normalizedScreenSpaceUV;
 }
-
+// Done
 float2 GetNormalizedScreenSpaceUV(float4 positionCS)
 {
     return GetNormalizedScreenSpaceUV(positionCS.xy);

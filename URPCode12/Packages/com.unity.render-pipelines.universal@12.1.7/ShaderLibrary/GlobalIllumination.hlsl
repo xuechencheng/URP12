@@ -25,7 +25,7 @@
     #define _MIXED_LIGHTING_SUBTRACTIVE
 #endif
 
-// Samples SH L0, L1 and L2 terms
+// Samples SH L0, L1 and L2 terms Done
 half3 SampleSH(half3 normalWS)
 {
     // LPPV is not supported in Ligthweight Pipeline
@@ -37,22 +37,17 @@ half3 SampleSH(half3 normalWS)
     SHCoefficients[4] = unity_SHBg;
     SHCoefficients[5] = unity_SHBb;
     SHCoefficients[6] = unity_SHC;
-
     return max(half3(0, 0, 0), SampleSH9(SHCoefficients, normalWS));
 }
 
-// SH Vertex Evaluation. Depending on target SH sampling might be
-// done completely per vertex or mixed with L2 term per vertex and L0, L1
-// per pixel. See SampleSHPixel
+// Done
 half3 SampleSHVertex(half3 normalWS)
 {
 #if defined(EVALUATE_SH_VERTEX)
-    return SampleSH(normalWS);
+    return SampleSH(normalWS);// L0 L1 L2
 #elif defined(EVALUATE_SH_MIXED)
-    // no max since this is only L2 contribution
-    return SHEvalLinearL2(normalWS, unity_SHBr, unity_SHBg, unity_SHBb, unity_SHC);
+    return SHEvalLinearL2(normalWS, unity_SHBr, unity_SHBg, unity_SHBb, unity_SHC);//L2
 #endif
-    // Fully per-pixel. Nothing to compute.
     return half3(0.0, 0.0, 0.0);
 }
 
@@ -272,12 +267,13 @@ half3 GlossyEnvironmentReflection(half3 reflectVector, float3 positionWS, half p
 #endif // _ENVIRONMENTREFLECTIONS_OFF
 }
 
+// Done
 half3 GlossyEnvironmentReflection(half3 reflectVector, half perceptualRoughness, half occlusion)
 {
 #if !defined(_ENVIRONMENTREFLECTIONS_OFF)
     half3 irradiance;
     half mip = PerceptualRoughnessToMipmapLevel(perceptualRoughness);
-    half4 encodedIrradiance = half4(SAMPLE_TEXTURECUBE_LOD(unity_SpecCube0, samplerunity_SpecCube0, reflectVector, mip)); // ???
+    half4 encodedIrradiance = half4(SAMPLE_TEXTURECUBE_LOD(unity_SpecCube0, samplerunity_SpecCube0, reflectVector, mip));
     #if defined(UNITY_USE_NATIVE_HDR)
         irradiance = encodedIrradiance.rgb;
     #else
@@ -350,7 +346,7 @@ half3 GlobalIllumination(BRDFData brdfData, half3 bakedGI, half occlusion, float
     const BRDFData noClearCoat = (BRDFData)0;
     return GlobalIllumination(brdfData, noClearCoat, 0.0, bakedGI, occlusion, positionWS, normalWS, viewDirectionWS);
 }
-
+// Done
 half3 GlobalIllumination(BRDFData brdfData, BRDFData brdfDataClearCoat, float clearCoatMask, half3 bakedGI, half occlusion, half3 normalWS, half3 viewDirectionWS)
 {
     half3 reflectVector = reflect(-viewDirectionWS, normalWS);
@@ -363,7 +359,6 @@ half3 GlobalIllumination(BRDFData brdfData, BRDFData brdfDataClearCoat, float cl
     half3 coatIndirectSpecular = GlossyEnvironmentReflection(reflectVector, brdfDataClearCoat.perceptualRoughness, half(1.0));
     // TODO: "grazing term" causes problems on full roughness
     half3 coatColor = EnvironmentBRDFClearCoat(brdfDataClearCoat, clearCoatMask, coatIndirectSpecular, fresnelTerm);
-
     // Blend with base layer using khronos glTF recommended way using NoV
     // Smooth surface & "ambiguous" lighting
     // NOTE: fresnelTerm (above) is pow4 instead of pow5, but should be ok as blend weight.
