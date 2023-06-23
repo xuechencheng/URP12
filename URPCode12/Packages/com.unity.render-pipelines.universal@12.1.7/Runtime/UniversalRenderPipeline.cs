@@ -22,7 +22,7 @@ namespace UnityEngine.Rendering.Universal
             public static readonly ProfilingSampler unknownSampler = new ProfilingSampler("Unknown");
 
             /// <summary>
-            /// Done 1
+            /// Done
             /// </summary>
             public static ProfilingSampler TryGetOrAddCameraSampler(Camera camera)
             {
@@ -34,7 +34,6 @@ namespace UnityEngine.Rendering.Universal
                 bool exists = s_HashSamplerCache.TryGetValue(cameraId, out ps);
                 if (!exists)
                 {
-                    // NOTE: camera.name allocates!
                     ps = new ProfilingSampler($"{nameof(UniversalRenderPipeline)}.{nameof(RenderSingleCamera)}: {camera.name}");
                     s_HashSamplerCache.Add(cameraId, ps);
                 }
@@ -318,7 +317,7 @@ namespace UnityEngine.Rendering.Universal
             RenderSingleCamera(context, cameraData, cameraData.postProcessEnabled);
         }
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         static bool TryGetCullingParameters(CameraData cameraData, out ScriptableCullingParameters cullingParams)
         {
@@ -334,7 +333,6 @@ namespace UnityEngine.Rendering.Universal
                 return true;
             }
 #endif
-
             return cameraData.camera.TryGetCullingParameters(false, out cullingParams);
         }
 
@@ -360,7 +358,7 @@ namespace UnityEngine.Rendering.Universal
             CommandBuffer cmd = CommandBufferPool.Get();
             CommandBuffer cmdScope = cameraData.xr.enabled ? null : cmd;
             ProfilingSampler sampler = Profiling.TryGetOrAddCameraSampler(camera);
-            using (new ProfilingScope(cmdScope, sampler)) // Enqueues a "BeginSample" command into the CommandBuffer cmd
+            using (new ProfilingScope(cmdScope, sampler))
             {
                 renderer.Clear(cameraData.renderType);
                 using (new ProfilingScope(null, Profiling.Pipeline.Renderer.setupCullingParameters))
@@ -515,7 +513,7 @@ namespace UnityEngine.Rendering.Universal
             if (asset.useAdaptivePerformance)
                 ApplyAdaptivePerformance(ref baseCameraData);
 #endif
-            RenderSingleCamera(context, baseCameraData, anyPostProcessingEnabled);
+            RenderSingleCamera(context, baseCameraData, anyPostProcessingEnabled);//Paused Point
             using (new ProfilingScope(null, Profiling.Pipeline.endCameraRendering))
             {
                 EndCameraRendering(context, baseCamera);
@@ -586,7 +584,7 @@ namespace UnityEngine.Rendering.Universal
 #endregion
         }
         /// <summary>
-        /// Done 1
+        /// Ignore
         /// </summary>
         static void UpdateVolumeFramework(Camera camera, UniversalAdditionalCameraData additionalCameraData)
         {
@@ -914,7 +912,6 @@ namespace UnityEngine.Rendering.Universal
             shadowData.mainLightShadowCascadesCount = settings.shadowCascadeCount;
             shadowData.mainLightShadowmapWidth = settings.mainLightShadowmapResolution;
             shadowData.mainLightShadowmapHeight = settings.mainLightShadowmapResolution;
-
             switch (shadowData.mainLightShadowCascadesCount)
             {
                 case 1:
@@ -960,9 +957,7 @@ namespace UnityEngine.Rendering.Universal
             lightData.mainLightIndex = mainLightIndex;
             if (settings.additionalLightsRenderingMode != LightRenderingMode.Disabled)
             {
-                lightData.additionalLightsCount =
-                    Math.Min((mainLightIndex != -1) ? visibleLights.Length - 1 : visibleLights.Length,
-                        maxVisibleAdditionalLights);
+                lightData.additionalLightsCount = Math.Min((mainLightIndex != -1) ? visibleLights.Length - 1 : visibleLights.Length,maxVisibleAdditionalLights);
                 lightData.maxPerObjectAdditionalLightsCount = Math.Min(settings.maxAdditionalLightsCount, maxPerObjectAdditionalLights);
             }
             else
@@ -1013,8 +1008,6 @@ namespace UnityEngine.Rendering.Universal
         /// <summary>
         /// Done
         /// </summary>
-        /// <param name="additionalLightsCount"></param>
-        /// <returns></returns>
         static PerObjectData GetPerObjectLightFlags(int additionalLightsCount)
         {
             using var profScope = new ProfilingScope(null, Profiling.Pipeline.getPerObjectLightFlags);
@@ -1022,7 +1015,6 @@ namespace UnityEngine.Rendering.Universal
             if (additionalLightsCount > 0)
             {
                 configuration |= PerObjectData.LightData;
-                // In this case we also need per-object indices (unity_LightIndices)
                 if (!RenderingUtils.useStructuredBuffer)
                     configuration |= PerObjectData.LightIndices;
             }
@@ -1062,7 +1054,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done 1 
+        /// Done
         /// </summary>
         static void SetupPerFrameShaderConstants()
         {
@@ -1072,8 +1064,8 @@ namespace UnityEngine.Rendering.Universal
             SphericalHarmonicsL2 ambientSH = RenderSettings.ambientProbe;
             Color linearGlossyEnvColor = new Color(ambientSH[0, 0], ambientSH[1, 0], ambientSH[2, 0]) * RenderSettings.reflectionIntensity;
             Color glossyEnvColor = CoreUtils.ConvertLinearToActiveColorSpace(linearGlossyEnvColor);
-            Shader.SetGlobalVector(ShaderPropertyId.glossyEnvironmentColor, glossyEnvColor);
-            
+            Shader.SetGlobalVector(ShaderPropertyId.glossyEnvironmentColor, glossyEnvColor);//_ENVIRONMENTREFLECTIONS_OFF ± π”√
+
             // Used as fallback cubemap for reflections
             Shader.SetGlobalVector(ShaderPropertyId.glossyEnvironmentCubeMapHDR, ReflectionProbe.defaultTextureHDRDecodeValues);
             Shader.SetGlobalTexture(ShaderPropertyId.glossyEnvironmentCubeMap, ReflectionProbe.defaultTexture);

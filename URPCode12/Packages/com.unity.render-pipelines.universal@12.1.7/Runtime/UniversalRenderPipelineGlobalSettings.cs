@@ -75,7 +75,7 @@ namespace UnityEngine.Rendering.Universal
             }
         }
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         static internal void UpdateGraphicsSettings(UniversalRenderPipelineGlobalSettings newSettings)
         {
@@ -93,7 +93,7 @@ namespace UnityEngine.Rendering.Universal
 
 #if UNITY_EDITOR
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         internal static UniversalRenderPipelineGlobalSettings Ensure(string folderPath = "", bool canCreateNewAsset = true)
         {
@@ -105,7 +105,6 @@ namespace UnityEngine.Rendering.Universal
             if (assetCreated == null)
             {
                 var guidGlobalSettingsAssets = AssetDatabase.FindAssets("t:UniversalRenderPipelineGlobalSettings");
-                //If we could not find the asset at the default path, find the first one
                 if (guidGlobalSettingsAssets.Length > 0)
                 {
                     var curGUID = guidGlobalSettingsAssets[0];
@@ -130,7 +129,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         internal static UniversalRenderPipelineGlobalSettings Create(string path, UniversalRenderPipelineGlobalSettings src = null)
         {

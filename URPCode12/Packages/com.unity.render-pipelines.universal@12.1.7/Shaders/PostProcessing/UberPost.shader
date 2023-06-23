@@ -114,12 +114,9 @@ Shader "Hidden/Universal Render Pipeline/UberPost"
         half4 Frag(Varyings input) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
-
             float2 uv = UnityStereoTransformScreenSpaceTex(input.uv);
             float2 uvDistorted = DistortUV(uv);
-
             half3 color = (0.0).xxx;
-
             #if _CHROMATIC_ABERRATION
             {
                 // Very fast version of chromatic aberration from HDRP using 3 samples and hardcoded

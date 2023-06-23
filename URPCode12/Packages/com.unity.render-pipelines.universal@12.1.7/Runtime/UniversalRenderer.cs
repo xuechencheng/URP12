@@ -48,7 +48,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         public override int SupportedCameraStackingTypes()
         {
@@ -545,9 +545,7 @@ namespace UnityEngine.Rendering.Universal
                 m_ActiveCameraDepthAttachment = m_CameraDepthAttachment;
             }
             cameraData.renderer.useDepthPriming = useDepthPriming;
-            bool requiresDepthCopyPass = !requiresDepthPrepass
-                && (requiresDepthTexture || cameraHasPostProcessingWithDepth)
-                && createDepthTexture;
+            bool requiresDepthCopyPass = !requiresDepthPrepass && (requiresDepthTexture || cameraHasPostProcessingWithDepth) & createDepthTexture;
             bool copyColorPass = renderingData.cameraData.requiresOpaqueTexture || renderPassInputs.requiresColorTexture;
             if ((DebugHandler != null) && DebugHandler.IsActiveForCamera(ref cameraData))
             {
@@ -703,7 +701,6 @@ namespace UnityEngine.Rendering.Universal
                 EnqueuePass(m_RenderTransparentForwardPass);// Pass12
             }
             EnqueuePass(m_OnRenderObjectCallbackPass);// Pass13
-
             bool hasCaptureActions = renderingData.cameraData.captureActions != null && lastCameraInTheStack;
             bool applyFinalPostProcessing = anyPostProcessing && lastCameraInTheStack &&
                 ((renderingData.cameraData.antialiasing == AntialiasingMode.FastApproximateAntialiasing) ||
@@ -778,7 +775,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         public override void SetupCullingParameters(ref ScriptableCullingParameters cullingParameters,
             ref CameraData cameraData)
@@ -918,7 +915,9 @@ namespace UnityEngine.Rendering.Universal
         {
             return SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES2 || SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3;
         }
-
+        /// <summary>
+        /// Done
+        /// </summary>
         void CreateCameraRenderTarget(ScriptableRenderContext context, ref RenderTextureDescriptor descriptor, bool primedDepth)
         {
             CommandBuffer cmd = CommandBufferPool.Get();
@@ -932,32 +931,25 @@ namespace UnityEngine.Rendering.Universal
                     colorDescriptor.autoGenerateMips = false;
                     colorDescriptor.depthBufferBits = (useDepthRenderBuffer) ? k_DepthStencilBufferBits : 0;
                     m_ColorBufferSystem.SetCameraSettings(cmd, colorDescriptor, FilterMode.Bilinear);
-
                     if (useDepthRenderBuffer)
                         ConfigureCameraTarget(m_ColorBufferSystem.GetBackBuffer(cmd).id, m_ColorBufferSystem.GetBufferA().id);
                     else
                         ConfigureCameraColorTarget(m_ColorBufferSystem.GetBackBuffer(cmd).id);
-
-
                     m_ActiveCameraColorAttachment = m_ColorBufferSystem.GetBackBuffer(cmd);
                     cmd.SetGlobalTexture("_CameraColorTexture", m_ActiveCameraColorAttachment.id);
                     //Set _AfterPostProcessTexture, users might still rely on this although it is now always the cameratarget due to swapbuffer
                     cmd.SetGlobalTexture("_AfterPostProcessTexture", m_ActiveCameraColorAttachment.id);
                 }
-
                 if (m_ActiveCameraDepthAttachment != RenderTargetHandle.CameraTarget)
                 {
                     var depthDescriptor = descriptor;
                     depthDescriptor.useMipMap = false;
                     depthDescriptor.autoGenerateMips = false;
-
                     depthDescriptor.bindMS = depthDescriptor.msaaSamples > 1 && (SystemInfo.supportsMultisampledTextures != 0);
-
                     // binding MS surfaces is not supported by the GLES backend, and it won't be fixed after investigating
                     // the high performance impact of potential fixes, which would make it more expensive than depth prepass (fogbugz 1339401 for more info)
                     if (IsGLESDevice())
                         depthDescriptor.bindMS = false;
-
                     depthDescriptor.colorFormat = RenderTextureFormat.Depth;
                     depthDescriptor.depthBufferBits = k_DepthStencilBufferBits;
                     cmd.GetTemporaryRT(m_ActiveCameraDepthAttachment.id, depthDescriptor, FilterMode.Point);

@@ -48,92 +48,73 @@ Shader "Hidden/Universal Render Pipeline/LutBuilderHdr"
         {
             // Switch back to linear
             float3 colorLinear = LogCToLinear(colorLutSpace);
-
             // White balance in LMS space
             float3 colorLMS = LinearToLMS(colorLinear);
-            colorLMS *= _ColorBalance.xyz;
+            colorLMS *= _ColorBalance.xyz; // 1, White Balance
             colorLinear = LMSToLinear(colorLMS);
-
             // Do contrast in log after white balance
             #if _TONEMAP_ACES
-            float3 colorLog = ACES_to_ACEScc(unity_to_ACES(colorLinear));
+                float3 colorLog = ACES_to_ACEScc(unity_to_ACES(colorLinear));
             #else
-            float3 colorLog = LinearToLogC(colorLinear);
+                float3 colorLog = LinearToLogC(colorLinear);
             #endif
-
-            colorLog = (colorLog - ACEScc_MIDGRAY) * _HueSatCon.z + ACEScc_MIDGRAY;
+            colorLog = (colorLog - ACEScc_MIDGRAY) * _HueSatCon.z + ACEScc_MIDGRAY;// 2,Color Adjustments(Constrast)
 
             #if _TONEMAP_ACES
-            colorLinear = ACES_to_ACEScg(ACEScc_to_ACES(colorLog));
+                colorLinear = ACES_to_ACEScg(ACEScc_to_ACES(colorLog));
             #else
-            colorLinear = LogCToLinear(colorLog);
+                colorLinear = LogCToLinear(colorLog);
             #endif
-
             // Color filter is just an unclipped multiplier
-            colorLinear *= _ColorFilter.xyz;
-
+            colorLinear *= _ColorFilter.xyz;// 2,Color Adjustments(_ColorFilter)
             // Do NOT feed negative values to the following color ops
             colorLinear = max(0.0, colorLinear);
-
             // Split toning
             // As counter-intuitive as it is, to make split-toning work the same way it does in Adobe
             // products we have to do all the maths in gamma-space...
-            float balance = _SplitShadows.w;
+            float balance = _SplitShadows.w;// 3, Split Toning
             float3 colorGamma = PositivePow(colorLinear, 1.0 / 2.2);
-
             float luma = saturate(GetLuminance(saturate(colorGamma)) + balance);
             float3 splitShadows = lerp((0.5).xxx, _SplitShadows.xyz, 1.0 - luma);
             float3 splitHighlights = lerp((0.5).xxx, _SplitHighlights.xyz, luma);
             colorGamma = SoftLight(colorGamma, splitShadows);
             colorGamma = SoftLight(colorGamma, splitHighlights);
-
             colorLinear = PositivePow(colorGamma, 2.2);
-
             // Channel mixing (Adobe style)
-            colorLinear = float3(
-                dot(colorLinear, _ChannelMixerRed.xyz),
-                dot(colorLinear, _ChannelMixerGreen.xyz),
-                dot(colorLinear, _ChannelMixerBlue.xyz)
-            );
+            colorLinear = float3( dot(colorLinear, _ChannelMixerRed.xyz),
+                dot(colorLinear, _ChannelMixerGreen.xyz), dot(colorLinear, _ChannelMixerBlue.xyz));// 4, Channel Mixer
 
             // Shadows, midtones, highlights
             luma = GetLuminance(colorLinear);
             float shadowsFactor = 1.0 - smoothstep(_ShaHiLimits.x, _ShaHiLimits.y, luma);
             float highlightsFactor = smoothstep(_ShaHiLimits.z, _ShaHiLimits.w, luma);
             float midtonesFactor = 1.0 - shadowsFactor - highlightsFactor;
-            colorLinear = colorLinear * _Shadows.xyz * shadowsFactor
-                        + colorLinear * _Midtones.xyz * midtonesFactor
-                        + colorLinear * _Highlights.xyz * highlightsFactor;
+            colorLinear = colorLinear * _Shadows.xyz * shadowsFactor + colorLinear * _Midtones.xyz * midtonesFactor + colorLinear * _Highlights.xyz * highlightsFactor;// 5,Shadows Midtones Highlights
 
             // Lift, gamma, gain
             colorLinear = colorLinear * _Gain.xyz + _Lift.xyz;
-            colorLinear = sign(colorLinear) * pow(abs(colorLinear), _Gamma.xyz);
-
+            colorLinear = sign(colorLinear) * pow(abs(colorLinear), _Gamma.xyz);// 6, Lift Gamma Gain
             // HSV operations
             float satMult;
             float3 hsv = RgbToHsv(colorLinear);
             {
                 // Hue Vs Sat
                 satMult = EvaluateCurve(_CurveHueVsSat, hsv.x) * 2.0;
-
                 // Sat Vs Sat
                 satMult *= EvaluateCurve(_CurveSatVsSat, hsv.y) * 2.0;
-
                 // Lum Vs Sat
                 satMult *= EvaluateCurve(_CurveLumVsSat, Luminance(colorLinear)) * 2.0;
-
                 // Hue Shift & Hue Vs Hue
                 float hue = hsv.x + _HueSatCon.x;
                 float offset = EvaluateCurve(_CurveHueVsHue, hue) - 0.5;
                 hue += offset;
                 hsv.x = RotateHue(hue, 0.0, 1.0);
             }
-            colorLinear = HsvToRgb(hsv);
+            colorLinear = HsvToRgb(hsv);//7, Color Curves
 
             // Global saturation
             luma = GetLuminance(colorLinear);
             colorLinear = luma.xxx + (_HueSatCon.yyy * satMult) * (colorLinear - luma.xxx);
-
             // YRGB curves
             // Conceptually these need to be in range [0;1] and from an artist-workflow perspective
             // it's easier to deal with
@@ -141,14 +122,12 @@ Shader "Hidden/Universal Render Pipeline/LutBuilderHdr"
             {
                 const float kHalfPixel = (1.0 / 128.0) / 2.0;
                 float3 c = colorLinear;
-
                 // Y (master)
                 c += kHalfPixel.xxx;
                 float mr = EvaluateCurve(_CurveMaster, c.r);
                 float mg = EvaluateCurve(_CurveMaster, c.g);
                 float mb = EvaluateCurve(_CurveMaster, c.b);
                 c = float3(mr, mg, mb);
-
                 // RGB
                 c += kHalfPixel.xxx;
                 float r = EvaluateCurve(_CurveRed, c.r);
@@ -157,7 +136,6 @@ Shader "Hidden/Universal Render Pipeline/LutBuilderHdr"
                 colorLinear = float3(r, g, b);
             }
             colorLinear = FastTonemapInvert(colorLinear);
-
             colorLinear = max(0.0, colorLinear);
             return colorLinear;
         }
@@ -175,7 +153,6 @@ Shader "Hidden/Universal Render Pipeline/LutBuilderHdr"
                 colorLinear = AcesTonemap(aces);
             }
             #endif
-
             return colorLinear;
         }
 

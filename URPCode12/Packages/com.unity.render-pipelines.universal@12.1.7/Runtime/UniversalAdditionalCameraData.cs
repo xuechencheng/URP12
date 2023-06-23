@@ -165,7 +165,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         public static void DestroyVolumeStack(this Camera camera, UniversalAdditionalCameraData cameraData)
         {
@@ -174,7 +174,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         internal static void GetVolumeLayerMaskAndTrigger(this Camera camera, UniversalAdditionalCameraData cameraData, out LayerMask layerMask, out Transform trigger)
         {
@@ -351,7 +351,7 @@ namespace UnityEngine.Rendering.Universal
             }
         }
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         internal void UpdateCameraStack()
         {
@@ -474,7 +474,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         public bool requiresVolumeFrameworkUpdate
         {

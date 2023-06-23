@@ -76,6 +76,7 @@ Shader "Hidden/Universal Render Pipeline/Bloom"
             o += (F + G + L + K) * div.y;
             o += (G + H + M + L) * div.y;
             half3 color = o.xyz;
+            // return 1;
         #else
             half3 color = SAMPLE_TEXTURE2D_X(_SourceTex, sampler_LinearClamp, uv).xyz;
         #endif

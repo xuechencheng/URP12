@@ -53,14 +53,14 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         public virtual int SupportedCameraStackingTypes()
         {
             return 0;
         }
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         public bool SupportsCameraStackingType(CameraRenderType cameraRenderType)
         {
@@ -520,14 +520,16 @@ namespace UnityEngine.Rendering.Universal
             m_CameraResolveTarget = resolveTarget;
         }
 
-        // This should be removed when early camera color target assignment is removed.
+        /// <summary>
+        /// Done
+        /// </summary>
         internal void ConfigureCameraColorTarget(RenderTargetIdentifier colorTarget)
         {
             m_CameraColorTarget = colorTarget;
         }
 
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         public abstract void Setup(ScriptableRenderContext context, ref RenderingData renderingData);
 
@@ -764,7 +766,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         internal void Clear(CameraRenderType cameraType)
         {

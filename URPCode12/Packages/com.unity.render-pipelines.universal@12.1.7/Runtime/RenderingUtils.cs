@@ -84,10 +84,11 @@ namespace UnityEngine.Rendering.Universal
                 //     deviceType == GraphicsDeviceType.PlayStation4 || deviceType == GraphicsDeviceType.PlayStation5 || deviceType == GraphicsDeviceType.XboxOne);
             }
         }
-
+        /// <summary>
+        /// Done
+        /// </summary>
         internal static bool SupportsLightLayers(GraphicsDeviceType type)
         {
-            // GLES2 does not support bitwise operations.
             return type != GraphicsDeviceType.OpenGLES2;
         }
 

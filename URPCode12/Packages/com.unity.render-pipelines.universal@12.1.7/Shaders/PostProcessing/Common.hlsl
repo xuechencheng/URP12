@@ -116,12 +116,11 @@ half3 ApplyTonemap(half3 input)
 
     return saturate(input);
 }
-
+// lutParams x: lut_height, y: 0.5 / lut_width, z: 0.5 / lut_height
 half3 ApplyColorGrading(half3 input, float postExposure, TEXTURE2D_PARAM(lutTex, lutSampler), float3 lutParams, TEXTURE2D_PARAM(userLutTex, userLutSampler), float3 userLutParams, float userLutContrib)
 {
     // Artist request to fine tune exposure in post without affecting bloom, dof etc
     input *= postExposure;
-
     // HDR Grading:
     //   - Apply internal LogC LUT
     //   - (optional) Clamp result & apply user LUT
@@ -129,7 +128,6 @@ half3 ApplyColorGrading(half3 input, float postExposure, TEXTURE2D_PARAM(lutTex,
     {
         float3 inputLutSpace = saturate(LinearToLogC(input)); // LUT space is in LogC
         input = ApplyLut2D(TEXTURE2D_ARGS(lutTex, lutSampler), inputLutSpace, lutParams);
-
         UNITY_BRANCH
         if (userLutContrib > 0.0)
         {
@@ -148,7 +146,6 @@ half3 ApplyColorGrading(half3 input, float postExposure, TEXTURE2D_PARAM(lutTex,
     #else
     {
         input = ApplyTonemap(input);
-
         UNITY_BRANCH
         if (userLutContrib > 0.0)
         {
@@ -157,7 +154,6 @@ half3 ApplyColorGrading(half3 input, float postExposure, TEXTURE2D_PARAM(lutTex,
             input = lerp(input, outLut, userLutContrib);
             input.rgb = GetSRGBToLinear(input.rgb);
         }
-
         input = ApplyLut2D(TEXTURE2D_ARGS(lutTex, lutSampler), input, lutParams);
     }
     #endif

@@ -528,6 +528,7 @@ real3 ApplyLut3D(TEXTURE3D_PARAM(tex, samplerTex), float3 uvw, float2 scaleOffse
 
 // 2D LUT grading
 // scaleOffset = (1 / lut_width, 1 / lut_height, lut_height - 1)
+// 将颜色转换为UV，并通过UV采样贴图
 real3 ApplyLut2D(TEXTURE2D_PARAM(tex, samplerTex), float3 uvw, float3 scaleOffset)
 {
     // Strip format where `height = sqrt(width)`
@@ -538,18 +539,19 @@ real3 ApplyLut2D(TEXTURE2D_PARAM(tex, samplerTex), float3 uvw, float3 scaleOffse
     uvw.xyz = lerp(
         SAMPLE_TEXTURE2D_LOD(tex, samplerTex, uvw.xy, 0.0).rgb,
         SAMPLE_TEXTURE2D_LOD(tex, samplerTex, uvw.xy + float2(scaleOffset.y, 0.0), 0.0).rgb,
-        uvw.z - shift
-    );
+        uvw.z - shift);
     return uvw;
 }
 
-// Returns the default value for a given position on a 2D strip-format color lookup table
+// Returns the default value for a given position on a 2D strip-format color lookup table 
+// lut_height = 32
 // params = (lut_height, 0.5 / lut_width, 0.5 / lut_height, lut_height / lut_height - 1)
+// Done 将UV转换成颜色
 real3 GetLutStripValue(float2 uv, float4 params)
 {
     uv -= params.yz;
     real3 color;
-    color.r = frac(uv.x * params.x);
+    color.r = frac(uv.x * params.x); //frac( 0, 32)
     color.b = uv.x - color.r / params.x;
     color.g = uv.y;
     return color * params.w;

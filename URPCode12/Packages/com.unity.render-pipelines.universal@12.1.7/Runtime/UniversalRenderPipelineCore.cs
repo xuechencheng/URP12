@@ -480,7 +480,7 @@ namespace UnityEngine.Rendering.Universal
         static List<int> m_ShadowResolutionData = new List<int>();
 
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         public static bool IsGameCamera(Camera camera)
         {
@@ -529,7 +529,7 @@ namespace UnityEngine.Rendering.Universal
         Comparison<Camera> cameraComparison = (camera1, camera2) => { return (int)camera1.depth - (int)camera2.depth; };
 #if UNITY_2021_1_OR_NEWER
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         void SortCameras(List<Camera> cameras)
         {

@@ -47,7 +47,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         internal virtual bool SupportsNativeRenderPass()
         {

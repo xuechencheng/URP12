@@ -909,7 +909,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Returns true if the Render Pipeline Asset supports light layers, false otherwise.
+        /// Done
         /// </summary>
         public bool supportsLightLayers
         {

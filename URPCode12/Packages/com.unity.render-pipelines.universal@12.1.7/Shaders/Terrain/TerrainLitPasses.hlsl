@@ -50,7 +50,7 @@ struct Varyings
     float4 clipPos                  : SV_POSITION;
     UNITY_VERTEX_OUTPUT_STEREO
 };
-
+// Done
 void InitializeInputData(Varyings IN, half3 normalTS, out InputData inputData)
 {
     inputData = (InputData)0;
@@ -86,16 +86,15 @@ void InitializeInputData(Varyings IN, half3 normalTS, out InputData inputData)
         inputData.fogCoord = InitializeInputDataFog(float4(IN.positionWS, 1.0), IN.fogFactorAndVertexLight.x);
         inputData.vertexLighting = IN.fogFactorAndVertexLight.yzw;
     #else
-    inputData.fogCoord = InitializeInputDataFog(float4(IN.positionWS, 1.0), IN.fogFactor);
+        inputData.fogCoord = InitializeInputDataFog(float4(IN.positionWS, 1.0), IN.fogFactor);
     #endif
-#if defined(DYNAMICLIGHTMAP_ON)
-    inputData.bakedGI = SAMPLE_GI(IN.uvMainAndLM.zw, IN.dynamicLightmapUV, SH, inputData.normalWS);
-#else
-    inputData.bakedGI = SAMPLE_GI(IN.uvMainAndLM.zw, SH, inputData.normalWS);
-#endif
+    #if defined(DYNAMICLIGHTMAP_ON)
+        inputData.bakedGI = SAMPLE_GI(IN.uvMainAndLM.zw, IN.dynamicLightmapUV, SH, inputData.normalWS);
+    #else
+        inputData.bakedGI = SAMPLE_GI(IN.uvMainAndLM.zw, SH, inputData.normalWS);
+    #endif
     inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.clipPos);
     inputData.shadowMask = SAMPLE_SHADOWMASK(IN.uvMainAndLM.zw)
-
     #if defined(DEBUG_DISPLAY)
         #if defined(DYNAMICLIGHTMAP_ON)
             inputData.dynamicLightmapUV = IN.dynamicLightmapUV;
@@ -109,7 +108,7 @@ void InitializeInputData(Varyings IN, half3 normalTS, out InputData inputData)
 }
 
 #ifndef TERRAIN_SPLAT_BASEPASS
-
+// Done
 void NormalMapMix(float4 uvSplat01, float4 uvSplat23, inout half4 splatControl, inout half3 mixedNormal)
 {
     #if defined(_NORMALMAP)
@@ -127,7 +126,7 @@ void NormalMapMix(float4 uvSplat01, float4 uvSplat23, inout half4 splatControl, 
         mixedNormal = normalize(nrm.xyz);
     #endif
 }
-
+// Done
 void SplatmapMix(float4 uvMainAndLM, float4 uvSplat01, float4 uvSplat23, inout half4 splatControl, out half weight, out half4 mixedDiffuse, out half4 defaultSmoothness, inout half3 mixedNormal)
 {
     half4 diffAlbedo[4];
@@ -148,7 +147,7 @@ void SplatmapMix(float4 uvMainAndLM, float4 uvSplat01, float4 uvSplat23, inout h
         // 20.0 is the number of steps in inputAlphaMask (Density mask. We decided 20 empirically)
         half4 opacityAsDensity = saturate((half4(diffAlbedo[0].a, diffAlbedo[1].a, diffAlbedo[2].a, diffAlbedo[3].a) - (1 - splatControl)) * 20.0);
         opacityAsDensity += 0.001h * splatControl;      // if all weights are zero, default to what the blend mask says
-        half4 useOpacityAsDensityParam = { _DiffuseRemapScale0.w, _DiffuseRemapScale1.w, _DiffuseRemapScale2.w, _DiffuseRemapScale3.w }; // 1 is off
+        half4 useOpacityAsDensityParam = { _DiffuseRemapScale0.w, _DiffuseRemapScale1.w, _DiffuseRemapScale2.w, _DiffuseRemapScale3.w }; // 勾上的时候该值为0, 1 is off
         splatControl = lerp(opacityAsDensity, splatControl, useOpacityAsDensityParam);
     }
 #endif
@@ -173,24 +172,21 @@ void SplatmapMix(float4 uvMainAndLM, float4 uvSplat01, float4 uvSplat23, inout h
 #endif
 
 #ifdef _TERRAIN_BLEND_HEIGHT
+// Done
 void HeightBasedSplatModify(inout half4 splatControl, in half4 masks[4])
 {
     // heights are in mask blue channel, we multiply by the splat Control weights to get combined height
     half4 splatHeight = half4(masks[0].b, masks[1].b, masks[2].b, masks[3].b) * splatControl.rgba;
     half maxHeight = max(splatHeight.r, max(splatHeight.g, max(splatHeight.b, splatHeight.a)));
-
     // Ensure that the transition height is not zero.
     half transition = max(_HeightTransition, 1e-5);
-
     // This sets the highest splat to "transition", and everything else to a lower value relative to that, clamping to zero
     // Then we clamp this to zero and normalize everything
     half4 weightedHeights = splatHeight + transition - maxHeight.xxxx;
     weightedHeights = max(0, weightedHeights);
-
     // We need to add an epsilon here for active layers (hence the blendMask again)
     // so that at least a layer shows up if everything's too low.
     weightedHeights = (weightedHeights + 1e-6) * splatControl;
-
     // Normalize (and clamp to epsilon to keep from dividing by zero)
     half sumHeight = max(dot(weightedHeights, half4(1, 1, 1, 1)), 1e-6);
     splatControl = weightedHeights / sumHeight.xxxx;
@@ -230,9 +226,9 @@ Varyings SplatmapVert(Attributes v)
         o.uvSplat23.xy = TRANSFORM_TEX(v.texcoord, _Splat2);
         o.uvSplat23.zw = TRANSFORM_TEX(v.texcoord, _Splat3);
     #endif
-#if defined(DYNAMICLIGHTMAP_ON)
-    o.dynamicLightmapUV = v.texcoord * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
-#endif
+    #if defined(DYNAMICLIGHTMAP_ON)
+        o.dynamicLightmapUV = v.texcoord * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
+    #endif
     #if defined(_NORMALMAP) && !defined(ENABLE_TERRAIN_PERPIXEL_NORMAL)
         half3 viewDirWS = GetWorldSpaceNormalizeViewDir(Attributes.positionWS);
         float4 vertexTangent = float4(cross(float3(0, 0, 1), v.normalOS), 1.0);
@@ -306,7 +302,7 @@ half4 SplatmapFragment(Varyings IN) : SV_TARGET
     half occlusion = 1;
 #else
     half4 hasMask = half4(_LayerHasMask0, _LayerHasMask1, _LayerHasMask2, _LayerHasMask3);
-    half4 masks[4];//r:metallic g:occlusion a:smoothness
+    half4 masks[4];//r:metallic g:occlusion b:hightBlend a:smoothness
     ComputeMasks(masks, hasMask, IN);
     float2 splatUV = (IN.uvMainAndLM.xy * (_Control_TexelSize.zw - 1.0f) + 0.5f) * _Control_TexelSize.xy;//( 1/width, 1/height, width, height)
     half4 splatControl = SAMPLE_TEXTURE2D(_Control, sampler_Control, splatUV);
@@ -320,7 +316,7 @@ half4 SplatmapFragment(Varyings IN) : SV_TARGET
     half weight;
     half4 mixedDiffuse;
     half4 defaultSmoothness;//Paused Point
-    SplatmapMix(IN.uvMainAndLM, IN.uvSplat01, IN.uvSplat23, splatControl, weight, mixedDiffuse, defaultSmoothness, normalTS);//Todo
+    SplatmapMix(IN.uvMainAndLM, IN.uvSplat01, IN.uvSplat23, splatControl, weight, mixedDiffuse, defaultSmoothness, normalTS);
     half3 albedo = mixedDiffuse.rgb;
     half4 defaultMetallic = half4(_Metallic0, _Metallic1, _Metallic2, _Metallic3);
     half4 defaultOcclusion = half4(_MaskMapRemapScale0.g, _MaskMapRemapScale1.g, _MaskMapRemapScale2.g, _MaskMapRemapScale3.g) +
@@ -339,12 +335,10 @@ half4 SplatmapFragment(Varyings IN) : SV_TARGET
     InputData inputData;
     InitializeInputData(IN, normalTS, inputData);
     SETUP_DEBUG_TEXTURE_DATA(inputData, IN.uvMainAndLM.xy, _BaseMap);
-
 #if defined(_DBUFFER)
     half3 specular = half3(0.0h, 0.0h, 0.0h);
     ApplyDecal(IN.clipPos, albedo, specular, inputData.normalWS, metallic, occlusion, smoothness);
 #endif
-
 #ifdef TERRAIN_GBUFFER
     BRDFData brdfData;
     InitializeBRDFData(albedo, metallic, /* specular */ half3(0.0h, 0.0h, 0.0h), smoothness, alpha, brdfData);

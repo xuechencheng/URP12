@@ -21,7 +21,7 @@ namespace UnityEngine.Rendering
         internal static Dictionary<TEnum, TProfilingSampler<TEnum>> samples = new Dictionary<TEnum, TProfilingSampler<TEnum>>();
 #endif
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         static TProfilingSampler()
         {
@@ -43,7 +43,7 @@ namespace UnityEngine.Rendering
             }
         }
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         public TProfilingSampler(string name) : base(name)
         {
@@ -56,7 +56,7 @@ namespace UnityEngine.Rendering
     public class ProfilingSampler
     {
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         public static ProfilingSampler Get<TEnum>(TEnum marker) where TEnum : Enum
         {
@@ -69,7 +69,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Perfect
+        /// Done
         /// </summary>
         public ProfilingSampler(string name)
         {
@@ -89,7 +89,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Perfect 如果cmd为null，那么只搜集CPU数据
+        /// Done 如果cmd为null，那么只搜集CPU数据
         /// </summary>
         public void Begin(CommandBuffer cmd)
         {
@@ -204,7 +204,7 @@ namespace UnityEngine.Rendering
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
     /// <summary>
-    /// Perfect
+    /// Done
     /// </summary>
     public struct ProfilingScope : IDisposable
     {
@@ -212,7 +212,7 @@ namespace UnityEngine.Rendering
         bool                m_Disposed;
         ProfilingSampler    m_Sampler;
         /// <summary>
-        /// Perfect
+        /// Done
         /// </summary>
         public ProfilingScope(CommandBuffer cmd, ProfilingSampler sampler)
         {
@@ -223,14 +223,14 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Perfect
+        /// Done
         /// </summary>
         public void Dispose()
         {
             Dispose(true);
         }
         /// <summary>
-        /// Perfect
+        /// Done
         /// </summary>
         void Dispose(bool disposing)
         {

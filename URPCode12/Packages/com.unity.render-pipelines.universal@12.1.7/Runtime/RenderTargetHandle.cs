@@ -22,7 +22,6 @@ namespace UnityEngine.Rendering.Universal
             if (xr.enabled)
                 return new RenderTargetHandle(xr.renderTarget);
 #endif
-
             return CameraTarget;
         }
 

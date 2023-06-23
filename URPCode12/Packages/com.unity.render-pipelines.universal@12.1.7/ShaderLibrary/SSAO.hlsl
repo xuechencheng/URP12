@@ -217,13 +217,11 @@ half3 ReconstructNormal(float2 uv, float depth, float3 vpos)
         return half3(normalize(cross(ddy(vpos), ddx(vpos))));
     #else
         float2 delta = float2(_SourceSize.zw * 2.0);
-
         // Sample the neighbour fragments
         float2 lUV = float2(-delta.x, 0.0);
         float2 rUV = float2( delta.x, 0.0);
         float2 uUV = float2(0.0,  delta.y);
         float2 dUV = float2(0.0, -delta.y);
-
         float3 l1 = float3(uv + lUV, 0.0); l1.z = SampleAndGetLinearEyeDepth(l1.xy); // Left1
         float3 r1 = float3(uv + rUV, 0.0); r1.z = SampleAndGetLinearEyeDepth(r1.xy); // Right1
         float3 u1 = float3(uv + uUV, 0.0); u1.z = SampleAndGetLinearEyeDepth(u1.xy); // Up1
@@ -233,15 +231,14 @@ half3 ReconstructNormal(float2 uv, float depth, float3 vpos)
         // vertical  : down = 0.0    up = 1.0
         #if defined(_RECONSTRUCT_NORMAL_MEDIUM)
              uint closest_horizontal = l1.z > r1.z ? 0 : 1;//选深度值大的点
-             uint closest_vertical   = d1.z > u1.z ? 0 : 1;
+             uint closest_vertical   = d1.z > u1.z ? 0 : 1;//(h,v)--(p1,p2) (0,0)--(l1,d1) (0,1)--(u1,l1) (1,0)--(d1,r1) (1,1)--(r1,u1)
         #else
             float3 l2 = float3(uv + lUV * 2.0, 0.0); l2.z = SampleAndGetLinearEyeDepth(l2.xy); // Left2
             float3 r2 = float3(uv + rUV * 2.0, 0.0); r2.z = SampleAndGetLinearEyeDepth(r2.xy); // Right2
             float3 u2 = float3(uv + uUV * 2.0, 0.0); u2.z = SampleAndGetLinearEyeDepth(u2.xy); // Up2
             float3 d2 = float3(uv + dUV * 2.0, 0.0); d2.z = SampleAndGetLinearEyeDepth(d2.xy); // Down2
-
             const uint closest_horizontal = abs( (2.0 * l1.z - l2.z) - depth) < abs( (2.0 * r1.z - r2.z) - depth) ? 0 : 1;
-            const uint closest_vertical   = abs( (2.0 * d1.z - d2.z) - depth) < abs( (2.0 * u1.z - u2.z) - depth) ? 0 : 1;
+            const uint closest_vertical   = abs( (2.0 * d1.z - d2.z) - depth) < abs( (2.0 * u1.z - u2.z) - depth) ? 0 : 1;//选取深度值变化小的点
         #endif
         // Calculate the triangle, in a counter-clockwize order, to
         // use based on the closest horizontal and vertical depths.
@@ -335,8 +332,8 @@ half4 SSAO(Varyings input) : SV_Target
             dotVal -= half(kBeta * depth_o);//kBeta = half(0.002)
         #endif
         half a1 = max(dotVal, half(0.0));
-        half a2 = dot(v_s2, v_s2) + kEpsilon;//kEpsilon = half(0.0001)
-        ao += a1 * rcp(a2);
+        half a2 = dot(v_s2, v_s2) + kEpsilon;//kEpsilon = half(0.0001) 向量长度的平方
+        ao += a1 * rcp(a2);//cos()/|V|
     }
     // Intensity normalization
     ao *= RADIUS;
@@ -358,7 +355,7 @@ half4 Blur(float2 uv, float2 delta) : SV_Target
         #if defined(_SOURCE_DEPTH_NORMALS)
             half3 n0 = half3(SampleSceneNormals(uv));
         #else
-            half3 n0 = SampleNormal(uv);
+            half3 n0 = SampleNormal(uv);//为什么要重新构建呢
         #endif
     #else
         half3 n0 = GetPackedNormal(p0);

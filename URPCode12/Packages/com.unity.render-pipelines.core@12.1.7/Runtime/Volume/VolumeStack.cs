@@ -53,7 +53,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         public void Dispose()
         {

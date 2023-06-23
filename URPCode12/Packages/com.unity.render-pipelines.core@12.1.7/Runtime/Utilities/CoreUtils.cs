@@ -982,9 +982,8 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Destroys a UnityObject safely.
+        /// Done
         /// </summary>
-        /// <param name="obj">Object to be destroyed.</param>
         public static void Destroy(UnityObject obj)
         {
             if (obj != null)

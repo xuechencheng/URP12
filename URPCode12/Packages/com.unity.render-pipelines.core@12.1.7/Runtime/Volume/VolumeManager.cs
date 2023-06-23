@@ -92,7 +92,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         public void ResetMainStack()
         {
@@ -290,7 +290,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         public void Update(Transform trigger, LayerMask layerMask)
         {
@@ -298,7 +298,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         public void Update(VolumeStack stack, Transform trigger, LayerMask layerMask)
         {
