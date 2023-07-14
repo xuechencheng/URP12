@@ -307,9 +307,8 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Configures the Store Action for the depth attachment of this render pass.
+        /// Done 1
         /// </summary>
-        /// <param name="storeAction">RenderBufferStoreAction to use</param>
         public void ConfigureDepthStoreAction(RenderBufferStoreAction storeAction)
         {
             m_DepthStoreAction = storeAction;

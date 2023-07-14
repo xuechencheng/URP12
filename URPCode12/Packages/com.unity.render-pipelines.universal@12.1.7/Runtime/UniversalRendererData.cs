@@ -286,14 +286,16 @@ namespace UnityEngine.Rendering.Universal
 
             ReloadAllNullProperties();
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         private void ReloadAllNullProperties()
         {
 #if UNITY_EDITOR
             ResourceReloader.TryReloadAllNullIn(this, UniversalRenderPipelineAsset.packagePath);
-#if ENABLE_VR && ENABLE_XR_MODULE
-            ResourceReloader.TryReloadAllNullIn(xrSystemData, UniversalRenderPipelineAsset.packagePath);
-#endif
+    #if ENABLE_VR && ENABLE_XR_MODULE
+                ResourceReloader.TryReloadAllNullIn(xrSystemData, UniversalRenderPipelineAsset.packagePath);
+    #endif
 #endif
         }
 

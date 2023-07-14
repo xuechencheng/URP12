@@ -26,7 +26,6 @@ namespace UnityEngine.Rendering
                 components = new Dictionary<Type, VolumeComponent>();
             else
                 components.Clear();
-
             foreach (var type in baseTypes)
             {
                 var inst = (VolumeComponent)ScriptableObject.CreateInstance(type);

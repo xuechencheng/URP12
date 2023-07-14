@@ -116,6 +116,9 @@ namespace UnityEngine.Rendering.Universal
         internal const int k_MaxVisibleAdditionalLightsMobileShaderLevelLessThan45 = 16;
         internal const int k_MaxVisibleAdditionalLightsMobile = 32;
         internal const int k_MaxVisibleAdditionalLightsNonMobile = 256;
+        /// <summary>
+        /// Done 1
+        /// </summary>
         public static int maxVisibleAdditionalLights
         {
             get
@@ -124,7 +127,6 @@ namespace UnityEngine.Rendering.Universal
                 bool isMobile = GraphicsSettings.HasShaderDefine(BuiltinShaderDefine.SHADER_API_MOBILE);
                 if (isMobile && (SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES2 || (SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3 && Graphics.minOpenGLESVersion <= OpenGLESVersion.OpenGLES30)))
                     return k_MaxVisibleAdditionalLightsMobileShaderLevelLessThan45;
-
                 // GLES can be selected as platform on Windows (not a mobile platform) but uniform buffer size so we must use a low light count.
                 return (isMobile || SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore || SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES2 || SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3)
                     ? k_MaxVisibleAdditionalLightsMobile : k_MaxVisibleAdditionalLightsNonMobile;
@@ -239,8 +241,6 @@ namespace UnityEngine.Rendering.Universal
             XRSystem.UpdateMSAALevel(asset.msaaSampleCount);
 #endif
 #if UNITY_EDITOR
-            // We do not want to start rendering if URP global settings are not ready (m_globalSettings is null)
-            // or been deleted/moved (m_globalSettings is not necessarily null)
             if (m_GlobalSettings == null || UniversalRenderPipelineGlobalSettings.instance == null)
             {
                 m_GlobalSettings = UniversalRenderPipelineGlobalSettings.Ensure();
@@ -317,7 +317,7 @@ namespace UnityEngine.Rendering.Universal
             RenderSingleCamera(context, cameraData, cameraData.postProcessEnabled);
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         static bool TryGetCullingParameters(CameraData cameraData, out ScriptableCullingParameters cullingParams)
         {
@@ -337,11 +337,11 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Renders a single camera. This method will do culling, setup and execution of the renderer.
+        /// Paused Point
         /// </summary>
-        /// <param name="context">Render context used to record commands during execution.</param>
-        /// <param name="cameraData">Camera rendering data. This might contain data inherited from a base camera.</param>
-        /// <param name="anyPostProcessingEnabled">True if at least one camera has post-processing enabled in the stack, false otherwise.</param>
+        /// <param name="context"></param>
+        /// <param name="cameraData"></param>
+        /// <param name="anyPostProcessingEnabled"></param>
         static void RenderSingleCamera(ScriptableRenderContext context, CameraData cameraData, bool anyPostProcessingEnabled)
         {
             Camera camera = cameraData.camera;
@@ -513,7 +513,7 @@ namespace UnityEngine.Rendering.Universal
             if (asset.useAdaptivePerformance)
                 ApplyAdaptivePerformance(ref baseCameraData);
 #endif
-            RenderSingleCamera(context, baseCameraData, anyPostProcessingEnabled);//Paused Point
+            RenderSingleCamera(context, baseCameraData, anyPostProcessingEnabled);
             using (new ProfilingScope(null, Profiling.Pipeline.endCameraRendering))
             {
                 EndCameraRendering(context, baseCamera);
@@ -529,10 +529,8 @@ namespace UnityEngine.Rendering.Universal
                     if (!currCamera.isActiveAndEnabled)
                         continue;
                     currCamera.TryGetComponent<UniversalAdditionalCameraData>(out var currCameraData);
-                    // Camera is overlay and enabled
                     if (currCameraData != null)
                     {
-                        // Copy base settings from base camera data and initialize initialize remaining specific settings for this camera type.
                         CameraData overlayCameraData = baseCameraData;
                         bool lastCamera = i == lastActiveOverlayCameraIndex;
 #if ENABLE_VR && ENABLE_XR_MODULE
@@ -584,7 +582,7 @@ namespace UnityEngine.Rendering.Universal
 #endregion
         }
         /// <summary>
-        /// Ignore
+        /// Done 1
         /// </summary>
         static void UpdateVolumeFramework(Camera camera, UniversalAdditionalCameraData additionalCameraData)
         {
@@ -603,35 +601,28 @@ namespace UnityEngine.Rendering.Universal
                 VolumeManager.instance.stack = additionalCameraData.volumeStack;
                 return;
             }
-            // When we want to update the volumes every frame...
-            // We destroy the volumeStack in the additional camera data, if present, to make sure
-            // it gets recreated and initialized if the update mode gets later changed to ViaScripting...
             if (additionalCameraData && additionalCameraData.volumeStack != null)
             {
                 camera.DestroyVolumeStack(additionalCameraData);
             }
-            // Get the mask + trigger and update the stack
             camera.GetVolumeLayerMaskAndTrigger(additionalCameraData, out LayerMask layerMask, out Transform trigger);
             VolumeManager.instance.ResetMainStack();
             VolumeManager.instance.Update(trigger, layerMask);
         }
-
+        /// <summary>
+        /// Done
+        /// </summary>
         static bool CheckPostProcessForDepth(in CameraData cameraData)
         {
             if (!cameraData.postProcessEnabled)
                 return false;
-
             if (cameraData.antialiasing == AntialiasingMode.SubpixelMorphologicalAntiAliasing)
                 return true;
-
             var stack = VolumeManager.instance.stack;
-
             if (stack.GetComponent<DepthOfField>().IsActive())
                 return true;
-
             if (stack.GetComponent<MotionBlur>().IsActive())
                 return true;
-
             return false;
         }
 
@@ -678,7 +669,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         static void InitializeStackedCameraData(Camera baseCamera, UniversalAdditionalCameraData baseAdditionalCameraData, ref CameraData cameraData)
         {
@@ -830,7 +821,7 @@ namespace UnityEngine.Rendering.Universal
             cameraData.worldSpaceCameraPos = camera.transform.position;
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         static void InitializeRenderingData(UniversalRenderPipelineAsset settings, ref CameraData cameraData, ref CullingResults cullResults,
             bool anyPostProcessingEnabled, out RenderingData renderingData)
@@ -870,7 +861,7 @@ namespace UnityEngine.Rendering.Universal
             CheckAndApplyDebugSettings(ref renderingData);
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         static void InitializeShadowData(UniversalRenderPipelineAsset settings, NativeArray<VisibleLight> visibleLights, bool mainLightCastShadows, bool additionalLightsCastShadows, out ShadowData shadowData)
         {
@@ -938,7 +929,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         static void InitializePostProcessingData(UniversalRenderPipelineAsset settings, out PostProcessingData postProcessingData)
         {
@@ -947,7 +938,7 @@ namespace UnityEngine.Rendering.Universal
             postProcessingData.useFastSRGBLinearConversion = settings.useFastSRGBLinearConversion;
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         static void InitializeLightData(UniversalRenderPipelineAsset settings, NativeArray<VisibleLight> visibleLights, int mainLightIndex, out LightData lightData)
         {
@@ -978,7 +969,9 @@ namespace UnityEngine.Rendering.Universal
                 lightData.originalIndices[i] = i;
             }
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         static void CleanupLightData(ref LightData lightData)
         {
             lightData.originalIndices.Dispose();
@@ -1006,7 +999,7 @@ namespace UnityEngine.Rendering.Universal
 #endif
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         static PerObjectData GetPerObjectLightFlags(int additionalLightsCount)
         {
@@ -1022,7 +1015,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         static int GetMainLightIndex(UniversalRenderPipelineAsset settings, NativeArray<VisibleLight> visibleLights)
         {
@@ -1054,12 +1047,11 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         static void SetupPerFrameShaderConstants()
         {
             using var profScope = new ProfilingScope(null, Profiling.Pipeline.setupPerFrameShaderConstants);
-
             // When glossy reflections are OFF in the shader we set a constant color to use as indirect specular
             SphericalHarmonicsL2 ambientSH = RenderSettings.ambientProbe;
             Color linearGlossyEnvColor = new Color(ambientSH[0, 0], ambientSH[1, 0], ambientSH[2, 0]) * RenderSettings.reflectionIntensity;

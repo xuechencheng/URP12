@@ -43,35 +43,25 @@ Shader "Hidden/Universal Render Pipeline/LutBuilderHdr"
             return saturate(x);
         }
 
-        // Note: when the ACES tonemapper is selected the grading steps will be done using ACES spaces
         float3 ColorGrade(float3 colorLutSpace)
         {
-            // Switch back to linear
             float3 colorLinear = LogCToLinear(colorLutSpace);
-            // White balance in LMS space
             float3 colorLMS = LinearToLMS(colorLinear);
             colorLMS *= _ColorBalance.xyz; // 1, White Balance
             colorLinear = LMSToLinear(colorLMS);
-            // Do contrast in log after white balance
             #if _TONEMAP_ACES
                 float3 colorLog = ACES_to_ACEScc(unity_to_ACES(colorLinear));
             #else
                 float3 colorLog = LinearToLogC(colorLinear);
             #endif
             colorLog = (colorLog - ACEScc_MIDGRAY) * _HueSatCon.z + ACEScc_MIDGRAY;// 2,Color Adjustments(Constrast)
-
             #if _TONEMAP_ACES
                 colorLinear = ACES_to_ACEScg(ACEScc_to_ACES(colorLog));
             #else
                 colorLinear = LogCToLinear(colorLog);
             #endif
-            // Color filter is just an unclipped multiplier
             colorLinear *= _ColorFilter.xyz;// 2,Color Adjustments(_ColorFilter)
-            // Do NOT feed negative values to the following color ops
             colorLinear = max(0.0, colorLinear);
-            // Split toning
-            // As counter-intuitive as it is, to make split-toning work the same way it does in Adobe
-            // products we have to do all the maths in gamma-space...
             float balance = _SplitShadows.w;// 3, Split Toning
             float3 colorGamma = PositivePow(colorLinear, 1.0 / 2.2);
             float luma = saturate(GetLuminance(saturate(colorGamma)) + balance);
@@ -80,9 +70,7 @@ Shader "Hidden/Universal Render Pipeline/LutBuilderHdr"
             colorGamma = SoftLight(colorGamma, splitShadows);
             colorGamma = SoftLight(colorGamma, splitHighlights);
             colorLinear = PositivePow(colorGamma, 2.2);
-            // Channel mixing (Adobe style)
-            colorLinear = float3( dot(colorLinear, _ChannelMixerRed.xyz),
-                dot(colorLinear, _ChannelMixerGreen.xyz), dot(colorLinear, _ChannelMixerBlue.xyz));// 4, Channel Mixer
+            colorLinear = float3( dot(colorLinear, _ChannelMixerRed.xyz), dot(colorLinear, _ChannelMixerGreen.xyz), dot(colorLinear, _ChannelMixerBlue.xyz));// 4, Channel Mixer
 
             // Shadows, midtones, highlights
             luma = GetLuminance(colorLinear);
@@ -158,10 +146,6 @@ Shader "Hidden/Universal Render Pipeline/LutBuilderHdr"
 
         float4 Frag(Varyings input) : SV_Target
         {
-            // Lut space
-            // We use Alexa LogC (El 1000) to store the LUT as it provides a good enough range
-            // (~58.85666) and is good enough to be stored in fp16 without losing precision in the
-            // darks
             float3 colorLutSpace = GetLutStripValue(input.uv, _Lut_Params);
             float3 gradedColor = ColorGrade(colorLutSpace);
             gradedColor = Tonemap(gradedColor);

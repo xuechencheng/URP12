@@ -57,14 +57,11 @@ namespace UnityEngine.Rendering.Universal.Internal
         {
             if (m_CameraMaterial == null || m_ObjectMaterial == null)
                 return;
-
             // Get data
             var camera = renderingData.cameraData.camera;
-
             // Never draw in Preview
             if (camera.cameraType == CameraType.Preview)
                 return;
-
             // Profiling command
             CommandBuffer cmd = CommandBufferPool.Get();
             using (new ProfilingScope(cmd, m_ProfilingSampler))
@@ -82,12 +79,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                 {
                     Shader.SetGlobalMatrix(kPreviousViewProjectionMatrix, m_MotionData.previousViewProjectionMatrix);
                 }
-
-                // These flags are still required in SRP or the engine won't compute previous model matrices...
-                // If the flag hasn't been set yet on this camera, motion vectors will skip a frame.
                 camera.depthTextureMode |= DepthTextureMode.MotionVectors | DepthTextureMode.Depth;
-
-                // TODO: add option to only draw either one?
                 DrawCameraMotionVectors(context, cmd, camera);
                 DrawObjectMotionVectors(context, ref renderingData, camera);
             }
@@ -129,7 +121,6 @@ namespace UnityEngine.Rendering.Universal.Internal
             var drawingSettings = GetDrawingSettings(ref renderingData);
             var filteringSettings = new FilteringSettings(RenderQueueRange.opaque, camera.cullingMask);
             var renderStateBlock = new RenderStateBlock(RenderStateMask.Nothing);
-
             // Draw Renderers
             context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref filteringSettings, ref renderStateBlock);
         }

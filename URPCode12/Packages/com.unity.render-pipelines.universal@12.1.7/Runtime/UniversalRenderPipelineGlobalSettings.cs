@@ -59,7 +59,7 @@ namespace UnityEngine.Rendering.Universal
 
         private static UniversalRenderPipelineGlobalSettings cachedInstance = null;
         /// <summary>
-        /// Active URP Global Settings asset. If the value is null then no UniversalRenderPipelineGlobalSettings has been registered to the Graphics Settings with the UniversalRenderPipeline.
+        /// Done 1
         /// </summary>
         public static UniversalRenderPipelineGlobalSettings instance
         {
@@ -75,7 +75,7 @@ namespace UnityEngine.Rendering.Universal
             }
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         static internal void UpdateGraphicsSettings(UniversalRenderPipelineGlobalSettings newSettings)
         {
@@ -93,7 +93,7 @@ namespace UnityEngine.Rendering.Universal
 
 #if UNITY_EDITOR
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         internal static UniversalRenderPipelineGlobalSettings Ensure(string folderPath = "", bool canCreateNewAsset = true)
         {
@@ -129,7 +129,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         internal static UniversalRenderPipelineGlobalSettings Create(string path, UniversalRenderPipelineGlobalSettings src = null)
         {

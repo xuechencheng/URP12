@@ -2,11 +2,6 @@ using UnityEngine.Experimental.Rendering;
 
 namespace UnityEngine.Rendering.Universal.Internal
 {
-    // Note: this pass can't be done at the same time as post-processing as it needs to be done in
-    // advance in case we're doing on-tile color grading.
-    /// <summary>
-    /// Renders a color grading LUT texture.
-    /// </summary>
     public class ColorGradingLutPass : ScriptableRenderPass
     {
         readonly Material m_LutBuilderLdr;
@@ -17,7 +12,9 @@ namespace UnityEngine.Rendering.Universal.Internal
         RenderTargetHandle m_InternalLut;
 
         bool m_AllowColorGradingACESHDR = true;
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         public ColorGradingLutPass(RenderPassEvent evt, PostProcessData data)
         {
             base.profilingSampler = new ProfilingSampler(nameof(ColorGradingLutPass));
@@ -34,7 +31,6 @@ namespace UnityEngine.Rendering.Universal.Internal
             }
             m_LutBuilderLdr = Load(data.shaders.lutBuilderLdrPS);
             m_LutBuilderHdr = Load(data.shaders.lutBuilderHdrPS);
-            // Warm up lut format as IsFormatSupported adds GC pressure...
             const FormatUsage kFlags = FormatUsage.Linear | FormatUsage.Render;
             if (SystemInfo.IsFormatSupported(GraphicsFormat.R16G16B16A16_SFloat, kFlags))
                 m_HdrLutFormat = GraphicsFormat.R16G16B16A16_SFloat;
@@ -47,13 +43,16 @@ namespace UnityEngine.Rendering.Universal.Internal
             if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3 && Graphics.minOpenGLESVersion <= OpenGLESVersion.OpenGLES30 && SystemInfo.graphicsDeviceName.StartsWith("Adreno (TM) 3"))
                 m_AllowColorGradingACESHDR = false;
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         public void Setup(in RenderTargetHandle internalLut)
         {
             m_InternalLut = internalLut;
         }
-
-        /// <inheritdoc/>
+        /// <summary>
+        /// Done 1
+        /// </summary>
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             var cmd = CommandBufferPool.Get();
@@ -85,29 +84,15 @@ namespace UnityEngine.Rendering.Universal.Internal
                 var channelMixerR = new Vector4(channelMixer.redOutRedIn.value / 100f, channelMixer.redOutGreenIn.value / 100f, channelMixer.redOutBlueIn.value / 100f, 0f);
                 var channelMixerG = new Vector4(channelMixer.greenOutRedIn.value / 100f, channelMixer.greenOutGreenIn.value / 100f, channelMixer.greenOutBlueIn.value / 100f, 0f);
                 var channelMixerB = new Vector4(channelMixer.blueOutRedIn.value / 100f, channelMixer.blueOutGreenIn.value / 100f, channelMixer.blueOutBlueIn.value / 100f, 0f);
-                var shadowsHighlightsLimits = new Vector4(
-                    shadowsMidtonesHighlights.shadowsStart.value,
-                    shadowsMidtonesHighlights.shadowsEnd.value,
-                    shadowsMidtonesHighlights.highlightsStart.value,
-                    shadowsMidtonesHighlights.highlightsEnd.value
-                );
-                var (shadows, midtones, highlights) = ColorUtils.PrepareShadowsMidtonesHighlights(
-                    shadowsMidtonesHighlights.shadows.value,
-                    shadowsMidtonesHighlights.midtones.value,
-                    shadowsMidtonesHighlights.highlights.value
-                );
-                var (lift, gamma, gain) = ColorUtils.PrepareLiftGammaGain(
-                    liftGammaGain.lift.value,
-                    liftGammaGain.gamma.value,
-                    liftGammaGain.gain.value
-                );
-                var (splitShadows, splitHighlights) = ColorUtils.PrepareSplitToning(
-                    splitToning.shadows.value,
-                    splitToning.highlights.value,
-                    splitToning.balance.value
-                );
-                var lutParameters = new Vector4(lutHeight, 0.5f / lutWidth, 0.5f / lutHeight,
-                    lutHeight / (lutHeight - 1f));
+                var shadowsHighlightsLimits = new Vector4(shadowsMidtonesHighlights.shadowsStart.value,
+                    shadowsMidtonesHighlights.shadowsEnd.value,shadowsMidtonesHighlights.highlightsStart.value,shadowsMidtonesHighlights.highlightsEnd.value);
+                var (shadows, midtones, highlights) = ColorUtils.PrepareShadowsMidtonesHighlights(shadowsMidtonesHighlights.shadows.value,
+                    shadowsMidtonesHighlights.midtones.value,shadowsMidtonesHighlights.highlights.value);
+                var (lift, gamma, gain) = ColorUtils.PrepareLiftGammaGain(liftGammaGain.lift.value,
+                    liftGammaGain.gamma.value,liftGammaGain.gain.value);
+                var (splitShadows, splitHighlights) = ColorUtils.PrepareSplitToning(splitToning.shadows.value,
+                    splitToning.highlights.value,splitToning.balance.value);
+                var lutParameters = new Vector4(lutHeight, 0.5f / lutWidth, 0.5f / lutHeight, lutHeight / (lutHeight - 1f));
                 // Fill in constants
                 material.SetVector(ShaderConstants._Lut_Params, lutParameters);
                 material.SetVector(ShaderConstants._ColorBalance, lmsColorBalance);
@@ -139,7 +124,6 @@ namespace UnityEngine.Rendering.Universal.Internal
                 if (hdr)
                 {
                     material.shaderKeywords = null;
-
                     switch (tonemapping.mode.value)
                     {
                         case TonemappingMode.Neutral: material.EnableKeyword(ShaderKeywordStrings.TonemapNeutral); break;

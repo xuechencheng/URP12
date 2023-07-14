@@ -17,17 +17,8 @@ namespace UnityEngine.Rendering
     public static class ResourceReloader
     {
         /// <summary>
-        /// Looks for resources in the given <paramref name="container"/> object and reload the ones
-        /// that are missing or broken.
-        /// This version will still return null value without throwing error if the issue is due to
-        /// AssetDatabase being not ready. But in this case the assetDatabaseNotReady result will be true.
+        /// Done 1
         /// </summary>
-        /// <param name="container">The object containing reload-able resources</param>
-        /// <param name="basePath">The base path for the package</param>
-        /// <returns>
-        ///   - 1 hasChange: True if something have been reloaded.
-        ///   - 2 assetDatabaseNotReady: True if the issue preventing loading is due to state of AssetDatabase
-        /// </returns>
         public static (bool hasChange, bool assetDatabaseNotReady) TryReloadAllNullIn(System.Object container, string basePath)
         {
             try
@@ -43,12 +34,8 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Looks for resources in the given <paramref name="container"/> object and reload the ones
-        /// that are missing or broken.
+        /// Done 1
         /// </summary>
-        /// <param name="container">The object containing reload-able resources</param>
-        /// <param name="basePath">The base path for the package</param>
-        /// <returns>True if something have been reloaded.</returns>
         public static bool ReloadAllNullIn(System.Object container, string basePath)
         {
             if (IsNull(container))
@@ -57,11 +44,10 @@ namespace UnityEngine.Rendering
             var changed = false;
             foreach (var fieldInfo in container.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static))
             {
-                //Recurse on sub-containers
                 if (IsReloadGroup(fieldInfo))
                 {
                     changed |= FixGroupIfNeeded(container, fieldInfo);
-                    changed |= ReloadAllNullIn(fieldInfo.GetValue(container), basePath);
+                    changed |= ReloadAllNullIn(fieldInfo.GetValue(container), basePath);//ตÝน้
                 }
 
                 //Find null field and reload them
@@ -70,17 +56,14 @@ namespace UnityEngine.Rendering
                 {
                     if (attribute.paths.Length == 1)
                     {
-                        changed |= SetAndLoadIfNull(container, fieldInfo, GetFullPath(basePath, attribute),
-                            attribute.package == ReloadAttribute.Package.Builtin);
+                        changed |= SetAndLoadIfNull(container, fieldInfo, GetFullPath(basePath, attribute), attribute.package == ReloadAttribute.Package.Builtin);
                     }
                     else if (attribute.paths.Length > 1)
                     {
                         changed |= FixArrayIfNeeded(container, fieldInfo, attribute.paths.Length);
-
                         var array = (Array)fieldInfo.GetValue(container);
                         if (IsReloadGroup(array))
                         {
-                            //Recurse on each sub-containers
                             for (int index = 0; index < attribute.paths.Length; ++index)
                             {
                                 changed |= FixGroupIfNeeded(array, index);
@@ -97,98 +80,85 @@ namespace UnityEngine.Rendering
                     }
                 }
             }
-
             if (changed && container is UnityEngine.Object c)
                 EditorUtility.SetDirty(c);
             return changed;
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         static bool FixGroupIfNeeded(System.Object container, FieldInfo info)
         {
             if (IsNull(container, info))
             {
                 var type = info.FieldType;
-                var value = type.IsSubclassOf(typeof(ScriptableObject))
-                    ? ScriptableObject.CreateInstance(type)
-                    : Activator.CreateInstance(type);
-
-                info.SetValue(
-                    container,
-                    value
-                );
+                var value = type.IsSubclassOf(typeof(ScriptableObject)) ? ScriptableObject.CreateInstance(type) : Activator.CreateInstance(type);
+                info.SetValue( container, value);
                 return true;
             }
-
             return false;
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         static bool FixGroupIfNeeded(Array array, int index)
         {
             Assert.IsNotNull(array);
-
             if (IsNull(array.GetValue(index)))
             {
                 var type = array.GetType().GetElementType();
-                var value = type.IsSubclassOf(typeof(ScriptableObject))
-                    ? ScriptableObject.CreateInstance(type)
-                    : Activator.CreateInstance(type);
-
-                array.SetValue(
-                    value,
-                    index
-                );
+                var value = type.IsSubclassOf(typeof(ScriptableObject)) ? ScriptableObject.CreateInstance(type): Activator.CreateInstance(type);
+                array.SetValue( value, index);
                 return true;
             }
-
             return false;
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         static bool FixArrayIfNeeded(System.Object container, FieldInfo info, int length)
         {
             if (IsNull(container, info) || ((Array)info.GetValue(container)).Length < length)
             {
-                info.SetValue(
-                    container,
-                    Activator.CreateInstance(info.FieldType, length)
-                );
+                info.SetValue( container, Activator.CreateInstance(info.FieldType, length));
                 return true;
             }
-
             return false;
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         static ReloadAttribute GetReloadAttribute(FieldInfo fieldInfo)
         {
-            var attributes = (ReloadAttribute[])fieldInfo
-                .GetCustomAttributes(typeof(ReloadAttribute), false);
+            var attributes = (ReloadAttribute[])fieldInfo.GetCustomAttributes(typeof(ReloadAttribute), false);
             if (attributes.Length == 0)
                 return null;
             return attributes[0];
         }
-
-        static bool IsReloadGroup(FieldInfo info)
-            => info.FieldType
-            .GetCustomAttributes(typeof(ReloadGroupAttribute), false).Length > 0;
+        /// <summary>
+        /// Done 1
+        /// </summary>
+        static bool IsReloadGroup(FieldInfo info) => info.FieldType.GetCustomAttributes(typeof(ReloadGroupAttribute), false).Length > 0;
 
         static bool IsReloadGroup(Array field)
             => field.GetType().GetElementType()
             .GetCustomAttributes(typeof(ReloadGroupAttribute), false).Length > 0;
-
-        static bool IsNull(System.Object container, FieldInfo info)
-            => IsNull(info.GetValue(container));
-
-        static bool IsNull(System.Object field)
-            => field == null || field.Equals(null);
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
+        static bool IsNull(System.Object container, FieldInfo info) => IsNull(info.GetValue(container));
+        /// <summary>
+        /// Done 1
+        /// </summary>
+        static bool IsNull(System.Object field) => field == null || field.Equals(null);
+        /// <summary>
+        /// Done 1
+        /// </summary>
         static UnityEngine.Object Load(string path, Type type, bool builtin)
         {
-            // Check if asset exist.
-            // Direct loading can be prevented by AssetDatabase being reloading.
             var guid = AssetDatabase.AssetPathToGUID(path);
             if (!builtin && String.IsNullOrEmpty(guid))
                 throw new Exception($"Cannot load. Incorrect path: {path}");
-
-            // Else the path is good. Attempt loading resource if AssetDatabase available.
             UnityEngine.Object result;
             if (builtin && type == typeof(Shader))
                 result = Shader.Find(path);
@@ -202,19 +172,21 @@ namespace UnityEngine.Rendering
             }
             return result;
         }
-
-        static bool SetAndLoadIfNull(System.Object container, FieldInfo info,
-            string path, bool builtin)
+        /// <summary>
+        /// Done 1
+        /// </summary>
+        static bool SetAndLoadIfNull(System.Object container, FieldInfo info, string path, bool builtin)
         {
             if (IsNull(container, info))
             {
                 info.SetValue(container, Load(path, info.FieldType, builtin));
                 return true;
             }
-
             return false;
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         static bool SetAndLoadIfNull(Array array, int index, string path, bool builtin)
         {
             var element = array.GetValue(index);
@@ -223,10 +195,11 @@ namespace UnityEngine.Rendering
                 array.SetValue(Load(path, array.GetType().GetElementType(), builtin), index);
                 return true;
             }
-
             return false;
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         static string GetFullPath(string basePath, ReloadAttribute attribute, int index = 0)
         {
             string path;

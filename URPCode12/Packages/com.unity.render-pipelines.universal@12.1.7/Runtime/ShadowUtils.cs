@@ -42,7 +42,7 @@ namespace UnityEngine.Rendering.Universal
             return result;
         }
         /// <summary>
-        /// Done 空间变换
+        /// Done1 空间变换
         /// </summary>
         public static bool ExtractDirectionalLightMatrix(ref CullingResults cullResults, ref ShadowData shadowData, int shadowLightIndex, int cascadeIndex, int shadowmapWidth, int shadowmapHeight, int shadowResolution, float shadowNearPlane, out Vector4 cascadeSplitDistance, out ShadowSliceData shadowSliceData)
         {
@@ -89,9 +89,10 @@ namespace UnityEngine.Rendering.Universal
             shadowMatrix = GetShadowTransform(projMatrix, viewMatrix);
             return success;
         }
-
-        public static void RenderShadowSlice(CommandBuffer cmd, ref ScriptableRenderContext context,
-            ref ShadowSliceData shadowSliceData, ref ShadowDrawingSettings settings, Matrix4x4 proj, Matrix4x4 view)
+        /// <summary>
+        /// Done 1
+        /// </summary>
+        public static void RenderShadowSlice(CommandBuffer cmd, ref ScriptableRenderContext context, ref ShadowSliceData shadowSliceData, ref ShadowDrawingSettings settings, Matrix4x4 proj, Matrix4x4 view)
         {
             cmd.SetGlobalDepthBias(1.0f, 2.5f); 
             cmd.SetViewport(new Rect(shadowSliceData.offsetX, shadowSliceData.offsetY, shadowSliceData.resolution, shadowSliceData.resolution));
@@ -112,7 +113,7 @@ namespace UnityEngine.Rendering.Universal
                 shadowSliceData.projectionMatrix, shadowSliceData.viewMatrix);
         }
         /// <summary>
-        /// Done 计算每个级联的分辨率
+        /// Done1 计算每个级联的分辨率
         /// </summary>
         public static int GetMaxTileResolutionInAtlas(int atlasWidth, int atlasHeight, int tileCount)
         {
@@ -126,7 +127,7 @@ namespace UnityEngine.Rendering.Universal
             return resolution;//正方形
         }
         /// <summary>
-        /// Done 级联偏移
+        /// Done1 级联偏移
         /// </summary>
         public static void ApplySliceTransform(ref ShadowSliceData shadowSliceData, int atlasWidth, int atlasHeight)
         {
@@ -137,7 +138,6 @@ namespace UnityEngine.Rendering.Universal
             sliceTransform.m11 = shadowSliceData.resolution * oneOverAtlasHeight;
             sliceTransform.m03 = shadowSliceData.offsetX * oneOverAtlasWidth;
             sliceTransform.m13 = shadowSliceData.offsetY * oneOverAtlasHeight;
-            // Apply shadow slice scale and offset
             shadowSliceData.shadowTransform = sliceTransform * shadowSliceData.shadowTransform;
         }
         /// <summary>
@@ -150,35 +150,18 @@ namespace UnityEngine.Rendering.Universal
                 Debug.LogWarning(string.Format("{0} is not a valid light index.", shadowLightIndex));
                 return Vector4.zero;
             }
-
             float frustumSize;
             if (shadowLight.lightType == LightType.Directional)
             {
-                // Frustum size is guaranteed to be a cube as we wrap shadow frustum around a sphere
                 frustumSize = 2.0f / lightProjectionMatrix.m00;//cot(FOV/2) / Aspect ???
             }
             else if (shadowLight.lightType == LightType.Spot)
             {
-                // For perspective projections, shadow texel size varies with depth
-                // It will only work well if done in receiver side in the pixel shader. Currently UniversalRP
-                // do bias on caster side in vertex shader. When we add shader quality tiers we can properly
-                // handle this. For now, as a poor approximation we do a constant bias and compute the size of
-                // the frustum as if it was orthogonal considering the size at mid point between near and far planes.
-                // Depending on how big the light range is, it will be good enough with some tweaks in bias
                 frustumSize = Mathf.Tan(shadowLight.spotAngle * 0.5f * Mathf.Deg2Rad) * shadowLight.range; // half-width (in world-space units) of shadow frustum's "far plane"
             }
             else if (shadowLight.lightType == LightType.Point)
             {
-                // [Copied from above case:]
-                // "For perspective projections, shadow texel size varies with depth
-                //  It will only work well if done in receiver side in the pixel shader. Currently UniversalRP
-                //  do bias on caster side in vertex shader. When we add shader quality tiers we can properly
-                //  handle this. For now, as a poor approximation we do a constant bias and compute the size of
-                //  the frustum as if it was orthogonal considering the size at mid point between near and far planes.
-                //  Depending on how big the light range is, it will be good enough with some tweaks in bias"
-                // Note: HDRP uses normalBias both in HDShadowUtils.CalcGuardAnglePerspective and HDShadowAlgorithms/EvalShadow_NormalBias (receiver bias)
                 float fovBias = Internal.AdditionalLightsShadowCasterPass.GetPointLightShadowFrustumFovBiasInDegrees((int)shadowResolution, (shadowLight.light.shadows == LightShadows.Soft));
-                // Note: the same fovBias was also used to compute ShadowUtils.ExtractPointLightMatrix
                 float cubeFaceAngle = 90 + fovBias;
                 frustumSize = Mathf.Tan(cubeFaceAngle * 0.5f * Mathf.Deg2Rad) * shadowLight.range; // half-width (in world-space units) of shadow frustum's "far plane"
             }
@@ -187,30 +170,17 @@ namespace UnityEngine.Rendering.Universal
                 Debug.LogWarning("Only point, spot and directional shadow casters are supported in universal pipeline");
                 frustumSize = 0.0f;
             }
-
-            // depth and normal bias scale is in shadowmap texel size in world space
             float texelSize = frustumSize / shadowResolution;
             float depthBias = -shadowData.bias[shadowLightIndex].x * texelSize;
             float normalBias = -shadowData.bias[shadowLightIndex].y * texelSize;
-
-            // The current implementation of NormalBias in Universal RP is the same as in Unity Built-In RP (i.e moving shadow caster vertices along normals when projecting them to the shadow map).
-            // This does not work well with Point Lights, which is why NormalBias value is hard-coded to 0.0 in Built-In RP (see value of unity_LightShadowBias.z in FrameDebugger, and native code that sets it: https://github.cds.internal.unity3d.com/unity/unity/blob/a9c916ba27984da43724ba18e70f51469e0c34f5/Runtime/Camera/Shadows.cpp#L1686 )
-            // We follow the same convention in Universal RP:
             if (shadowLight.lightType == LightType.Point)
                 normalBias = 0.0f;
-
             if (shadowData.supportsSoftShadows && shadowLight.light.shadows == LightShadows.Soft)
             {
-                // TODO: depth and normal bias assume sample is no more than 1 texel away from shadowmap
-                // This is not true with PCF. Ideally we need to do either
-                // cone base bias (based on distance to center sample)
-                // or receiver place bias based on derivatives.
-                // For now we scale it by the PCF kernel size of non-mobile platforms (5x5)
                 const float kernelRadius = 2.5f;
                 depthBias *= kernelRadius;
                 normalBias *= kernelRadius;
             }
-
             return new Vector4(depthBias, normalBias, 0.0f, 0.0f);
         }
 
@@ -223,39 +193,33 @@ namespace UnityEngine.Rendering.Universal
         /// <param name="bias">[OUT] Ordinate of the fading part at abscissa 0</param>
         internal static void GetScaleAndBiasForLinearDistanceFade(float fadeDistance, float border, out float scale, out float bias)
         {
-            // To avoid division from zero
-            // This values ensure that fade within cascade will be 0 and outside 1
             if (border < 0.0001f)
             {
-                float multiplier = 1000f; // To avoid blending if difference is in fractions
+                float multiplier = 1000f;
                 scale = multiplier;
                 bias = -fadeDistance * multiplier;
                 return;
             }
-
             border = 1 - border;
             border *= border;
-
             // Fade with distance calculation is just a linear fade from 90% of fade distance to fade distance. 90% arbitrarily chosen but should work well enough.
             float distanceFadeNear = border * fadeDistance;
             scale = 1.0f / (fadeDistance - distanceFadeNear);
             bias = -distanceFadeNear / (fadeDistance - distanceFadeNear);
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public static void SetupShadowCasterConstantBuffer(CommandBuffer cmd, ref VisibleLight shadowLight, Vector4 shadowBias)
         {
             cmd.SetGlobalVector("_ShadowBias", shadowBias);
-
             Vector3 lightDirection = -shadowLight.localToWorldMatrix.GetColumn(2);
             cmd.SetGlobalVector("_LightDirection", new Vector4(lightDirection.x, lightDirection.y, lightDirection.z, 0.0f));
-
             Vector3 lightPosition = shadowLight.localToWorldMatrix.GetColumn(3);
             cmd.SetGlobalVector("_LightPosition", new Vector4(lightPosition.x, lightPosition.y, lightPosition.z, 1.0f));
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public static RenderTexture GetTemporaryShadowTexture(int width, int height, int bits)
         {
@@ -270,12 +234,10 @@ namespace UnityEngine.Rendering.Universal
             return shadowTexture;
         }
         /// <summary>
-        /// Done 1,裁剪空间 2,规划到[0,1]
+        /// Done1 1,裁剪空间 2,规划到[0,1]
         /// </summary>
         static Matrix4x4 GetShadowTransform(Matrix4x4 proj, Matrix4x4 view)
         {
-            // Currently CullResults ComputeDirectionalShadowMatricesAndCullingPrimitives doesn't
-            // apply z reversal to projection matrix. We need to do it manually here.
             if (SystemInfo.usesReversedZBuffer)
             {
                 proj.m20 = -proj.m20;
@@ -283,19 +245,14 @@ namespace UnityEngine.Rendering.Universal
                 proj.m22 = -proj.m22;
                 proj.m23 = -proj.m23;
             }
-
             Matrix4x4 worldToShadow = proj * view;
-
             var textureScaleAndBias = Matrix4x4.identity;
             textureScaleAndBias.m00 = 0.5f;
             textureScaleAndBias.m11 = 0.5f;
             textureScaleAndBias.m22 = 0.5f;
             textureScaleAndBias.m03 = 0.5f;
             textureScaleAndBias.m23 = 0.5f;
-            textureScaleAndBias.m13 = 0.5f;
-            // textureScaleAndBias maps texture space coordinates from [-1,1] to [0,1]
-
-            // Apply texture scale and offset to save a MAD in shader.
+            textureScaleAndBias.m13 = 0.5f;//x * 0.5 + 0.5, [-1,1] to [0,1]
             return textureScaleAndBias * worldToShadow;
         }
     }

@@ -230,11 +230,8 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Clear the currently bound render texture.
+        /// Done 1
         /// </summary>
-        /// <param name="cmd">CommandBuffer used for rendering commands.</param>
-        /// <param name="clearFlag">Specify how the render texture should be cleared.</param>
-        /// <param name="clearColor">Specify with which color the render texture should be cleared.</param>
         public static void ClearRenderTarget(CommandBuffer cmd, ClearFlag clearFlag, Color clearColor)
         {
             if (clearFlag != ClearFlag.None)
@@ -375,16 +372,9 @@ namespace UnityEngine.Rendering
             ClearRenderTarget(cmd, clearFlag, clearColor);
         }
 
-        // Explicit load and store actions
         /// <summary>
-        /// Set the current render texture.
+        /// Done 1
         /// </summary>
-        /// <param name="cmd">CommandBuffer used for rendering commands.</param>
-        /// <param name="buffer">Color buffer RenderTargetIdentifier.</param>
-        /// <param name="loadAction">Load action.</param>
-        /// <param name="storeAction">Store action.</param>
-        /// <param name="clearFlag">If not set to ClearFlag.None, specifies how to clear the render target after setup.</param>
-        /// <param name="clearColor">If applicable, color with which to clear the render texture after setup.</param>
         public static void SetRenderTarget(CommandBuffer cmd, RenderTargetIdentifier buffer, RenderBufferLoadAction loadAction, RenderBufferStoreAction storeAction, ClearFlag clearFlag, Color clearColor)
         {
             cmd.SetRenderTarget(buffer, loadAction, storeAction);
@@ -855,7 +845,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public static Color ConvertSRGBToActiveColorSpace(Color color)
         {
@@ -893,11 +883,8 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Creates a Material with the provided shader.
-        /// hideFlags will be set to HideFlags.HideAndDontSave.
+        /// Done
         /// </summary>
-        /// <param name="shader">Shader used for the material.</param>
-        /// <returns>A new Material instance using the provided shader.</returns>
         public static Material CreateEngineMaterial(Shader shader)
         {
             if (shader == null)
@@ -905,7 +892,6 @@ namespace UnityEngine.Rendering
                 Debug.LogError("Cannot create required material because shader is null");
                 return null;
             }
-
             var mat = new Material(shader)
             {
                 hideFlags = HideFlags.HideAndDontSave
@@ -939,11 +925,8 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Set a global keyword using a CommandBuffer
+        /// Done 1
         /// </summary>
-        /// <param name="cmd">CommandBuffer on which to set the global keyword.</param>
-        /// <param name="keyword">Keyword to be set.</param>
-        /// <param name="state">Value of the keyword to be set.</param>
         public static void SetKeyword(CommandBuffer cmd, string keyword, bool state)
         {
             if (state)

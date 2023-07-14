@@ -92,7 +92,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public void ResetMainStack()
         {
@@ -260,7 +260,6 @@ namespace UnityEngine.Rendering
         [Conditional("UNITY_EDITOR")]
         public void CheckBaseTypes()
         {
-            // Editor specific hack to work around serialization doing funky things when exiting
             if (m_ComponentsDefaultState == null || (m_ComponentsDefaultState.Count > 0 && m_ComponentsDefaultState[0] == null))
                 ReloadBaseTypes();
         }
@@ -271,8 +270,6 @@ namespace UnityEngine.Rendering
         [Conditional("UNITY_EDITOR")]
         public void CheckStack(VolumeStack stack)
         {
-            // The editor doesn't reload the domain when exiting play mode but still kills every
-            // object created while in play mode, like stacks' component states
             var components = stack.components;
             if (components == null)
             {
@@ -290,7 +287,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public void Update(Transform trigger, LayerMask layerMask)
         {
@@ -298,7 +295,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public void Update(VolumeStack stack, Transform trigger, LayerMask layerMask)
         {
@@ -383,7 +380,6 @@ namespace UnityEngine.Rendering
                 }
                 m_SortedVolumes.Add(mask, list);
             }
-            // Check sorting state
             bool sortNeeded;
             if (m_SortNeeded.TryGetValue(mask, out sortNeeded) && sortNeeded)
             {
@@ -413,7 +409,7 @@ namespace UnityEngine.Rendering
             }
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         static bool IsVolumeRenderedByCamera(Volume volume, Camera camera)
         {

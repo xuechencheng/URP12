@@ -34,12 +34,8 @@ namespace UnityEngine.Rendering.Universal
     public static class LightExtensions
     {
         /// <summary>
-        /// Universal Render Pipeline exposes additional light data in a separate component.
-        /// This method returns the additional data component for the given light or create one if it doesn't exist yet.
+        /// Done 1
         /// </summary>
-        /// <param name="light"></param>
-        /// <returns>The <c>UniversalAdditionalLightData</c> for this light.</returns>
-        /// <see cref="UniversalAdditionalLightData"/>
         public static UniversalAdditionalLightData GetUniversalAdditionalLightData(this Light light)
         {
             var gameObject = light.gameObject;

@@ -150,11 +150,11 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        ///Done 1 OpenGL ES until version 3.1
+        ///Done 1 
         /// </summary>
         public static bool IsSupported()
         {
-            return SystemInfo.graphicsShaderLevel >= 45;
+            return SystemInfo.graphicsShaderLevel >= 45;//OpenGL ES until version 3.1
         }
     }
 }

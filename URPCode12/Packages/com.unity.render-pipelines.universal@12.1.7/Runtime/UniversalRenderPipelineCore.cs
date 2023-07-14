@@ -480,7 +480,7 @@ namespace UnityEngine.Rendering.Universal
         static List<int> m_ShadowResolutionData = new List<int>();
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public static bool IsGameCamera(Camera camera)
         {
@@ -529,7 +529,7 @@ namespace UnityEngine.Rendering.Universal
         Comparison<Camera> cameraComparison = (camera1, camera2) => { return (int)camera1.depth - (int)camera2.depth; };
 #if UNITY_2021_1_OR_NEWER
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         void SortCameras(List<Camera> cameras)
         {
@@ -732,16 +732,14 @@ namespace UnityEngine.Rendering.Universal
 #endif
         };
 
-        // called from DeferredLights.cs too
-        public static void GetLightAttenuationAndSpotDirection(
-            LightType lightType, float lightRange, Matrix4x4 lightLocalToWorldMatrix,
-            float spotAngle, float? innerSpotAngle,
-            out Vector4 lightAttenuation, out Vector4 lightSpotDir)
+        /// <summary>
+        /// Done 1
+        /// </summary>
+        public static void GetLightAttenuationAndSpotDirection( LightType lightType, float lightRange, Matrix4x4 lightLocalToWorldMatrix,
+            float spotAngle, float? innerSpotAngle,out Vector4 lightAttenuation, out Vector4 lightSpotDir)
         {
             lightAttenuation = k_DefaultLightAttenuation;
             lightSpotDir = k_DefaultLightSpotDirection;
-
-            // Directional Light attenuation is initialize so distance attenuation always be 1.0
             if (lightType != LightType.Directional)
             {
                 // Light attenuation in universal matches the unity vanilla one.
@@ -763,18 +761,15 @@ namespace UnityEngine.Rendering.Universal
                 float oneOverFadeRangeSqr = 1.0f / fadeRangeSqr;
                 float lightRangeSqrOverFadeRangeSqr = -lightRangeSqr / fadeRangeSqr;
                 float oneOverLightRangeSqr = 1.0f / Mathf.Max(0.0001f, lightRange * lightRange);
-
                 // On untethered devices: Use the faster linear smoothing factor (SHADER_HINT_NICE_QUALITY).
                 // On other devices: Use the smoothing factor that matches the GI.
                 lightAttenuation.x = GraphicsSettings.HasShaderDefine(Graphics.activeTier, BuiltinShaderDefine.SHADER_API_MOBILE) || SystemInfo.graphicsDeviceType == GraphicsDeviceType.Switch ? oneOverFadeRangeSqr : oneOverLightRangeSqr;
                 lightAttenuation.y = lightRangeSqrOverFadeRangeSqr;
             }
-
             if (lightType == LightType.Spot)
             {
                 Vector4 dir = lightLocalToWorldMatrix.GetColumn(2);
                 lightSpotDir = new Vector4(-dir.x, -dir.y, -dir.z, 0.0f);
-
                 // Spot Attenuation with a linear falloff can be defined as
                 // (SdotL - cosOuterAngle) / (cosInnerAngle - cosOuterAngle)
                 // This can be rewritten as
@@ -797,7 +792,9 @@ namespace UnityEngine.Rendering.Universal
                 lightAttenuation.w = add;
             }
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         public static void InitializeLightConstants_Common(NativeArray<VisibleLight> lights, int lightIndex, out Vector4 lightPos, out Vector4 lightColor, out Vector4 lightAttenuation, out Vector4 lightSpotDir, out Vector4 lightOcclusionProbeChannel)
         {
             lightPos = k_DefaultLightPosition;
@@ -805,12 +802,8 @@ namespace UnityEngine.Rendering.Universal
             lightOcclusionProbeChannel = k_DefaultLightsProbeChannel;
             lightAttenuation = k_DefaultLightAttenuation;
             lightSpotDir = k_DefaultLightSpotDirection;
-
-            // When no lights are visible, main light will be set to -1.
-            // In this case we initialize it to default values and return
             if (lightIndex < 0)
                 return;
-
             VisibleLight lightData = lights[lightIndex];
             if (lightData.lightType == LightType.Directional)
             {
@@ -822,20 +815,13 @@ namespace UnityEngine.Rendering.Universal
                 Vector4 pos = lightData.localToWorldMatrix.GetColumn(3);
                 lightPos = new Vector4(pos.x, pos.y, pos.z, 1.0f);
             }
-
             // VisibleLight.finalColor already returns color in active color space
             lightColor = lightData.finalColor;
-
-            GetLightAttenuationAndSpotDirection(
-                lightData.lightType, lightData.range, lightData.localToWorldMatrix,
-                lightData.spotAngle, lightData.light?.innerSpotAngle,
-                out lightAttenuation, out lightSpotDir);
-
+            GetLightAttenuationAndSpotDirection(lightData.lightType, lightData.range, lightData.localToWorldMatrix,
+                lightData.spotAngle, lightData.light?.innerSpotAngle,out lightAttenuation, out lightSpotDir);
             Light light = lightData.light;
-
             if (light != null && light.bakingOutput.lightmapBakeType == LightmapBakeType.Mixed &&
-                0 <= light.bakingOutput.occlusionMaskChannel &&
-                light.bakingOutput.occlusionMaskChannel < 4)
+                0 <= light.bakingOutput.occlusionMaskChannel && light.bakingOutput.occlusionMaskChannel < 4)
             {
                 lightOcclusionProbeChannel[light.bakingOutput.occlusionMaskChannel] = 1.0f;
             }

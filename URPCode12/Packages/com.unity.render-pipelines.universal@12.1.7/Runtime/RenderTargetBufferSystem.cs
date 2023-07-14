@@ -26,7 +26,9 @@ namespace UnityEngine.Rendering.Universal.Internal
 
         SwapBuffer backBuffer { get { return m_AisBackBuffer ? m_A : m_B; } }
         SwapBuffer frontBuffer { get { return m_AisBackBuffer ? m_B : m_A; } }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         public RenderTargetBufferSystem(string name)
         {
             m_A.name = Shader.PropertyToID(name + "A");
@@ -34,13 +36,15 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_A.rt.Init(name + "A");
             m_B.rt.Init(name + "B");
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         public RenderTargetHandle GetBackBuffer()
         {
             return backBuffer.rt;
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public RenderTargetHandle GetBackBuffer(CommandBuffer cmd)
         {
@@ -49,7 +53,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             return backBuffer.rt;
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public RenderTargetHandle GetFrontBuffer(CommandBuffer cmd)
         {
@@ -85,14 +89,14 @@ namespace UnityEngine.Rendering.Universal.Internal
             return frontBuffer.rt;
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public void Swap()
         {
             m_AisBackBuffer = !m_AisBackBuffer;
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         void Initialize(CommandBuffer cmd)
         {
@@ -105,7 +109,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_RTisAllocated = true;
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public void Clear(CommandBuffer cmd)
         {
@@ -115,7 +119,9 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_AisBackBuffer = true;
             m_AllowMSAA = true;
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         public void SetCameraSettings(CommandBuffer cmd, RenderTextureDescriptor desc, FilterMode filterMode)
         {
             Clear(cmd); //SetCameraSettings is called when new stack starts rendering. Make sure the targets are updated to use the new descriptor.
@@ -123,7 +129,9 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_FilterMode = filterMode;
             Initialize(cmd);
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         public void SetCameraSettings(RenderTextureDescriptor desc, FilterMode filterMode)
         {
             m_Desc = desc;

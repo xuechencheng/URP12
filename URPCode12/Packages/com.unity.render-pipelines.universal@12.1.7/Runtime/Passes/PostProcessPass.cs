@@ -3,7 +3,6 @@ using UnityEngine.Experimental.Rendering;
 
 namespace UnityEngine.Rendering.Universal
 {
-    // TODO: xmldoc
     public interface IPostProcessComponent
     {
         bool IsActive();
@@ -13,11 +12,6 @@ namespace UnityEngine.Rendering.Universal
 
 namespace UnityEngine.Rendering.Universal.Internal
 {
-    // TODO: TAA
-    // TODO: Motion blur
-    /// <summary>
-    /// Renders the post-processing effect stack.
-    /// </summary>
     public class PostProcessPass : ScriptableRenderPass
     {
         RenderTextureDescriptor m_Descriptor;
@@ -33,7 +27,6 @@ namespace UnityEngine.Rendering.Universal.Internal
 
         MaterialLibrary m_Materials;
         PostProcessData m_Data;
-
         // Builtin effects settings
         DepthOfField m_DepthOfField;
         MotionBlur m_MotionBlur;
@@ -46,7 +39,6 @@ namespace UnityEngine.Rendering.Universal.Internal
         ColorAdjustments m_ColorAdjustments;
         Tonemapping m_Tonemapping;
         FilmGrain m_FilmGrain;
-
         // Misc
         const int k_MaxPyramidSize = 16;
         readonly GraphicsFormat m_DefaultHDRFormat;
@@ -62,30 +54,22 @@ namespace UnityEngine.Rendering.Universal.Internal
         // Needed if the device changes its render target width/height (ex, Mobile platform allows change of orientation)
         float m_BokehMaxRadius;
         float m_BokehRCPAspect;
-
         // True when this is the very last pass in the pipeline
         bool m_IsFinalPass;
-
         // If there's a final post process pass after this pass.
         // If yes, Film Grain and Dithering are setup in the final pass, otherwise they are setup in this pass.
         bool m_HasFinalPass;
-
         // Some Android devices do not support sRGB backbuffer
         // We need to do the conversion manually on those
         bool m_EnableSRGBConversionIfNeeded;
-
         // Option to use procedural draw instead of cmd.blit
         bool m_UseDrawProcedural;
-
         // Use Fast conversions between SRGB and Linear
         bool m_UseFastSRGBLinearConversion;
-
         // Blit to screen or color frontbuffer at the end
         bool m_ResolveToScreen;
-
         // Renderer is using swapbuffer system
         bool m_UseSwapBuffer;
-
         Material m_BlitMaterial;
         /// <summary>
         /// Done
@@ -113,7 +97,6 @@ namespace UnityEngine.Rendering.Universal.Internal
                 m_SMAAEdgeFormat = GraphicsFormat.R8G8_UNorm;
             else
                 m_SMAAEdgeFormat = GraphicsFormat.R8G8B8A8_UNorm;
-
             if (SystemInfo.IsFormatSupported(GraphicsFormat.R16_UNorm, FormatUsage.Linear | FormatUsage.Render))
                 m_GaussianCoCFormat = GraphicsFormat.R16_UNorm;
             else if (SystemInfo.IsFormatSupported(GraphicsFormat.R16_SFloat, FormatUsage.Linear | FormatUsage.Render))
@@ -244,7 +227,6 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_FilmGrain = stack.GetComponent<FilmGrain>();
             m_UseDrawProcedural = renderingData.cameraData.xr.enabled;
             m_UseFastSRGBLinearConversion = renderingData.postProcessingData.useFastSRGBLinearConversion;
-
             if (m_IsFinalPass)
             {
                 var cmd = CommandBufferPool.Get();
@@ -257,13 +239,9 @@ namespace UnityEngine.Rendering.Universal.Internal
             }
             else if (CanRunOnTile())
             {
-                // TODO: Add a fast render path if only on-tile compatible effects are used and we're actually running on a platform that supports it
-                // Note: we can still work on-tile if FXAA is enabled, it'd be part of the final pass
             }
             else
             {
-                // Regular render path (not on-tile) - we do everything in a single command buffer as it
-                // makes it easier to manage temporary targets' lifetime
                 var cmd = CommandBufferPool.Get();
                 using (new ProfilingScope(cmd, m_ProfilingRenderPostProcessing))
                 {
@@ -275,8 +253,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_ResetHistory = false;
         }
 
-        RenderTextureDescriptor GetCompatibleDescriptor()
-            => GetCompatibleDescriptor(m_Descriptor.width, m_Descriptor.height, m_Descriptor.graphicsFormat);
+        RenderTextureDescriptor GetCompatibleDescriptor() => GetCompatibleDescriptor(m_Descriptor.width, m_Descriptor.height, m_Descriptor.graphicsFormat);
         /// <summary>
         /// Done
         /// </summary>
@@ -335,8 +312,6 @@ namespace UnityEngine.Rendering.Universal.Internal
             ref CameraData cameraData = ref renderingData.cameraData;
             ref ScriptableRenderer renderer = ref cameraData.renderer;
             bool isSceneViewCamera = cameraData.isSceneViewCamera;
-            //Check amount of swaps we have to do
-            //We blit back and forth without msaa untill the last blit.
             bool useStopNan = cameraData.isStopNaNEnabled && m_Materials.stopNaN != null;
             bool useSubPixeMorpAA = cameraData.antialiasing == AntialiasingMode.SubpixelMorphologicalAntiAliasing && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES2;
             var dofMaterial = m_DepthOfField.mode.value == DepthOfFieldMode.Gaussian ? m_Materials.gaussianDepthOfField : m_Materials.bokehDepthOfField;
@@ -349,7 +324,6 @@ namespace UnityEngine.Rendering.Universal.Internal
             {
                 renderer.EnableSwapBufferMSAA(false);
             }
-            // Don't use these directly unless you have a good reason to, use GetSource() and GetDestination() instead
             bool tempTargetUsed = false;
             bool tempTarget2Used = false;
             RenderTargetIdentifier source = m_UseSwapBuffer ? renderer.cameraColorTarget : m_Source;
@@ -369,7 +343,6 @@ namespace UnityEngine.Rendering.Universal.Internal
                     }
                     else if (destination == m_Source && m_Descriptor.msaaSamples > 1)
                     {
-                        // Avoid using m_Source.id as new destination, it may come with a depth buffer that we don't want, may have MSAA that we don't want etc
                         cmd.GetTemporaryRT(ShaderConstants._TempTarget2, GetCompatibleDescriptor(), FilterMode.Bilinear);
                         destination = ShaderConstants._TempTarget2;
                         tempTarget2Used = true;
@@ -377,13 +350,11 @@ namespace UnityEngine.Rendering.Universal.Internal
                     return destination;
                 }
             }
-
             void Swap(ref ScriptableRenderer r)
             {
                 --amountOfPassesRemaining;
                 if (m_UseSwapBuffer)
                 {
-                    //we want the last blit to be to MSAA
                     if (amountOfPassesRemaining == 0 && !m_HasFinalPass)
                     {
                         r.EnableSwapBufferMSAA(true);
@@ -397,24 +368,18 @@ namespace UnityEngine.Rendering.Universal.Internal
                     CoreUtils.Swap(ref source, ref destination);
                 }
             }
-            // Setup projection matrix for cmd.DrawMesh()
             cmd.SetGlobalMatrix(ShaderConstants._FullscreenProjMat, GL.GetGPUProjectionMatrix(Matrix4x4.identity, true));
-            // Optional NaN killer before post-processing kicks in
-            // stopNaN may be null on Adreno 3xx. It doesn't support full shader level 3.5, but SystemInfo.graphicsShaderLevel is 35.
-            if (useStopNan)
+            if (useStopNan)// PP 1
             {
                 using (new ProfilingScope(cmd, ProfilingSampler.Get(URPProfileId.StopNaNs)))
                 {
-                    RenderingUtils.Blit(
-                        cmd, GetSource(), GetDestination(), m_Materials.stopNaN, 0, m_UseDrawProcedural,
-                        RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,
-                        RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
+                    RenderingUtils.Blit( cmd, GetSource(), GetDestination(), m_Materials.stopNaN, 0, m_UseDrawProcedural,
+                        RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
                     Swap(ref renderer);
                 }
             }
-
             // Anti-aliasing
-            if (useSubPixeMorpAA)
+            if (useSubPixeMorpAA)// PP 2
             {
                 using (new ProfilingScope(cmd, ProfilingSampler.Get(URPProfileId.SMAA)))
                 {
@@ -422,10 +387,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                     Swap(ref renderer);
                 }
             }
-            // Depth of Field
-            // Adreno 3xx SystemInfo.graphicsShaderLevel is 35, but instancing support is disabled due to buggy drivers.
-            // DOF shader uses #pragma target 3.5 which adds requirement for instancing support, thus marking the shader unsupported on those devices.
-            if (useDepthOfField)
+            if (useDepthOfField)// PP 3
             {
                 var markerName = m_DepthOfField.mode.value == DepthOfFieldMode.Gaussian ? URPProfileId.GaussianDepthOfField : URPProfileId.BokehDepthOfField;
                 using (new ProfilingScope(cmd, ProfilingSampler.Get(markerName)))
@@ -434,8 +396,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                     Swap(ref renderer);
                 }
             }
-            // Motion blur
-            if (useMotionBlur)
+            if (useMotionBlur)// PP 4
             {
                 using (new ProfilingScope(cmd, ProfilingSampler.Get(URPProfileId.MotionBlur)))
                 {
@@ -443,9 +404,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                     Swap(ref renderer);
                 }
             }
-            // Panini projection is done as a fullscreen pass after all depth-based effects are done
-            // and before bloom kicks in
-            if (usePaniniProjection)
+            if (usePaniniProjection)// PP 5
             {
                 using (new ProfilingScope(cmd, ProfilingSampler.Get(URPProfileId.PaniniProjection)))
                 {
@@ -453,8 +412,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                     Swap(ref renderer);
                 }
             }
-            // Lens Flare
-            if (useLensFlare)
+            if (useLensFlare)// PP 6
             {
                 bool usePanini;
                 float paniniDistance;
@@ -477,24 +435,19 @@ namespace UnityEngine.Rendering.Universal.Internal
                 }
             }
 
-            // Combined post-processing stack
-            using (new ProfilingScope(cmd, ProfilingSampler.Get(URPProfileId.UberPostProcess)))
+            using (new ProfilingScope(cmd, ProfilingSampler.Get(URPProfileId.UberPostProcess)))// PP 7
             {
-                // Reset uber keywords
                 m_Materials.uber.shaderKeywords = null;
-                // Bloom goes first
                 bool bloomActive = m_Bloom.IsActive();
                 if (bloomActive)
                 {
                     using (new ProfilingScope(cmd, ProfilingSampler.Get(URPProfileId.Bloom)))
                         SetupBloom(cmd, GetSource(), m_Materials.uber);
                 }
-                // Setup other effects constants
                 SetupLensDistortion(m_Materials.uber, isSceneViewCamera);
                 SetupChromaticAberration(m_Materials.uber);
                 SetupVignette(m_Materials.uber);
                 SetupColorGrading(cmd, ref renderingData, m_Materials.uber);
-                // Only apply dithering & grain if there isn't a final pass.
                 SetupGrain(cameraData, m_Materials.uber);
                 SetupDithering(cameraData, m_Materials.uber);
                 if (RequireSRGBConversionBlitToBackBuffer(cameraData))
@@ -504,17 +457,13 @@ namespace UnityEngine.Rendering.Universal.Internal
                     m_Materials.uber.EnableKeyword(ShaderKeywordStrings.UseFastSRGBLinearConversion);
                 }
                 GetActiveDebugHandler(renderingData)?.UpdateShaderGlobalPropertiesForFinalValidationPass(cmd, ref cameraData, !m_HasFinalPass);
-                // Done with Uber, blit it
                 cmd.SetGlobalTexture(ShaderPropertyId.sourceTex, GetSource());
                 var colorLoadAction = RenderBufferLoadAction.DontCare;
                 if (m_Destination == RenderTargetHandle.CameraTarget && !cameraData.isDefaultViewport)
                     colorLoadAction = RenderBufferLoadAction.Load;
                 RenderTargetIdentifier targetDestination = m_UseSwapBuffer ? destination : m_Destination.id;
-                // Note: We rendering to "camera target" we need to get the cameraData.targetTexture as this will get the targetTexture of the camera stack.
-                // Overlay cameras need to output to the target described in the base camera while doing camera stack.
                 RenderTargetHandle cameraTargetHandle = RenderTargetHandle.GetCameraTarget(cameraData.xr);
                 RenderTargetIdentifier cameraTarget = (cameraData.targetTexture != null && !cameraData.xr.enabled) ? new RenderTargetIdentifier(cameraData.targetTexture) : cameraTargetHandle.Identifier();
-                // With camera stacking we not always resolve post to final screen as we might run post-processing in the middle of the stack.
                 if (m_UseSwapBuffer)
                 {
                     cameraTarget = (m_ResolveToScreen) ? cameraTarget : targetDestination;
@@ -564,11 +513,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                     cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
                     if ((m_Destination == RenderTargetHandle.CameraTarget && !m_UseSwapBuffer) || (m_ResolveToScreen && m_UseSwapBuffer))
                         cmd.SetViewport(cameraData.pixelRect);
-                    cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_Materials.uber);
-                    // TODO: Implement swapbuffer in 2DRenderer so we can remove this
-                    // For now, when render post-processing in the middle of the camera stack (not resolving to screen)
-                    // we do an extra blit to ping pong results back to color texture. In future we should allow a Swap of the current active color texture
-                    // in the pipeline to avoid this extra blit.
+                    cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_Materials.uber);// PP 7
                     if (!m_ResolveToScreen && !m_UseSwapBuffer)
                     {
                         cmd.SetGlobalTexture(ShaderPropertyId.sourceTex, cameraTarget);
@@ -1257,13 +1202,8 @@ namespace UnityEngine.Rendering.Universal.Internal
             material.SetVector(ShaderConstants._Lut_Params, new Vector4(1f / lutWidth, 1f / lutHeight, lutHeight - 1f, postExposureLinear));
             material.SetTexture(ShaderConstants._UserLut, m_ColorLookup.texture.value);
             material.SetVector(ShaderConstants._UserLut_Params, !m_ColorLookup.IsActive()
-                ? Vector4.zero
-                : new Vector4(1f / m_ColorLookup.texture.value.width,
-                    1f / m_ColorLookup.texture.value.height,
-                    m_ColorLookup.texture.value.height - 1f,
-                    m_ColorLookup.contribution.value)
-            );
-
+                ? Vector4.zero : new Vector4(1f / m_ColorLookup.texture.value.width, 1f / m_ColorLookup.texture.value.height,
+                    m_ColorLookup.texture.value.height - 1f, m_ColorLookup.contribution.value));
             if (hdr)
             {
                 material.EnableKeyword(ShaderKeywordStrings.HDRGrading);
@@ -1339,22 +1279,11 @@ namespace UnityEngine.Rendering.Universal.Internal
             bool isFxaaEnabled = (cameraData.antialiasing == AntialiasingMode.FastApproximateAntialiasing);
             if (cameraData.imageScalingMode != ImageScalingMode.None)
             {
-                // FSR is only considered "enabled" when we're performing upscaling. (downscaling uses a linear filter unconditionally)
                 bool isFsrEnabled = ((cameraData.imageScalingMode == ImageScalingMode.Upscaling) && (cameraData.upscalingFilter == ImageUpscalingFilter.FSR));
-                // When FXAA is enabled in scaled renders, we execute it in a separate blit since it's not designed to be used in
-                // situations where the input and output resolutions do not match.
-                // When FSR is active, we always need an additional pass since it has a very particular color encoding requirement.
-                // NOTE: An ideal implementation could inline this color conversion logic into the UberPost pass, but the current code structure would make
-                //       this process very complex. Specifically, we'd need to guarantee that the uber post output is always written to a UNORM format render
-                //       target in order to preserve the precision of specially encoded color data.
                 bool isSetupRequired = (isFxaaEnabled || isFsrEnabled);
-
-                // Make sure to remove any MSAA and attached depth buffers from the temporary render targets
                 var tempRtDesc = cameraData.cameraTargetDescriptor;
                 tempRtDesc.msaaSamples = 1;
                 tempRtDesc.depthBufferBits = 0;
-                // Select a UNORM format since we've already performed tonemapping. (Values are in 0-1 range)
-                // This improves precision and is required if we want to avoid excessive banding when FSR is in use.
                 tempRtDesc.graphicsFormat = UniversalRenderPipeline.MakeUnormRenderTextureGraphicsFormat();
                 m_Materials.scalingSetup.shaderKeywords = null;
                 var sourceRtId = m_Source;
@@ -1370,7 +1299,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                     }
                     cmd.GetTemporaryRT(ShaderConstants._ScalingSetupTexture, tempRtDesc, FilterMode.Point);
                     isScalingSetupUsed = true;
-                    Blit(cmd, m_Source, ShaderConstants._ScalingSetupTexture, m_Materials.scalingSetup);
+                    Blit(cmd, m_Source, ShaderConstants._ScalingSetupTexture, m_Materials.scalingSetup);// PP 1
                     cmd.SetGlobalTexture(ShaderPropertyId.sourceTex, ShaderConstants._ScalingSetupTexture);
                     sourceRtId = ShaderConstants._ScalingSetupTexture;
                 }
@@ -1378,10 +1307,6 @@ namespace UnityEngine.Rendering.Universal.Internal
                 {
                     case ImageScalingMode.Upscaling:
                     {
-                        // In the upscaling case, set material keywords based on the selected upscaling filter
-                        // Note: If FSR is enabled, we go down this path regardless of the current render scale. We do this because
-                        //       FSR still provides visual benefits at 100% scale. This will also make the transition between 99% and 100%
-                        //       scale less obvious for cases where FSR is used with dynamic resolution scaling.
                         switch (cameraData.upscalingFilter)
                         {
                             case ImageUpscalingFilter.Point:
@@ -1391,7 +1316,6 @@ namespace UnityEngine.Rendering.Universal.Internal
                             }
                             case ImageUpscalingFilter.Linear:
                             {
-                                // Do nothing as linear is the default filter in the shader
                                 break;
                             }
                             case ImageUpscalingFilter.FSR:
@@ -1406,18 +1330,14 @@ namespace UnityEngine.Rendering.Universal.Internal
                                 var fsrInputSize = new Vector2(cameraData.cameraTargetDescriptor.width, cameraData.cameraTargetDescriptor.height);
                                 var fsrOutputSize = new Vector2(cameraData.pixelWidth, cameraData.pixelHeight);
                                 FSRUtils.SetEasuConstants(cmd, fsrInputSize, fsrInputSize, fsrOutputSize);
-                                Blit(cmd, sourceRtId, ShaderConstants._UpscaledTexture, m_Materials.easu);
+                                Blit(cmd, sourceRtId, ShaderConstants._UpscaledTexture, m_Materials.easu);// PP 2
                                 // RCAS
-                                // Use the override value if it's available, otherwise use the default.
                                 float sharpness = cameraData.fsrOverrideSharpness ? cameraData.fsrSharpness : FSRUtils.kDefaultSharpnessLinear;
-                                // Set up the parameters for the RCAS pass unless the sharpness value indicates that it wont have any effect.
                                 if (cameraData.fsrSharpness > 0.0f)
                                 {
-                                    // RCAS is performed during the final post blit, but we set up the parameters here for better logical grouping.
                                     material.EnableKeyword(ShaderKeywordStrings.Rcas);
                                     FSRUtils.SetRcasConstantsLinear(cmd, sharpness);
                                 }
-                                // Update the source texture for the next operation
                                 cmd.SetGlobalTexture(ShaderPropertyId.sourceTex, ShaderConstants._UpscaledTexture);
                                 PostProcessUtils.SetSourceSize(cmd, upscaleRtDesc);
                                 break;
@@ -1427,15 +1347,12 @@ namespace UnityEngine.Rendering.Universal.Internal
                     }
                     case ImageScalingMode.Downscaling:
                     {
-                        // In the downscaling case, we don't perform any sort of filter override logic since we always want linear filtering
-                        // and it's already the default option in the shader.
                         break;
                     }
                 }
             }
             else if (isFxaaEnabled)
             {
-                // In unscaled renders, FXAA can be safely performed in the FinalPost shader
                 material.EnableKeyword(ShaderKeywordStrings.Fxaa);
             }
 
@@ -1472,7 +1389,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                 cmd.SetViewport(cameraData.pixelRect);
                 cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, material);
                 cmd.SetViewProjectionMatrices(cameraData.camera.worldToCameraMatrix, cameraData.camera.projectionMatrix);
-                cameraData.renderer.ConfigureCameraTarget(cameraTarget, cameraTarget);
+                cameraData.renderer.ConfigureCameraTarget(cameraTarget, cameraTarget);// PP 3
             }
             if (isUpscaledTextureUsed)
             {

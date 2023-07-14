@@ -315,7 +315,7 @@ half4 SplatmapFragment(Varyings IN) : SV_TARGET
 
     half weight;
     half4 mixedDiffuse;
-    half4 defaultSmoothness;//Paused Point
+    half4 defaultSmoothness;
     SplatmapMix(IN.uvMainAndLM, IN.uvSplat01, IN.uvSplat23, splatControl, weight, mixedDiffuse, defaultSmoothness, normalTS);
     half3 albedo = mixedDiffuse.rgb;
     half4 defaultMetallic = half4(_Metallic0, _Metallic1, _Metallic2, _Metallic3);

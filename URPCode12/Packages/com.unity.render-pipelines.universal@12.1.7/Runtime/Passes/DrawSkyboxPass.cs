@@ -7,24 +7,25 @@ namespace UnityEngine.Rendering.Universal
     /// </summary>
     public class DrawSkyboxPass : ScriptableRenderPass
     {
+        /// <summary>
+        /// Done
+        /// </summary>
         public DrawSkyboxPass(RenderPassEvent evt)
         {
             base.profilingSampler = new ProfilingSampler(nameof(DrawSkyboxPass));
-
             renderPassEvent = evt;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Done
+        /// </summary>
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             CameraData cameraData = renderingData.cameraData;
             Camera camera = cameraData.camera;
-
             var activeDebugHandler = GetActiveDebugHandler(renderingData);
             if (activeDebugHandler != null)
             {
-                // TODO: The skybox needs to work the same as the other shaders, but until it does we'll not render it
-                // when certain debug modes are active (e.g. wireframe/overdraw modes)
                 if (activeDebugHandler.IsScreenClearNeeded)
                 {
                     return;

@@ -29,15 +29,13 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Provides the set actions to the renderer to be triggered at the end of the render loop for camera capture
+        /// Done 1
         /// </summary>
-        /// <param name="camera">The camera to get actions for</param>
-        /// <returns>Enumeration of actions</returns>
+        /// <param name="camera"></param>
         public static IEnumerator<Action<RenderTargetIdentifier, CommandBuffer>> GetCaptureActions(Camera camera)
         {
             if (!actionDict.TryGetValue(camera, out var actions) || actions.Count == 0)
                 return null;
-
             return actions.GetEnumerator();
         }
 

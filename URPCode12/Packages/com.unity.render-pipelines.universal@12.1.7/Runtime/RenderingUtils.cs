@@ -85,7 +85,7 @@ namespace UnityEngine.Rendering.Universal
             }
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         internal static bool SupportsLightLayers(GraphicsDeviceType type)
         {
@@ -254,12 +254,8 @@ namespace UnityEngine.Rendering.Universal
         [Conditional("DEVELOPMENT_BUILD"), Conditional("UNITY_EDITOR")]
         internal static void RenderObjectsWithError(ScriptableRenderContext context, ref CullingResults cullResults, Camera camera, FilteringSettings filterSettings, SortingCriteria sortFlags)
         {
-            // TODO: When importing project, AssetPreviewUpdater::CreatePreviewForAsset will be called multiple times.
-            // This might be in a point that some resources required for the pipeline are not finished importing yet.
-            // Proper fix is to add a fence on asset import.
             if (errorMaterial == null)
                 return;
-
             SortingSettings sortingSettings = new SortingSettings(camera) { criteria = sortFlags };
             DrawingSettings errorSettings = new DrawingSettings(m_LegacyShaderPassNames[0], sortingSettings)
             {
@@ -269,7 +265,6 @@ namespace UnityEngine.Rendering.Universal
             };
             for (int i = 1; i < m_LegacyShaderPassNames.Count; ++i)
                 errorSettings.SetShaderPassName(i, m_LegacyShaderPassNames[i]);
-
             context.DrawRenderers(cullResults, ref errorSettings, ref filterSettings);
         }
 
@@ -346,7 +341,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         internal static uint GetValidColorBufferCount(RenderTargetIdentifier[] colorBuffers)
         {

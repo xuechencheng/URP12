@@ -11,7 +11,7 @@ using UnityEngine.Profiling;
 namespace UnityEngine.Rendering
 {
     /// <summary>
-    /// Done
+    /// Done 1
     /// </summary>
     class TProfilingSampler<TEnum> : ProfilingSampler where TEnum : Enum
     {
@@ -21,7 +21,7 @@ namespace UnityEngine.Rendering
         internal static Dictionary<TEnum, TProfilingSampler<TEnum>> samples = new Dictionary<TEnum, TProfilingSampler<TEnum>>();
 #endif
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         static TProfilingSampler()
         {
@@ -43,7 +43,7 @@ namespace UnityEngine.Rendering
             }
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public TProfilingSampler(string name) : base(name)
         {
@@ -51,12 +51,12 @@ namespace UnityEngine.Rendering
     }
 
     /// <summary>
-    /// Done
+    /// Done 1
     /// </summary>
     public class ProfilingSampler
     {
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public static ProfilingSampler Get<TEnum>(TEnum marker) where TEnum : Enum
         {
@@ -69,7 +69,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public ProfilingSampler(string name)
         {
@@ -89,11 +89,11 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done 如果cmd为null，那么只搜集CPU数据
+        /// Done 1
         /// </summary>
         public void Begin(CommandBuffer cmd)
         {
-            if (cmd != null)
+            if (cmd != null)//如果cmd为null，那么只搜集CPU数据
 #if UNITY_USE_RECORDER
                 if (sampler != null && sampler.isValid)
                     cmd.BeginSample(sampler);
@@ -106,7 +106,7 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Perfect
+        /// Done 1
         /// </summary>
         public void End(CommandBuffer cmd)
         {
@@ -204,7 +204,7 @@ namespace UnityEngine.Rendering
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
     /// <summary>
-    /// Done
+    /// Done 1
     /// </summary>
     public struct ProfilingScope : IDisposable
     {
@@ -212,7 +212,7 @@ namespace UnityEngine.Rendering
         bool                m_Disposed;
         ProfilingSampler    m_Sampler;
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public ProfilingScope(CommandBuffer cmd, ProfilingSampler sampler)
         {
@@ -223,14 +223,14 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public void Dispose()
         {
             Dispose(true);
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         void Dispose(bool disposing)
         {

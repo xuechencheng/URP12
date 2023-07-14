@@ -81,9 +81,7 @@ Varyings DepthNormalsVertex(Attributes input)
 half4 DepthNormalsFragment(Varyings input) : SV_TARGET
 {
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
-
     Alpha(SampleAlbedoAlpha(input.uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap)).a, _BaseColor, _Cutoff);
-
     #if defined(_GBUFFER_NORMALS_OCT)
         float3 normalWS = normalize(input.normalWS);
         float2 octNormalWS = PackNormalOctQuadEncode(normalWS);           // values between [-1, +1], must use fp32 on some platforms
@@ -100,23 +98,19 @@ half4 DepthNormalsFragment(Varyings input) : SV_TARGET
             #endif
             ApplyPerPixelDisplacement(viewDirTS, uv);
         #endif
-
         #if defined(_NORMALMAP) || defined(_DETAIL)
             float sgn = input.tangentWS.w;      // should be either +1 or -1
             float3 bitangent = sgn * cross(input.normalWS.xyz, input.tangentWS.xyz);
             float3 normalTS = SampleNormal(uv, TEXTURE2D_ARGS(_BumpMap, sampler_BumpMap), _BumpScale);
-
             #if defined(_DETAIL)
                 half detailMask = SAMPLE_TEXTURE2D(_DetailMask, sampler_DetailMask, uv).a;
                 float2 detailUv = uv * _DetailAlbedoMap_ST.xy + _DetailAlbedoMap_ST.zw;
                 normalTS = ApplyDetailNormal(detailUv, normalTS, detailMask);
             #endif
-
             float3 normalWS = TransformTangentToWorld(normalTS, half3x3(input.tangentWS.xyz, bitangent.xyz, input.normalWS.xyz));
         #else
             float3 normalWS = input.normalWS;
         #endif
-
         return half4(NormalizeNormalPerPixel(normalWS), 0.0);
     #endif
 }

@@ -6,13 +6,17 @@ namespace UnityEngine.Rendering.Universal
 
     internal class InvokeOnRenderObjectCallbackPass : ScriptableRenderPass
     {
+        /// <summary>
+        /// Done
+        /// </summary>
         public InvokeOnRenderObjectCallbackPass(RenderPassEvent evt)
         {
             base.profilingSampler = new ProfilingSampler(nameof(InvokeOnRenderObjectCallbackPass));
             renderPassEvent = evt;
         }
-
-        /// <inheritdoc/>
+        /// <summary>
+        /// Done
+        /// </summary>
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             context.InvokeOnRenderObjectCallback();

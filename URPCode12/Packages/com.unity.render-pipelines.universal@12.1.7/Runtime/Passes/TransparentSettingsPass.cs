@@ -10,21 +10,25 @@ namespace UnityEngine.Rendering.Universal
 
         const string m_ProfilerTag = "Transparent Settings Pass";
         private static readonly ProfilingSampler m_ProfilingSampler = new ProfilingSampler(m_ProfilerTag);
-
+        /// <summary>
+        /// Done
+        /// </summary>
         public TransparentSettingsPass(RenderPassEvent evt, bool shadowReceiveSupported)
         {
             base.profilingSampler = new ProfilingSampler(nameof(TransparentSettingsPass));
             renderPassEvent = evt;
             m_shouldReceiveShadows = shadowReceiveSupported;
         }
-
+        /// <summary>
+        /// Done
+        /// </summary>
         public bool Setup(ref RenderingData renderingData)
         {
-            // Currently we only need to enqueue this pass when the user
-            // doesn't want transparent objects to receive shadows
             return !m_shouldReceiveShadows;
         }
-
+        /// <summary>
+        /// Done
+        /// </summary>
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             // Get a command buffer...
@@ -36,7 +40,6 @@ namespace UnityEngine.Rendering.Universal
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.MainLightShadowCascades, m_shouldReceiveShadows);
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.AdditionalLightShadows, m_shouldReceiveShadows);
             }
-
             // Execute and release the command buffer...
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);

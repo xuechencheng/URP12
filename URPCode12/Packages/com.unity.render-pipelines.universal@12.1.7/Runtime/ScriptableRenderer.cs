@@ -53,14 +53,14 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public virtual int SupportedCameraStackingTypes()
         {
             return 0;
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public bool SupportsCameraStackingType(CameraRenderType cameraRenderType)
         {
@@ -267,7 +267,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         void SetShaderTimeValues(CommandBuffer cmd, float time, float deltaTime, float smoothDeltaTime)
         {
@@ -370,16 +370,9 @@ namespace UnityEngine.Rendering.Universal
 
         static class RenderPassBlock
         {
-            // Executes render passes that are inputs to the main rendering
-            // but don't depend on camera state. They all render in monoscopic mode. f.ex, shadow maps.
             public static readonly int BeforeRendering = 0;
-
-            // Main bulk of render pass execution. They required camera state to be properly set
-            // and when enabled they will render in stereo.
             public static readonly int MainRenderingOpaque = 1;
             public static readonly int MainRenderingTransparent = 2;
-
-            // Execute after Post-processing.
             public static readonly int AfterRendering = 3;
         }
 
@@ -482,18 +475,17 @@ namespace UnityEngine.Rendering.Universal
 
             m_UseOptimizedStoreActions = m_StoreActionsOptimizationSetting != StoreActionsOptimization.Store;
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         public void Dispose()
         {
-            // Dispose all renderer features...
             for (int i = 0; i < m_RendererFeatures.Count; ++i)
             {
                 if (rendererFeatures[i] == null)
                     continue;
-
                 rendererFeatures[i].Dispose();
             }
-
             Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -503,10 +495,8 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Configures the camera target.
+        /// Done 1
         /// </summary>
-        /// <param name="colorTarget">Camera color target. Pass BuiltinRenderTextureType.CameraTarget if rendering to backbuffer.</param>
-        /// <param name="depthTarget">Camera depth target. Pass BuiltinRenderTextureType.CameraTarget if color has depth or rendering to backbuffer.</param>
         public void ConfigureCameraTarget(RenderTargetIdentifier colorTarget, RenderTargetIdentifier depthTarget)
         {
             m_CameraColorTarget = colorTarget;
@@ -521,7 +511,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         internal void ConfigureCameraColorTarget(RenderTargetIdentifier colorTarget)
         {
@@ -529,7 +519,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public abstract void Setup(ScriptableRenderContext context, ref RenderingData renderingData);
 
@@ -679,7 +669,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         protected static ClearFlag GetCameraClearFlag(ref CameraData cameraData)
         {
@@ -697,7 +687,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         internal void OnPreCullRenderPasses(in CameraData cameraData)
         {
@@ -712,7 +702,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         protected void AddRenderPasses(ref RenderingData renderingData)
         {
@@ -744,7 +734,7 @@ namespace UnityEngine.Rendering.Universal
                 m_UseOptimizedStoreActions = false;
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         void ClearRenderingState(CommandBuffer cmd)
         {
@@ -766,7 +756,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         internal void Clear(CameraRenderType cameraType)
         {
@@ -780,8 +770,7 @@ namespace UnityEngine.Rendering.Universal
             m_CameraDepthTarget = BuiltinRenderTextureType.CameraTarget;
         }
 
-        void ExecuteBlock(int blockIndex, in RenderBlocks renderBlocks,
-            ScriptableRenderContext context, ref RenderingData renderingData, bool submit = false)
+        void ExecuteBlock(int blockIndex, in RenderBlocks renderBlocks, ScriptableRenderContext context, ref RenderingData renderingData, bool submit = false)
         {
             foreach (int currIndex in renderBlocks.GetRange(blockIndex))
             {
@@ -797,7 +786,7 @@ namespace UnityEngine.Rendering.Universal
             return renderPass.useNativeRenderPass && useRenderPassEnabled;
         }
         /// <summary>
-        /// Done
+        /// Paused Point
         /// </summary>
         void ExecuteRenderPass(ScriptableRenderContext context, ScriptableRenderPass renderPass, ref RenderingData renderingData)
         {
@@ -824,7 +813,7 @@ namespace UnityEngine.Rendering.Universal
 #endif
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         void SetRenderPassAttachments(CommandBuffer cmd, ScriptableRenderPass renderPass, ref CameraData cameraData)
         {
@@ -1071,7 +1060,9 @@ namespace UnityEngine.Rendering.Universal
             SetRenderTarget(cmd, colorAttachment, colorLoadAction, RenderBufferStoreAction.Store,
                 depthAttachment, depthLoadAction, RenderBufferStoreAction.Store, clearFlag, clearColor);
         }
-
+        /// <summary>
+        /// Done 1
+        /// </summary>
         internal static void SetRenderTarget(CommandBuffer cmd, RenderTargetIdentifier colorAttachment, RenderTargetIdentifier depthAttachment, ClearFlag clearFlag, Color clearColor, RenderBufferStoreAction colorStoreAction, RenderBufferStoreAction depthStoreAction)
         {
             m_ActiveColorAttachments[0] = colorAttachment;
@@ -1082,15 +1073,9 @@ namespace UnityEngine.Rendering.Universal
             m_ActiveDepthStoreAction = depthStoreAction;
             for (int i = 1; i < m_ActiveColorStoreActions.Length; ++i)
                 m_ActiveColorStoreActions[i] = RenderBufferStoreAction.Store;
-
             m_ActiveDepthAttachment = depthAttachment;
-
-            RenderBufferLoadAction colorLoadAction = ((uint)clearFlag & (uint)ClearFlag.Color) != 0 ?
-                RenderBufferLoadAction.DontCare : RenderBufferLoadAction.Load;
-
-            RenderBufferLoadAction depthLoadAction = ((uint)clearFlag & (uint)ClearFlag.Depth) != 0 ?
-                RenderBufferLoadAction.DontCare : RenderBufferLoadAction.Load;
-
+            RenderBufferLoadAction colorLoadAction = ((uint)clearFlag & (uint)ClearFlag.Color) != 0 ? RenderBufferLoadAction.DontCare : RenderBufferLoadAction.Load;
+            RenderBufferLoadAction depthLoadAction = ((uint)clearFlag & (uint)ClearFlag.Depth) != 0 ? RenderBufferLoadAction.DontCare : RenderBufferLoadAction.Load;
             // if we shouldn't use optimized store actions then fall back to the conservative safe (un-optimal!) route and just store everything
             if (!m_UseOptimizedStoreActions)
             {
@@ -1099,18 +1084,12 @@ namespace UnityEngine.Rendering.Universal
                 if (depthStoreAction != RenderBufferStoreAction.StoreAndResolve)
                     depthStoreAction = RenderBufferStoreAction.Store;
             }
-
-
-            SetRenderTarget(cmd, colorAttachment, colorLoadAction, colorStoreAction,
-                depthAttachment, depthLoadAction, depthStoreAction, clearFlag, clearColor);
+            SetRenderTarget(cmd, colorAttachment, colorLoadAction, colorStoreAction, depthAttachment, depthLoadAction, depthStoreAction, clearFlag, clearColor);
         }
-
-        static void SetRenderTarget(CommandBuffer cmd,
-            RenderTargetIdentifier colorAttachment,
-            RenderBufferLoadAction colorLoadAction,
-            RenderBufferStoreAction colorStoreAction,
-            ClearFlag clearFlags,
-            Color clearColor)
+        /// <summary>
+        /// Done 1
+        /// </summary>
+        static void SetRenderTarget(CommandBuffer cmd, RenderTargetIdentifier colorAttachment, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, ClearFlag clearFlags, Color clearColor)
         {
             CoreUtils.SetRenderTarget(cmd, colorAttachment, colorLoadAction, colorStoreAction, clearFlags, clearColor);
         }
@@ -1174,7 +1153,7 @@ namespace UnityEngine.Rendering.Universal
             context.DrawWireOverlay(camera);
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         void InternalStartRendering(ScriptableRenderContext context, ref RenderingData renderingData)
         {
@@ -1236,7 +1215,7 @@ namespace UnityEngine.Rendering.Universal
             private NativeArray<int> m_BlockRanges;
             private NativeArray<int> m_BlockRangeLengths;
             /// <summary>
-            /// Done
+            /// Done 1
             /// </summary>
             public RenderBlocks(List<ScriptableRenderPass> activeRenderPassQueue)
             {
@@ -1255,7 +1234,9 @@ namespace UnityEngine.Rendering.Universal
                 }
             }
 
-            //  RAII like Dispose pattern implementation for 'using' keyword
+            /// <summary>
+            /// Done 1
+            /// </summary>
             public void Dispose()
             {
                 m_BlockRangeLengths.Dispose();
@@ -1263,7 +1244,7 @@ namespace UnityEngine.Rendering.Universal
             }
 
             /// <summary>
-            /// Done
+            /// Done 1
             /// </summary>
             void FillBlockRanges(List<ScriptableRenderPass> activeRenderPassQueue)
             {
@@ -1272,10 +1253,8 @@ namespace UnityEngine.Rendering.Universal
                 m_BlockRanges[currRangeIndex++] = 0;
                 for (int i = 0; i < m_BlockEventLimits.Length - 1; ++i)
                 {
-                    while (currRenderPass < activeRenderPassQueue.Count &&
-                           activeRenderPassQueue[currRenderPass].renderPassEvent < m_BlockEventLimits[i])
+                    while (currRenderPass < activeRenderPassQueue.Count && activeRenderPassQueue[currRenderPass].renderPassEvent < m_BlockEventLimits[i])
                         currRenderPass++;
-
                     m_BlockRanges[currRangeIndex++] = currRenderPass;
                 }
                 m_BlockRanges[currRangeIndex] = activeRenderPassQueue.Count;

@@ -44,11 +44,6 @@ namespace UnityEngine.Rendering.Universal
         //TemporalAntialiasing
     }
 
-    /// <summary>
-    /// Holds information about the render type of a camera. Options are Base or Overlay.
-    /// Base rendering type allows the camera to render to either the screen or to a texture.
-    /// Overlay rendering type allows the camera to render on top of a previous camera output, thus compositing camera results.
-    /// </summary>
     public enum CameraRenderType
     {
         Base,
@@ -165,7 +160,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public static void DestroyVolumeStack(this Camera camera, UniversalAdditionalCameraData cameraData)
         {
@@ -174,7 +169,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         internal static void GetVolumeLayerMaskAndTrigger(this Camera camera, UniversalAdditionalCameraData cameraData, out LayerMask layerMask, out Transform trigger)
         {
@@ -351,7 +346,7 @@ namespace UnityEngine.Rendering.Universal
             }
         }
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         internal void UpdateCameraStack()
         {
@@ -417,7 +412,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Returns the <see cref="ScriptableRenderer"/> that is used to render this camera.
+        /// Done 1
         /// </summary>
         public ScriptableRenderer scriptableRenderer
         {
@@ -474,7 +469,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Done
+        /// Done 1
         /// </summary>
         public bool requiresVolumeFrameworkUpdate
         {

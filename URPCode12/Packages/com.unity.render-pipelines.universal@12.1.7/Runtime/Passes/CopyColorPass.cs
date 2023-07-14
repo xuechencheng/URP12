@@ -2,13 +2,6 @@ using System;
 
 namespace UnityEngine.Rendering.Universal.Internal
 {
-    /// <summary>
-    /// Copy the given color buffer to the given destination color buffer.
-    ///
-    /// You can use this pass to copy a color buffer to the destination,
-    /// so you can use it later in rendering. For example, you can copy
-    /// the opaque texture to use it for distortion effects.
-    /// </summary>
     public class CopyColorPass : ScriptableRenderPass
     {
         int m_SampleOffsetShaderHandle;
@@ -20,12 +13,11 @@ namespace UnityEngine.Rendering.Universal.Internal
         private RenderTargetHandle destination { get; set; }
 
         /// <summary>
-        /// Create the CopyColorPass
+        /// Done
         /// </summary>
         public CopyColorPass(RenderPassEvent evt, Material samplingMaterial, Material copyColorMaterial = null)
         {
             base.profilingSampler = new ProfilingSampler(nameof(CopyColorPass));
-
             m_SamplingMaterial = samplingMaterial;
             m_CopyColorMaterial = copyColorMaterial;
             m_SampleOffsetShaderHandle = Shader.PropertyToID("_SampleOffset");
@@ -35,17 +27,17 @@ namespace UnityEngine.Rendering.Universal.Internal
         }
 
         /// <summary>
-        /// Configure the pass with the source and destination to execute on.
+        /// Done
         /// </summary>
-        /// <param name="source">Source Render Target</param>
-        /// <param name="destination">Destination Render Target</param>
         public void Setup(RenderTargetIdentifier source, RenderTargetHandle destination, Downsampling downsampling)
         {
             this.source = source;
             this.destination = destination;
             m_DownsamplingMethod = downsampling;
         }
-
+        /// <summary>
+        /// Done
+        /// </summary>
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
         {
             RenderTextureDescriptor descriptor = renderingData.cameraData.cameraTargetDescriptor;
@@ -61,11 +53,14 @@ namespace UnityEngine.Rendering.Universal.Internal
                 descriptor.width /= 4;
                 descriptor.height /= 4;
             }
-
             cmd.GetTemporaryRT(destination.id, descriptor, m_DownsamplingMethod == Downsampling.None ? FilterMode.Point : FilterMode.Bilinear);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Done 1
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="renderingData"></param>
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             if (m_SamplingMaterial == null)
@@ -73,22 +68,15 @@ namespace UnityEngine.Rendering.Universal.Internal
                 Debug.LogErrorFormat("Missing {0}. {1} render pass will not execute. Check for missing reference in the renderer resources.", m_SamplingMaterial, GetType().Name);
                 return;
             }
-
             CommandBuffer cmd = CommandBufferPool.Get();
-
-            //It is possible that the given color target is now the frontbuffer
             if (source == renderingData.cameraData.renderer.GetCameraColorFrontBuffer(cmd))
             {
                 source = renderingData.cameraData.renderer.cameraColorTarget;
             }
-
             using (new ProfilingScope(cmd, ProfilingSampler.Get(URPProfileId.CopyColor)))
             {
                 RenderTargetIdentifier opaqueColorRT = destination.Identifier();
-
-                ScriptableRenderer.SetRenderTarget(cmd, opaqueColorRT, BuiltinRenderTextureType.CameraTarget, clearFlag,
-                    clearColor);
-
+                ScriptableRenderer.SetRenderTarget(cmd, opaqueColorRT, BuiltinRenderTextureType.CameraTarget, clearFlag, clearColor);
                 bool useDrawProceduleBlit = renderingData.cameraData.xr.enabled;
                 switch (m_DownsamplingMethod)
                 {
@@ -107,17 +95,17 @@ namespace UnityEngine.Rendering.Universal.Internal
                         break;
                 }
             }
-
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Done 1
+        /// </summary>
         public override void OnCameraCleanup(CommandBuffer cmd)
         {
             if (cmd == null)
                 throw new ArgumentNullException("cmd");
-
             if (destination != RenderTargetHandle.CameraTarget)
             {
                 cmd.ReleaseTemporaryRT(destination.id);

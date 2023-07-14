@@ -37,16 +37,12 @@ namespace UnityEngine.Rendering
         }
 
         /// <summary>
-        /// Initialize Blitter resources. Must be called once before any use
+        /// Done
         /// </summary>
-        /// <param name="blitPS"></param> Blit shader
-        /// <param name="blitColorAndDepthPS"></param> Blit shader
         public static void Initialize(Shader blitPS, Shader blitColorAndDepthPS)
         {
             s_Blit = CoreUtils.CreateEngineMaterial(blitPS);
             s_BlitColorAndDepth = CoreUtils.CreateEngineMaterial(blitColorAndDepthPS);
-
-            // With texture array enabled, we still need the normal blit version for other systems like atlas
             if (TextureXR.useTexArray)
             {
                 s_Blit.EnableKeyword("DISABLE_TEXTURE2D_X_ARRAY");
@@ -54,14 +50,11 @@ namespace UnityEngine.Rendering
                 s_BlitTexArraySingleSlice = CoreUtils.CreateEngineMaterial(blitPS);
                 s_BlitTexArraySingleSlice.EnableKeyword("BLIT_SINGLE_SLICE");
             }
-
             if (SystemInfo.graphicsShaderLevel < 30)
             {
-                /*UNITY_NEAR_CLIP_VALUE*/
                 float nearClipZ = -1;
                 if (SystemInfo.usesReversedZBuffer)
                     nearClipZ = 1;
-
                 if (!s_TriangleMesh)
                 {
                     s_TriangleMesh = new Mesh();
@@ -69,7 +62,6 @@ namespace UnityEngine.Rendering
                     s_TriangleMesh.uv = GetFullScreenTriangleTexCoord();
                     s_TriangleMesh.triangles = new int[3] { 0, 1, 2 };
                 }
-
                 if (!s_QuadMesh)
                 {
                     s_QuadMesh = new Mesh();
@@ -77,19 +69,17 @@ namespace UnityEngine.Rendering
                     s_QuadMesh.uv = GetQuadTexCoord();
                     s_QuadMesh.triangles = new int[6] { 0, 1, 2, 0, 2, 3 };
                 }
-
                 // Should match Common.hlsl
                 static Vector3[] GetFullScreenTriangleVertexPosition(float z /*= UNITY_NEAR_CLIP_VALUE*/)
                 {
                     var r = new Vector3[3];
                     for (int i = 0; i < 3; i++)
                     {
-                        Vector2 uv = new Vector2((i << 1) & 2, i & 2);
-                        r[i] = new Vector3(uv.x * 2.0f - 1.0f, uv.y * 2.0f - 1.0f, z);
+                        Vector2 uv = new Vector2((i << 1) & 2, i & 2);//{ 0, 0} {2, 0} {0, 2}
+                        r[i] = new Vector3(uv.x * 2.0f - 1.0f, uv.y * 2.0f - 1.0f, z);//{ -1, -1, z} { 3, -1, z} { -1, 3, z}
                     }
                     return r;
                 }
-
                 // Should match Common.hlsl
                 static Vector2[] GetFullScreenTriangleTexCoord()
                 {
@@ -97,13 +87,12 @@ namespace UnityEngine.Rendering
                     for (int i = 0; i < 3; i++)
                     {
                         if (SystemInfo.graphicsUVStartsAtTop)
-                            r[i] = new Vector2((i << 1) & 2, 1.0f - (i & 2));
+                            r[i] = new Vector2((i << 1) & 2, 1.0f - (i & 2));//{ 0, 1} { 2, 1} {0, -1}
                         else
-                            r[i] = new Vector2((i << 1) & 2, i & 2);
+                            r[i] = new Vector2((i << 1) & 2, i & 2);//{ 0, 0} { 2, 0} { 0, 2}
                     }
                     return r;
                 }
-
                 // Should match Common.hlsl
                 static Vector3[] GetQuadVertexPosition(float z /*= UNITY_NEAR_CLIP_VALUE*/)
                 {
@@ -116,9 +105,8 @@ namespace UnityEngine.Rendering
                         float y = 1 - (topBit + botBit) & 1; // produces 1 for indices 0,3 and 0 for 1,2
                         r[i] = new Vector3(x, y, z);
                     }
-                    return r;
+                    return r; // { 0, 1, z} { 0, 0, z} { 1, 0, z} { 1, 1, z}
                 }
-
                 // Should match Common.hlsl
                 static Vector2[] GetQuadTexCoord()
                 {
@@ -134,7 +122,7 @@ namespace UnityEngine.Rendering
 
                         r[i] = new Vector2(u, v);
                     }
-                    return r;
+                    return r;//{ 0, 0} { 0, 1} { 1, 1} { 1, 0}
                 }
             }
         }
