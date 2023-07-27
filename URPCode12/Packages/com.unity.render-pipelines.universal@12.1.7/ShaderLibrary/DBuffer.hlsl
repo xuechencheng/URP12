@@ -117,24 +117,14 @@ void DecodeFromDBuffer(
 
 DECLARE_DBUFFER_TEXTURE(_DBufferTexture);
 
-void ApplyDecal(float4 positionCS,
-    inout half3 baseColor,
-    inout half3 specularColor,
-    inout half3 normalWS,
-    inout half metallic,
-    inout half occlusion,
-    inout half smoothness)
+void ApplyDecal(float4 positionCS, inout half3 baseColor, inout half3 specularColor, inout half3 normalWS, inout half metallic, inout half occlusion, inout half smoothness)
 {
     FETCH_DBUFFER(DBuffer, _DBufferTexture, int2(positionCS.xy));
-
     DecalSurfaceData decalSurfaceData;
     DECODE_FROM_DBUFFER(DBuffer, decalSurfaceData);
-
     // using alpha compositing https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch23.html, mean weight of 1 is neutral
-
     // Note: We only test weight (i.e decalSurfaceData.xxx.w is < 1.0) if it can save something
     baseColor.xyz = baseColor.xyz * decalSurfaceData.baseColor.w + decalSurfaceData.baseColor.xyz;
-
 #if defined(_DBUFFER_MRT2) || defined(_DBUFFER_MRT3)
     // Always test the normal as we can have decompression artifact
     if (decalSurfaceData.normalWS.w < 1.0)
@@ -142,7 +132,6 @@ void ApplyDecal(float4 positionCS,
         normalWS.xyz = normalize(normalWS.xyz * decalSurfaceData.normalWS.w + decalSurfaceData.normalWS.xyz);
     }
 #endif
-
 #if defined(_DBUFFER_MRT3)
 #ifdef _SPECULAR_SETUP
     if (decalSurfaceData.MAOSAlpha.x < 1.0)
@@ -153,9 +142,7 @@ void ApplyDecal(float4 positionCS,
 #else
     metallic = metallic * decalSurfaceData.MAOSAlpha + decalSurfaceData.metallic;
 #endif
-
     occlusion = occlusion * decalSurfaceData.MAOSAlpha + decalSurfaceData.occlusion;
-
     smoothness = smoothness * decalSurfaceData.MAOSAlpha + decalSurfaceData.smoothness;
 #endif
 }

@@ -42,7 +42,7 @@
 #define REQUIRES_WORLD_SPACE_POS_INTERPOLATOR
 
 #if defined(LIGHTMAP_ON) || defined(LIGHTMAP_SHADOW_MIXING) || defined(SHADOWS_SHADOWMASK)
-#define CALCULATE_BAKED_SHADOWS
+    #define CALCULATE_BAKED_SHADOWS
 #endif
 
 SCREENSPACE_TEXTURE(_ScreenSpaceShadowmapTexture);
@@ -403,7 +403,7 @@ half AdditionalLightShadow(int lightIndex, float3 positionWS, half3 lightDirecti
 
     return MixRealtimeAndBakedShadows(realtimeShadow, bakedShadow, shadowFade);
 }
-// Done
+// Done 1
 float4 GetShadowCoord(VertexPositionInputs vertexInput)
 {
 #if defined(_MAIN_LIGHT_SHADOWS_SCREEN) && !defined(_SURFACE_TYPE_TRANSPARENT)

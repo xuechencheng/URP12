@@ -113,12 +113,12 @@ static const half kEpsilon = half(0.0001);
 #else
     #define unity_eyeIndex 0
 #endif
-// Done
+// Done 1
 half4 PackAONormal(half ao, half3 n)
 {
     return half4(ao, n * half(0.5) + half(0.5));
 }
-// Done
+// Done 1
 half3 GetPackedNormal(half4 p)
 {
     return p.gba * half(2.0) - half(1.0);
@@ -137,7 +137,7 @@ half EncodeAO(half x)
         return x;
     #endif
 }
-// Done
+// Done 1
 half CompareNormal(half3 d1, half3 d2)
 {
     //SmoothStep(float from, float to, float t)
@@ -152,20 +152,20 @@ half2 CosSin(half theta)
     return half2(cs, sn);
 }
 
-// Pseudo random number generator with 2D coordinates
+// Done 2
 //[0, 1]的伪随机数
 half GetRandomUVForSSAO(float u, int sampleIndex)
 {
     return SSAORandomUV[u * 20 + sampleIndex];
 }
 
-// Done
+// Done 2
 float2 GetScreenSpacePosition(float2 uv)
 {
     return float2(uv * SCREEN_PARAMS.xy * DOWNSAMPLE);
 }
 
-// Sample point picker
+// Done 2
 // 生成一个方向随机的单位向量
 half3 PickSamplePoint(float2 uv, int sampleIndex)
 {
@@ -175,7 +175,8 @@ half3 PickSamplePoint(float2 uv, int sampleIndex)
     const half theta = (GetRandomUVForSSAO(half(1.0), sampleIndex) + gn) * half(TWO_PI);//[0, 4π]
     return half3(CosSin(theta) * sqrt(half(1.0) - u * u), u);//单位向量
 }
-// Done
+
+// Done 2
 float SampleAndGetLinearEyeDepth(float2 uv)
 {
     float rawDepth = SampleSceneDepth(uv.xy);
@@ -186,13 +187,11 @@ float SampleAndGetLinearEyeDepth(float2 uv)
     #endif
 }
 
-// This returns a vector in world unit (not a position), from camera to the given point described by uv screen coordinate and depth (in absolute world unit).
-// Done 视野空间坐标 可以想象成世界空间内的相机坐标为起点，片元坐标为终点的向量
+// Done 2
+//视野空间坐标 可以想象成世界空间内的相机坐标为起点，片元坐标为终点的向量
 half3 ReconstructViewPos(float2 uv, float depth)
 {
-    // Screen is y-inverted.
     uv.y = 1.0 - uv.y;
-    // view pos in world space
     #if defined(_ORTHOGRAPHIC)
         float zScale = depth * _ProjectionParams.w; // divide by far plane
         float3 viewPos = _CameraViewTopLeftCorner[unity_eyeIndex].xyz + _CameraViewXExtent[unity_eyeIndex].xyz * uv.x + _CameraViewYExtent[unity_eyeIndex].xyz * uv.y + _CameraViewZExtent[unity_eyeIndex].xyz * zScale;
@@ -204,12 +203,7 @@ half3 ReconstructViewPos(float2 uv, float depth)
     return half3(viewPos);
 }
 
-// Try reconstructing normal accurately from depth buffer.
-// Low:    DDX/DDY on the current pixel
-// Medium: 3 taps on each direction | x | * | y |
-// High:   5 taps on each direction: | z | x | * | y | w |
-// https://atyuwen.github.io/posts/normal-reconstruction/
-// https://wickedengine.net/2019/09/22/improved-normal-reconstruction-from-depth/
+// Done 2
 // 重新构建法线
 half3 ReconstructNormal(float2 uv, float depth, float3 vpos)
 {
@@ -217,7 +211,6 @@ half3 ReconstructNormal(float2 uv, float depth, float3 vpos)
         return half3(normalize(cross(ddy(vpos), ddx(vpos))));
     #else
         float2 delta = float2(_SourceSize.zw * 2.0);
-        // Sample the neighbour fragments
         float2 lUV = float2(-delta.x, 0.0);
         float2 rUV = float2( delta.x, 0.0);
         float2 uUV = float2(0.0,  delta.y);
@@ -226,9 +219,6 @@ half3 ReconstructNormal(float2 uv, float depth, float3 vpos)
         float3 r1 = float3(uv + rUV, 0.0); r1.z = SampleAndGetLinearEyeDepth(r1.xy); // Right1
         float3 u1 = float3(uv + uUV, 0.0); u1.z = SampleAndGetLinearEyeDepth(u1.xy); // Up1
         float3 d1 = float3(uv + dUV, 0.0); d1.z = SampleAndGetLinearEyeDepth(d1.xy); // Down1
-        // Determine the closest horizontal and vertical pixels...
-        // horizontal: left = 0.0 right = 1.0
-        // vertical  : down = 0.0    up = 1.0
         #if defined(_RECONSTRUCT_NORMAL_MEDIUM)
              uint closest_horizontal = l1.z > r1.z ? 0 : 1;//选深度值大的点
              uint closest_vertical   = d1.z > u1.z ? 0 : 1;//(h,v)--(p1,p2) (0,0)--(l1,d1) (0,1)--(u1,l1) (1,0)--(d1,r1) (1,1)--(r1,u1)
@@ -240,13 +230,6 @@ half3 ReconstructNormal(float2 uv, float depth, float3 vpos)
             const uint closest_horizontal = abs( (2.0 * l1.z - l2.z) - depth) < abs( (2.0 * r1.z - r2.z) - depth) ? 0 : 1;
             const uint closest_vertical   = abs( (2.0 * d1.z - d2.z) - depth) < abs( (2.0 * u1.z - u2.z) - depth) ? 0 : 1;//选取深度值变化小的点
         #endif
-        // Calculate the triangle, in a counter-clockwize order, to
-        // use based on the closest horizontal and vertical depths.
-        // h == 0.0 && v == 0.0: p1 = left,  p2 = down
-        // h == 1.0 && v == 0.0: p1 = down,  p2 = right
-        // h == 1.0 && v == 1.0: p1 = right, p2 = up
-        // h == 0.0 && v == 1.0: p1 = up,    p2 = left
-        // Calculate the view space positions for the three points...
         float3 P1;
         float3 P2;
         if (closest_vertical == 0)
@@ -259,13 +242,11 @@ half3 ReconstructNormal(float2 uv, float depth, float3 vpos)
             P1 = closest_horizontal == 0 ? u1 : r1;
             P2 = closest_horizontal == 0 ? l1 : u1;
         }
-        // Use the cross product to calculate the normal...
         return half3(normalize(cross(ReconstructViewPos(P2.xy, P2.z) - vpos, ReconstructViewPos(P1.xy, P1.z) - vpos)));
     #endif
 }
 
-// For when we don't need to output the depth or view position
-// Used in the blur passes
+// Done 2
 half3 SampleNormal(float2 uv)
 {
     #if defined(_SOURCE_DEPTH_NORMALS)
@@ -276,7 +257,7 @@ half3 SampleNormal(float2 uv)
         return ReconstructNormal(uv, depth, vpos);
     #endif
 }
-
+// Done 2
 void SampleDepthNormalView(float2 uv, out float depth, out half3 normal, out half3 vpos)
 {
     depth  = SampleAndGetLinearEyeDepth(uv);
@@ -284,47 +265,37 @@ void SampleDepthNormalView(float2 uv, out float depth, out half3 normal, out hal
     #if defined(_SOURCE_DEPTH_NORMALS)
         normal = half3(SampleSceneNormals(uv));
     #else
-        normal = ReconstructNormal(uv, depth, vpos);//Todo
+        normal = ReconstructNormal(uv, depth, vpos);
     #endif
 }
 
-// Distance-based AO estimator based on Morgan 2011
-// "Alchemy screen-space ambient obscurance algorithm"
-// http://graphics.cs.williams.edu/papers/AlchemyHPG11/
+// Done 2
 half4 SSAO(Varyings input) : SV_Target
 {
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
     float2 uv = input.uv;
-    half3x3 camTransform = (half3x3)_CameraViewProjections[unity_eyeIndex]; // camera viewProjection matrix
-    // Get the depth, normal and view position for this fragment
+    half3x3 camTransform = (half3x3)_CameraViewProjections[unity_eyeIndex];
     float depth_o; half3 norm_o; half3 vpos_o;
-    SampleDepthNormalView(uv, depth_o, norm_o, vpos_o);//depth_o线性深度 norm_o单位长度的世界空间法线 --vpos_o视野空间坐标
-    // This was added to avoid a NVIDIA driver issue.
+    SampleDepthNormalView(uv, depth_o, norm_o, vpos_o);//depth_o线性深度 norm_o单位长度的世界空间法线 vpos_o视野空间坐标
     const half rcpSampleCount = half(rcp(SAMPLE_COUNT));//SAMPLE_COUNT [4,20]
     half ao = 0.0;
     for (int s = 0; s < SAMPLE_COUNT; s++)
     {
-        // Sample point
         half3 v_s1 = PickSamplePoint(uv, s);
-        // Make it distributed between [0, _Radius]
         v_s1 *= sqrt((half(s) + half(1.0)) * rcpSampleCount) * RADIUS;//SAMPLE_COUNT = 4，sqrt(1/4) sqrt(2/4) sqrt(3/4) sqrt(1)
         //保证v_s1和norm_o同向
         v_s1 = faceforward(v_s1, -norm_o, v_s1);//如果第二个参数和第三个参数的点积小于0，返回值为第一个参数，否则返回第一个参数乘以-1。
         half3 vpos_s1 = vpos_o + v_s1;//取周围的一个点
-        // Reproject the sample point
-        half3 spos_s1 = mul(camTransform, vpos_s1);
+        half3 spos_s1 = mul(camTransform, vpos_s1);//世界空间到齐次空间
         #if defined(_ORTHOGRAPHIC)
             float2 uv_s1_01 = clamp((spos_s1.xy + float(1.0)) * float(0.5), float(0.0), float(1.0));
         #else
-            float zdist = -dot(UNITY_MATRIX_V[2].xyz, vpos_s1);
+            float zdist = -dot(UNITY_MATRIX_V[2].xyz, vpos_s1);// ???
             float2 uv_s1_01 = clamp((spos_s1.xy * rcp(zdist) + float(1.0)) * float(0.5), float(0.0), float(1.0));
         #endif
-        // Depth at the sample point
         float depth_s1 = SampleAndGetLinearEyeDepth(uv_s1_01);
-        // Relative position of the sample point
         half3 vpos_s2 = ReconstructViewPos(uv_s1_01, depth_s1);//vpos_s1的遮挡点
         half3 v_s2 = vpos_s2 - vpos_o;//从片元指向遮挡点的向量，非单位长度
-        // Estimate the obscurance value
         half dotVal = dot(v_s2, norm_o);//阻挡值
         #if defined(_ORTHOGRAPHIC)
             dotVal -= half(2.0 * kBeta * depth_o);
@@ -333,16 +304,14 @@ half4 SSAO(Varyings input) : SV_Target
         #endif
         half a1 = max(dotVal, half(0.0));
         half a2 = dot(v_s2, v_s2) + kEpsilon;//kEpsilon = half(0.0001) 向量长度的平方
-        ao += a1 * rcp(a2);//cos()/|V|
+        ao += a1 * rcp(a2);//cos / |V|
     }
-    // Intensity normalization
     ao *= RADIUS;
-    // Apply contrast
     ao = PositivePow(ao * INTENSITY * rcpSampleCount, kContrast);//kContrast = half(0.5)
     return PackAONormal(ao, norm_o);
 }
 
-// Geometry-aware separable bilateral filter
+// Done 2 带法线接近程度的模糊
 half4 Blur(float2 uv, float2 delta) : SV_Target
 {
     half4 p0 =  (half4) SAMPLE_BASEMAP(uv                 );
@@ -377,8 +346,7 @@ half4 Blur(float2 uv, float2 delta) : SV_Target
 
     return PackAONormal(s, n0);
 }
-
-// Geometry-aware bilateral filter (single pass/small kernel)
+// Done 2
 half BlurSmall(float2 uv, float2 delta)
 {
     half4 p0 = (half4) SAMPLE_BASEMAP(uv                            );
@@ -386,47 +354,42 @@ half BlurSmall(float2 uv, float2 delta)
     half4 p2 = (half4) SAMPLE_BASEMAP(uv + float2( delta.x, -delta.y));
     half4 p3 = (half4) SAMPLE_BASEMAP(uv + float2(-delta.x,  delta.y));
     half4 p4 = (half4) SAMPLE_BASEMAP(uv + float2( delta.x,  delta.y));
-
     half3 n0 = GetPackedNormal(p0);
-
     half w0 = half(1.0);
     half w1 = CompareNormal(n0, GetPackedNormal(p1));
     half w2 = CompareNormal(n0, GetPackedNormal(p2));
     half w3 = CompareNormal(n0, GetPackedNormal(p3));
     half w4 = CompareNormal(n0, GetPackedNormal(p4));
-
     half s = half(0.0);
     s += GetPackedAO(p0) * w0;
     s += GetPackedAO(p1) * w1;
     s += GetPackedAO(p2) * w2;
     s += GetPackedAO(p3) * w3;
     s += GetPackedAO(p4) * w4;
-
     return s *= rcp(w0 + w1 + w2 + w3 + w4);
 }
 
+// Done 2
 half4 HorizontalBlur(Varyings input) : SV_Target
 {
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
-
     const float2 uv = input.uv;
     const float2 delta = float2(_SourceSize.z, 0.0);
     return Blur(uv, delta);
 }
 
+// Done 2
 half4 VerticalBlur(Varyings input) : SV_Target
 {
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
-
     const float2 uv = input.uv;
     const float2 delta = float2(0.0, _SourceSize.w * rcp(DOWNSAMPLE));
     return Blur(uv, delta);
 }
-
+// Done 2
 half4 FinalBlur(Varyings input) : SV_Target
 {
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
-
     const float2 uv = input.uv;
     const float2 delta = _SourceSize.zw;
     return half(1.0) - BlurSmall(uv, delta );
