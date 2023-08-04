@@ -193,19 +193,19 @@ namespace UnityEngine.Rendering.Universal
         /// <param name="bias">[OUT] Ordinate of the fading part at abscissa 0</param>
         internal static void GetScaleAndBiasForLinearDistanceFade(float fadeDistance, float border, out float scale, out float bias)
         {
-            if (border < 0.0001f)
+            if (border < 0.0001f)//border = lastBorder / maxShadowDistance
             {
                 float multiplier = 1000f;
                 scale = multiplier;
                 bias = -fadeDistance * multiplier;
                 return;
             }
-            border = 1 - border;
-            border *= border;
+            border = 1 - border;// 0.9
+            border *= border; // 0.81
             // Fade with distance calculation is just a linear fade from 90% of fade distance to fade distance. 90% arbitrarily chosen but should work well enough.
-            float distanceFadeNear = border * fadeDistance;
-            scale = 1.0f / (fadeDistance - distanceFadeNear);
-            bias = -distanceFadeNear / (fadeDistance - distanceFadeNear);
+            float distanceFadeNear = border * fadeDistance; // 0.8 * fadeDistance
+            scale = 1.0f / (fadeDistance - distanceFadeNear);// 1 / (fadeDistance * 0.2)
+            bias = -distanceFadeNear / (fadeDistance - distanceFadeNear);// -5
         }
         /// <summary>
         /// Done 1

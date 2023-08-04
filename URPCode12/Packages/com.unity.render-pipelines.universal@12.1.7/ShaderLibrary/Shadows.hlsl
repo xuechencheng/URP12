@@ -334,7 +334,7 @@ half GetMainLightShadowFade(float3 positionWS)
     float3 camToPixel = positionWS - _WorldSpaceCameraPos;
     float distanceCamToPixel2 = dot(camToPixel, camToPixel);
 
-    float fade = saturate(distanceCamToPixel2 * float(_MainLightShadowParams.z) + float(_MainLightShadowParams.w));
+    float fade = saturate(distanceCamToPixel2 * float(_MainLightShadowParams.z) + float(_MainLightShadowParams.w));//z: main light fade scale, w: main light fade bias
     return half(fade);
 }
 
@@ -346,10 +346,10 @@ half GetAdditionalLightShadowFade(float3 positionWS)
     float fade = saturate(distanceCamToPixel2 * float(_AdditionalShadowFadeParams.x) + float(_AdditionalShadowFadeParams.y));
     return half(fade);
 }
-
+// 1表示不在阴影内
 half MixRealtimeAndBakedShadows(half realtimeShadow, half bakedShadow, half shadowFade)
 {
-#if defined(LIGHTMAP_SHADOW_MIXING)
+#if defined(LIGHTMAP_SHADOW_MIXING)//ShadowMask and Subtractive, not Distance ShadowMask
     return min(lerp(realtimeShadow, 1, shadowFade), bakedShadow);
 #else
     return lerp(realtimeShadow, bakedShadow, shadowFade);
@@ -362,7 +362,7 @@ half BakedShadow(half4 shadowMask, half4 occlusionProbeChannels)
     // If occlusionProbeChannels all components are zero we use default baked shadow value 1.0
     // This code is optimized for mobile platforms:
     // half bakedShadow = any(occlusionProbeChannels) ? dot(shadowMask, occlusionProbeChannels) : 1.0h;
-    half bakedShadow = half(1.0) + dot(shadowMask - half(1.0), occlusionProbeChannels);
+    half bakedShadow = half(1.0) + dot(shadowMask - half(1.0), occlusionProbeChannels);//shadowMask为0表示在阴影内，1表示不在阴影内
     return bakedShadow;
 }
 

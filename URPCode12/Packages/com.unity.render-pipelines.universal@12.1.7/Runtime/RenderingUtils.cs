@@ -32,7 +32,7 @@ namespace UnityEngine.Rendering.Universal
         static Mesh s_FullscreenMesh = null;
 
         /// <summary>
-        /// Returns a mesh that you can use with <see cref="CommandBuffer.DrawMesh(Mesh, Matrix4x4, Material)"/> to render full-screen effects.
+        /// Done
         /// </summary>
         public static Mesh fullscreenMesh
         {

@@ -176,7 +176,7 @@ half3 PickSamplePoint(float2 uv, int sampleIndex)
     return half3(CosSin(theta) * sqrt(half(1.0) - u * u), u);//单位向量
 }
 
-// Done 2
+// Done
 float SampleAndGetLinearEyeDepth(float2 uv)
 {
     float rawDepth = SampleSceneDepth(uv.xy);
@@ -187,7 +187,7 @@ float SampleAndGetLinearEyeDepth(float2 uv)
     #endif
 }
 
-// Done 2
+// Done
 //视野空间坐标 可以想象成世界空间内的相机坐标为起点，片元坐标为终点的向量
 half3 ReconstructViewPos(float2 uv, float depth)
 {
@@ -203,7 +203,7 @@ half3 ReconstructViewPos(float2 uv, float depth)
     return half3(viewPos);
 }
 
-// Done 2
+// Done
 // 重新构建法线
 half3 ReconstructNormal(float2 uv, float depth, float3 vpos)
 {
@@ -257,7 +257,7 @@ half3 SampleNormal(float2 uv)
         return ReconstructNormal(uv, depth, vpos);
     #endif
 }
-// Done 2
+// Done
 void SampleDepthNormalView(float2 uv, out float depth, out half3 normal, out half3 vpos)
 {
     depth  = SampleAndGetLinearEyeDepth(uv);

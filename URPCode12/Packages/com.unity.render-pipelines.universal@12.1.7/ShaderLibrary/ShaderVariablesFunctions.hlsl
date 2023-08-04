@@ -3,7 +3,7 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderVariablesFunctions.deprecated.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Debug/DebuggingCommon.hlsl"
-//Done 1
+//Done
 VertexPositionInputs GetVertexPositionInputs(float3 positionOS)
 {
     VertexPositionInputs input;

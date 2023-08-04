@@ -49,7 +49,7 @@ namespace UnityEngine.Rendering.Universal
         private const string k_SourceDepthNormalsKeyword = "_SOURCE_DEPTH_NORMALS";
         internal bool afterOpaque => m_Settings.AfterOpaque;
         /// <summary>
-        /// Done 2
+        /// Done
         /// </summary>
         public override void Create()
         {
@@ -60,7 +60,7 @@ namespace UnityEngine.Rendering.Universal
             GetMaterial();
         }
         /// <summary>
-        /// Done 2
+        /// Done
         /// </summary>
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
@@ -78,14 +78,14 @@ namespace UnityEngine.Rendering.Universal
             }
         }
         /// <summary>
-        /// Done 2
+        /// Done
         /// </summary>
         protected override void Dispose(bool disposing)
         {
             CoreUtils.Destroy(m_Material);
         }
         /// <summary>
-        /// Done 2
+        /// Done
         /// </summary>
         private bool GetMaterial()
         {
@@ -105,7 +105,6 @@ namespace UnityEngine.Rendering.Universal
             return m_Material != null;
         }
 
-        // The SSAO Pass
         private class ScreenSpaceAmbientOcclusionPass : ScriptableRenderPass
         {
             // Properties
@@ -154,14 +153,14 @@ namespace UnityEngine.Rendering.Universal
                 AfterOpaque = 4
             }
             /// <summary>
-            /// Done 2
+            /// Done
             /// </summary>
             internal ScreenSpaceAmbientOcclusionPass()
             {
                 m_CurrentSettings = new ScreenSpaceAmbientOcclusionSettings();
             }
             /// <summary>
-            /// Done 2
+            /// Done
             /// </summary>
             internal bool Setup(ScreenSpaceAmbientOcclusionSettings featureSettings, ScriptableRenderer renderer, Material material)
             {
@@ -216,10 +215,10 @@ namespace UnityEngine.Rendering.Universal
                     cview.SetColumn(3, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));//移动到相机坐标原点
                     Matrix4x4 cviewProj = proj * cview;
                     Matrix4x4 cviewProjInv = cviewProj.inverse;
-                    Vector4 topLeftCorner = cviewProjInv.MultiplyPoint(new Vector4(-1, 1, -1, 1));//相机近平面左上角世界坐标
+                    Vector4 topLeftCorner = cviewProjInv.MultiplyPoint(new Vector4(-1, 1, -1, 1));//近平面 左上角
                     Vector4 topRightCorner = cviewProjInv.MultiplyPoint(new Vector4(1, 1, -1, 1));
                     Vector4 bottomLeftCorner = cviewProjInv.MultiplyPoint(new Vector4(-1, -1, -1, 1));
-                    Vector4 farCentre = cviewProjInv.MultiplyPoint(new Vector4(0, 0, 1, 1));//远平面中心的世界坐标
+                    Vector4 farCentre = cviewProjInv.MultiplyPoint(new Vector4(0, 0, 1, 1));//远平面 中心
                     m_CameraTopLeftCorner[eyeIndex] = topLeftCorner;
                     m_CameraXExtent[eyeIndex] = topRightCorner - topLeftCorner;
                     m_CameraYExtent[eyeIndex] = bottomLeftCorner - topLeftCorner;
@@ -293,7 +292,7 @@ namespace UnityEngine.Rendering.Universal
             }
 
             /// <summary>
-            /// Done 2
+            /// Done
             /// </summary>
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
@@ -336,7 +335,7 @@ namespace UnityEngine.Rendering.Universal
                 CommandBufferPool.Release(cmd);
             }
             /// <summary>
-            /// Done 2
+            /// Done
             /// </summary>
             private void Render(CommandBuffer cmd, RenderTargetIdentifier target, ShaderPasses pass)
             {

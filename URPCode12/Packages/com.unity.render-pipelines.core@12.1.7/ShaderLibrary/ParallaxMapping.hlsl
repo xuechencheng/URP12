@@ -11,7 +11,7 @@ half3 GetViewDirectionTangentSpace(half4 tangentWS, half3 normalWS, half3 viewDi
     half3 WorldSpaceNormal = renormFactor * normalWS.xyz;       
     half3 WorldSpaceTangent = renormFactor * tangentWS.xyz;
     half3 WorldSpaceBiTangent = renormFactor * bitang;
-    half3x3 tangentSpaceTransform = half3x3(WorldSpaceTangent, WorldSpaceBiTangent, WorldSpaceNormal);//按行填充矩阵 切线空间变换矩阵
+    half3x3 tangentSpaceTransform = half3x3(WorldSpaceTangent, WorldSpaceBiTangent, WorldSpaceNormal);//按行填充矩阵 切线空间变换矩阵 因为转置矩阵等于逆矩阵吗???
     half3 viewDirTS = mul(tangentSpaceTransform, viewDirWS);
     return viewDirTS;
 }
