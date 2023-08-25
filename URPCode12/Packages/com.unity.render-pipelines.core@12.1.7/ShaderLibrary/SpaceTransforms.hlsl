@@ -156,7 +156,7 @@ real3 TransformWorldToHClipDir(real3 directionWS, bool doNormalize = false)
     return dirHCS;
 }
 
-// Done 1
+// Done
 float3 TransformObjectToWorldNormal(float3 normalOS, bool doNormalize = true)
 {
 #ifdef UNITY_ASSUME_UNIFORM_SCALING

@@ -26,7 +26,7 @@ VertexNormalInputs GetVertexNormalInputs(float3 normalOS)
     return tbn;
 }
 
-// Done 1
+// Done
 VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float4 tangentOS)
 {
     VertexNormalInputs tbn;
@@ -332,7 +332,7 @@ float3 MixFog(float3 fragColor, float fogFactor)
 // Linear depth buffer value between [0, 1] or [1, 0] to eye depth value between [near, far]
 half LinearDepthToEyeDepth(half rawDepth)
 {
-    #if UNITY_REVERSED_Z
+    #if UNITY_REVERSED_Z // n = 1 f = 0
         return half(_ProjectionParams.z - (_ProjectionParams.z - _ProjectionParams.y) * rawDepth);
     #else
         return half(_ProjectionParams.y + (_ProjectionParams.z - _ProjectionParams.y) * rawDepth);

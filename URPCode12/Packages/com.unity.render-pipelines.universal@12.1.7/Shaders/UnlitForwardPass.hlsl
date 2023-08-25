@@ -89,6 +89,8 @@ half4 UnlitPassFragment(Varyings input) : SV_Target
 
     half2 uv = input.uv;
     half4 texColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, uv);
+    texColor = SAMPLE_TEXTURE2D_X_LOD(_BaseMap, sampler_BaseMap, uv, 0);
+    
     half3 color = texColor.rgb * _BaseColor.rgb;
     half alpha = texColor.a * _BaseColor.a;
     AlphaDiscard(alpha, _Cutoff);

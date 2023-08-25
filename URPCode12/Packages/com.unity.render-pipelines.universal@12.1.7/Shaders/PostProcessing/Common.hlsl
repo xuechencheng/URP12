@@ -214,10 +214,10 @@ half3 FXAALoad(int2 icoords, int idx, int idy, float4 sourceSize, TEXTURE2D_X(in
 half3 ApplyFXAA(half3 color, float2 positionNDC, int2 positionSS, float4 sourceSize, TEXTURE2D_X(inputTexture))
 {
     // Edge detection
-    half3 rgbNW = FXAALoad(positionSS, -1, -1, sourceSize, inputTexture);// 左下
-    half3 rgbNE = FXAALoad(positionSS,  1, -1, sourceSize, inputTexture);// 右下
-    half3 rgbSW = FXAALoad(positionSS, -1,  1, sourceSize, inputTexture);// 左上
-    half3 rgbSE = FXAALoad(positionSS,  1,  1, sourceSize, inputTexture);// 右上
+    half3 rgbNW = FXAALoad(positionSS, -1, -1, sourceSize, inputTexture);// 左下 西北 左上
+    half3 rgbNE = FXAALoad(positionSS,  1, -1, sourceSize, inputTexture);// 右下 东北 右上
+    half3 rgbSW = FXAALoad(positionSS, -1,  1, sourceSize, inputTexture);// 左上 西南 左下
+    half3 rgbSE = FXAALoad(positionSS,  1,  1, sourceSize, inputTexture);// 右上 东南 右下
     rgbNW = saturate(rgbNW);
     rgbNE = saturate(rgbNE);
     rgbSW = saturate(rgbSW);
@@ -229,11 +229,11 @@ half3 ApplyFXAA(half3 color, float2 positionNDC, int2 positionSS, float4 sourceS
     half lumaSE = Luminance(rgbSE);
     half lumaM = Luminance(color);
     float2 dir;
-    dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));// 上边 - 下边 ？？？
+    dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));// 下边 - 上边
     dir.y = ((lumaNW + lumaSW) - (lumaNE + lumaSE));// 左边 - 右边
     half lumaSum = lumaNW + lumaNE + lumaSW + lumaSE;
-    float dirReduce = max(lumaSum * (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);// 越暗数值越小
-    float rcpDirMin = rcp(min(abs(dir.x), abs(dir.y)) + dirReduce);// 越暗该值越大，变化越大该值小
+    float dirReduce = max(lumaSum * (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);// 越暗数值越小 FXAA_REDUCE_MUL = 1/8 FXAA_REDUCE_MIN = 1 / 128
+    float rcpDirMin = rcp(min(abs(dir.x), abs(dir.y)) + dirReduce);// 越暗该值越大，变化越小该值越大
     dir = min((FXAA_SPAN_MAX).xx, max((-FXAA_SPAN_MAX).xx, dir * rcpDirMin)) * sourceSize.zw;// 限制在[-8,8]
     // Blur
     half3 rgb03 = FXAAFetch(positionNDC, dir * (0.0 / 3.0 - 0.5), inputTexture);// -0.5

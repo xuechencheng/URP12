@@ -287,18 +287,6 @@ half3 GlossyEnvironmentReflection(half3 reflectVector, half perceptualRoughness,
 
 half3 SubtractDirectMainLightFromLightmap(Light mainLight, half3 normalWS, half3 bakedGI)
 {
-    // Let's try to make realtime shadows work on a surface, which already contains
-    // baked lighting and shadowing from the main sun light.
-    // Summary:
-    // 1) Calculate possible value in the shadow by subtracting estimated light contribution from the places occluded by realtime shadow:
-    //      a) preserves other baked lights and light bounces
-    //      b) eliminates shadows on the geometry facing away from the light
-    // 2) Clamp against user defined ShadowColor.
-    // 3) Pick original lightmap value, if it is the darkest one.
-
-
-    // 1) Gives good estimate of illumination as if light would've been shadowed during the bake.
-    // We only subtract the main direction light. This is accounted in the contribution term below.
     half shadowStrength = GetMainLightShadowStrength();
     half contributionTerm = saturate(dot(mainLight.direction, normalWS));
     half3 lambert = mainLight.color * contributionTerm;
@@ -312,10 +300,9 @@ half3 SubtractDirectMainLightFromLightmap(Light mainLight, half3 normalWS, half3
     // 3) Pick darkest color
     return min(bakedGI, realtimeShadow);
 }
-
+// Here
 half3 GlobalIllumination(BRDFData brdfData, BRDFData brdfDataClearCoat, float clearCoatMask,
     half3 bakedGI, half occlusion, float3 positionWS, half3 normalWS, half3 viewDirectionWS){
-    
     half3 reflectVector = reflect(-viewDirectionWS, normalWS);
     half NoV = saturate(dot(normalWS, viewDirectionWS));
     half fresnelTerm = Pow4(1.0 - NoV);

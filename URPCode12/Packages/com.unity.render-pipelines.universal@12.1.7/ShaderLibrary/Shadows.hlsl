@@ -403,7 +403,7 @@ half AdditionalLightShadow(int lightIndex, float3 positionWS, half3 lightDirecti
 
     return MixRealtimeAndBakedShadows(realtimeShadow, bakedShadow, shadowFade);
 }
-// Done 1
+// Done
 float4 GetShadowCoord(VertexPositionInputs vertexInput)
 {
 #if defined(_MAIN_LIGHT_SHADOWS_SCREEN) && !defined(_SURFACE_TYPE_TRANSPARENT)

@@ -48,6 +48,9 @@ namespace UnityEngine.Rendering.Universal
         {
             bool success = cullResults.ComputeDirectionalShadowMatricesAndCullingPrimitives(shadowLightIndex,
                 cascadeIndex, shadowData.mainLightShadowCascadesCount, shadowData.mainLightShadowCascadesSplit, shadowResolution, shadowNearPlane, out shadowSliceData.viewMatrix, out shadowSliceData.projectionMatrix, out shadowSliceData.splitData);
+
+            //VisiableVPMat(shadowSliceData.viewMatrix.inverse, shadowSliceData.projectionMatrix);
+
             cascadeSplitDistance = shadowSliceData.splitData.cullingSphere;//cullSphere (ÇòÐÄ, °ë¾¶)
             shadowSliceData.offsetX = (cascadeIndex % 2) * shadowResolution;
             shadowSliceData.offsetY = (cascadeIndex / 2) * shadowResolution;
@@ -59,6 +62,36 @@ namespace UnityEngine.Rendering.Universal
             return success;
         }
 
+        static GameObject cubeObj = null;
+        static int count = 0;
+        public static void VisiableVPMat(Matrix4x4 view, Matrix4x4 project)
+        {
+            if (count++ != 1000) {
+                return;
+            }
+            Debug.LogError("view Mat");
+            Debug.LogError(view);
+            Debug.LogError("Proj Mat");
+            Debug.LogError(project);
+            Debug.LogError("view Mat Inverse");
+            var viewInverse = view.inverse;
+            Debug.LogError(view.inverse);
+            if (cubeObj != null)
+            {
+                GameObject.Destroy(cubeObj);
+            }
+            cubeObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cubeObj.transform.position = view.GetColumn(3);
+            cubeObj.name = "TTTTTT";
+            cubeObj.transform.rotation = GetRotation(view);// view.rotation;
+            var planes = project.decomposeProjection;
+            cubeObj.transform.localScale = new Vector3(planes.right - planes.left, planes.top - planes.bottom, planes.zFar - planes.zNear);
+            cubeObj.transform.position += cubeObj.transform.forward * (planes.zFar - planes.zNear) / 2;
+        }
+        private static Quaternion GetRotation(Matrix4x4 matrix)
+        {
+            return Quaternion.LookRotation(matrix.GetColumn(2) * (-1), matrix.GetColumn(1));
+        }
         public static bool ExtractSpotLightMatrix(ref CullingResults cullResults, ref ShadowData shadowData, int shadowLightIndex, out Matrix4x4 shadowMatrix, out Matrix4x4 viewMatrix, out Matrix4x4 projMatrix, out ShadowSplitData splitData)
         {
             bool success = cullResults.ComputeSpotShadowMatricesAndCullingPrimitives(shadowLightIndex, out viewMatrix, out projMatrix, out splitData); // returns false if input parameters are incorrect (rare)

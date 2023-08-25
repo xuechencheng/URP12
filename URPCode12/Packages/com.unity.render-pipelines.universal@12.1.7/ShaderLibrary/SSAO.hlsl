@@ -113,12 +113,12 @@ static const half kEpsilon = half(0.0001);
 #else
     #define unity_eyeIndex 0
 #endif
-// Done 1
+// Done
 half4 PackAONormal(half ao, half3 n)
 {
     return half4(ao, n * half(0.5) + half(0.5));
 }
-// Done 1
+// Done
 half3 GetPackedNormal(half4 p)
 {
     return p.gba * half(2.0) - half(1.0);
@@ -137,7 +137,7 @@ half EncodeAO(half x)
         return x;
     #endif
 }
-// Done 1
+// Done
 half CompareNormal(half3 d1, half3 d2)
 {
     //SmoothStep(float from, float to, float t)
@@ -165,7 +165,7 @@ float2 GetScreenSpacePosition(float2 uv)
     return float2(uv * SCREEN_PARAMS.xy * DOWNSAMPLE);
 }
 
-// Done 2
+// Done
 // 生成一个方向随机的单位向量
 half3 PickSamplePoint(float2 uv, int sampleIndex)
 {
@@ -183,12 +183,13 @@ float SampleAndGetLinearEyeDepth(float2 uv)
     #if defined(_ORTHOGRAPHIC)
         return LinearDepthToEyeDepth(rawDepth);
     #else
-        return LinearEyeDepth(rawDepth, _ZBufferParams);
+        return LinearEyeDepth(rawDepth, _ZBufferParams);//[near, far]
     #endif
 }
 
 // Done
 //视野空间坐标 可以想象成世界空间内的相机坐标为起点，片元坐标为终点的向量
+//相机指向片元的世界空间内的向量
 half3 ReconstructViewPos(float2 uv, float depth)
 {
     uv.y = 1.0 - uv.y;
@@ -246,7 +247,7 @@ half3 ReconstructNormal(float2 uv, float depth, float3 vpos)
     #endif
 }
 
-// Done 2
+// Done
 half3 SampleNormal(float2 uv)
 {
     #if defined(_SOURCE_DEPTH_NORMALS)
@@ -269,7 +270,7 @@ void SampleDepthNormalView(float2 uv, out float depth, out half3 normal, out hal
     #endif
 }
 
-// Done 2
+// Done
 half4 SSAO(Varyings input) : SV_Target
 {
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
@@ -290,7 +291,7 @@ half4 SSAO(Varyings input) : SV_Target
         #if defined(_ORTHOGRAPHIC)
             float2 uv_s1_01 = clamp((spos_s1.xy + float(1.0)) * float(0.5), float(0.0), float(1.0));
         #else
-            float zdist = -dot(UNITY_MATRIX_V[2].xyz, vpos_s1);// ???
+            float zdist = -dot(UNITY_MATRIX_V[2].xyz, vpos_s1);// 齐次除法，w正好是-z
             float2 uv_s1_01 = clamp((spos_s1.xy * rcp(zdist) + float(1.0)) * float(0.5), float(0.0), float(1.0));
         #endif
         float depth_s1 = SampleAndGetLinearEyeDepth(uv_s1_01);
@@ -311,7 +312,7 @@ half4 SSAO(Varyings input) : SV_Target
     return PackAONormal(ao, norm_o);
 }
 
-// Done 2 带法线接近程度的模糊
+// Done 带法线接近程度的模糊
 half4 Blur(float2 uv, float2 delta) : SV_Target
 {
     half4 p0 =  (half4) SAMPLE_BASEMAP(uv                 );
@@ -369,7 +370,7 @@ half BlurSmall(float2 uv, float2 delta)
     return s *= rcp(w0 + w1 + w2 + w3 + w4);
 }
 
-// Done 2
+// Done
 half4 HorizontalBlur(Varyings input) : SV_Target
 {
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
@@ -378,7 +379,7 @@ half4 HorizontalBlur(Varyings input) : SV_Target
     return Blur(uv, delta);
 }
 
-// Done 2
+// Done
 half4 VerticalBlur(Varyings input) : SV_Target
 {
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
@@ -386,13 +387,13 @@ half4 VerticalBlur(Varyings input) : SV_Target
     const float2 delta = float2(0.0, _SourceSize.w * rcp(DOWNSAMPLE));
     return Blur(uv, delta);
 }
-// Done 2
+// Done
 half4 FinalBlur(Varyings input) : SV_Target
 {
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
     const float2 uv = input.uv;
     const float2 delta = _SourceSize.zw;
-    return half(1.0) - BlurSmall(uv, delta );
+    return half(1.0) - BlurSmall(uv, delta);
 }
 
 #endif //UNIVERSAL_SSAO_INCLUDED

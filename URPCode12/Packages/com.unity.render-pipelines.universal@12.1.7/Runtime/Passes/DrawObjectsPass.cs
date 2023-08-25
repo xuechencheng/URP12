@@ -108,7 +108,6 @@ namespace UnityEngine.Rendering.Universal.Internal
                 else
                 {
                     context.DrawRenderers(renderingData.cullResults, ref drawSettings, ref filterSettings, ref m_RenderStateBlock);
-                    // Render objects that did not match any shader pass with error shader
                     RenderingUtils.RenderObjectsWithError(context, ref renderingData.cullResults, camera, filterSettings, SortingCriteria.None);
                 }
             }

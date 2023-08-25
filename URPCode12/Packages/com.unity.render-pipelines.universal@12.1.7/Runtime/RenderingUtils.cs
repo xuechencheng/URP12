@@ -32,7 +32,7 @@ namespace UnityEngine.Rendering.Universal
         static Mesh s_FullscreenMesh = null;
 
         /// <summary>
-        /// Done
+        /// Done ×ø±ê( -1, -1)-( 1, 1)µÄ¾ØÐÎ
         /// </summary>
         public static Mesh fullscreenMesh
         {

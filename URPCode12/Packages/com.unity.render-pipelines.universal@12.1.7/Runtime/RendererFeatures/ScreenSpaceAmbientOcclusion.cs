@@ -66,8 +66,7 @@ namespace UnityEngine.Rendering.Universal
         {
             if (!GetMaterial())
             {
-                Debug.LogErrorFormat(
-                    "{0}.AddRenderPasses(): Missing material. {1} render pass will not be added. Check for missing reference in the renderer resources.",
+                Debug.LogErrorFormat("{0}.AddRenderPasses(): Missing material. {1} render pass will not be added. Check for missing reference in the renderer resources.",
                     GetType().Name, name);
                 return;
             }
@@ -193,7 +192,7 @@ namespace UnityEngine.Rendering.Universal
             }
 
             /// <summary>
-            /// Done 2
+            /// Done
             /// </summary>
             public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
             {
@@ -215,7 +214,7 @@ namespace UnityEngine.Rendering.Universal
                     cview.SetColumn(3, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));//移动到相机坐标原点
                     Matrix4x4 cviewProj = proj * cview;
                     Matrix4x4 cviewProjInv = cviewProj.inverse;
-                    Vector4 topLeftCorner = cviewProjInv.MultiplyPoint(new Vector4(-1, 1, -1, 1));//近平面 左上角
+                    Vector4 topLeftCorner = cviewProjInv.MultiplyPoint(new Vector4(-1, 1, -1, 1));//近平面 左上角 世界空间，相机位置指向该点的向量
                     Vector4 topRightCorner = cviewProjInv.MultiplyPoint(new Vector4(1, 1, -1, 1));
                     Vector4 bottomLeftCorner = cviewProjInv.MultiplyPoint(new Vector4(-1, -1, -1, 1));
                     Vector4 farCentre = cviewProjInv.MultiplyPoint(new Vector4(0, 0, 1, 1));//远平面 中心
@@ -229,7 +228,7 @@ namespace UnityEngine.Rendering.Universal
                 m_Material.SetVectorArray(s_CameraViewTopLeftCornerID, m_CameraTopLeftCorner);
                 m_Material.SetVectorArray(s_CameraViewXExtentID, m_CameraXExtent);
                 m_Material.SetVectorArray(s_CameraViewYExtentID, m_CameraYExtent);
-                m_Material.SetVectorArray(s_CameraViewZExtentID, m_CameraZExtent);
+                m_Material.SetVectorArray(s_CameraViewZExtentID, m_CameraZExtent);//正交相机使用
                 // Update keywords
                 CoreUtils.SetKeyword(m_Material, k_OrthographicCameraKeyword, renderingData.cameraData.camera.orthographic);
                 ScreenSpaceAmbientOcclusionSettings.DepthSource source = this.isRendererDeferred ? ScreenSpaceAmbientOcclusionSettings.DepthSource.DepthNormals : m_CurrentSettings.Source;
@@ -343,7 +342,7 @@ namespace UnityEngine.Rendering.Universal
                 cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_Material, 0, (int)pass);
             }
             /// <summary>
-            /// Done 2
+            /// Done
             /// </summary>
             private void RenderAndSetBaseMap(CommandBuffer cmd, RenderTargetIdentifier baseMap, RenderTargetIdentifier target, ShaderPasses pass)
             {
@@ -351,7 +350,7 @@ namespace UnityEngine.Rendering.Universal
                 Render(cmd, target, pass);
             }
             /// <summary>
-            /// Done 2
+            /// Done
             /// </summary>
             public override void OnCameraCleanup(CommandBuffer cmd)
             {

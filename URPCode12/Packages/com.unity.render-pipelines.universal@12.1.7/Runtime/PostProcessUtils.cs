@@ -74,7 +74,7 @@ namespace UnityEngine.Rendering.Universal
             material.SetVector(ShaderConstants._Grain_TilingParams, tilingParams);
         }
         /// <summary>
-        /// Done 1
+        /// Done
         /// </summary>
         internal static void SetSourceSize(CommandBuffer cmd, RenderTextureDescriptor desc)
         {
